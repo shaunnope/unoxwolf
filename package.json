@@ -1,0 +1,10 @@
+{
+  "name": "horace-abbot",
+  "version": "1.0.0",
+  "description": "A Telegram bot for automated scheduling and reminders",
+  "packageManager": "yarn@3.4.1",
+  "dependencies": {
+    "grammy": "^1.14.1",
+    "typescript": "^4.9.5"
+  }
+}
