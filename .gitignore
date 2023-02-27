@@ -137,3 +137,6 @@ dist
 
 # js files from ts
 *.js
+
+# vscode
+.vscode
