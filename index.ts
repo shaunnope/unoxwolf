@@ -1,13 +1,15 @@
 import * as dotenv from 'dotenv'
 dotenv.config() // set process.env
 
+import { log } from './src/utils/logger';
+
 import bot from './src/bot';
 
-console.info('Starting bot...')
+log.info('Starting bot...')
 bot.start();
 
 function stop_bot() {
-  console.info('Stopping bot...')
+  log.info('Stopping bot...')
   bot.stop()
 }
 

@@ -1,21 +1,16 @@
-import { BotError, CommandContext, Composer, Context, NextFunction, session } from "grammy";
+import { CommandContext, Composer, Context } from "grammy";
 import { errHandler } from "../utils/handler";
 
 import lgtb_stickers from "./lgtb.json";
-// const lgtb_stickers = require("./lgtb.json");
+import { mw_logger } from './base';
+
 
 export const lgtb = new Composer().errorBoundary(errHandler);
 
 // init.use(session);
 
 // logger
-lgtb.use((ctx, next) => {
-    const start = Date.now()
-    return next().then(() => {
-      const ms = Date.now() - start
-      console.log('response time %sms', ms)
-    })
-})
+lgtb.use(mw_logger)
 
 lgtb.on(":sticker", async (ctx) => {
     const sticker = {
@@ -35,7 +30,7 @@ lgtb.on(":sticker", async (ctx) => {
 })
 
 async function bread(ctx: CommandContext<Context>) {
-    let sticker = lgtb_stickers[Math.floor(Math.random() * lgtb_stickers.length)]
+    const sticker = lgtb_stickers[Math.floor(Math.random() * lgtb_stickers.length)]
     ctx.api.sendSticker(ctx.msg.chat.id, sticker.file_id, {reply_to_message_id: ctx.msg.message_id})
 }
 

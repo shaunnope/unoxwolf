@@ -1,18 +1,13 @@
-import { BotError, Composer, Context, NextFunction, session } from "grammy";
+import { Composer } from "grammy";
 import { errHandler } from "../utils/handler";
+import { mw_logger } from "./base";
 
 export const init = new Composer().errorBoundary(errHandler);
 
 // init.use(session);
 
 // logger
-init.use((ctx, next) => {
-    const start = Date.now()
-    return next().then(() => {
-      const ms = Date.now() - start
-      console.log('response time %sms', ms)
-    })
-})
+init.use(mw_logger)
 
 init.command("start", (ctx) => {
     ctx.reply("Hi there! I am Horace, here to provide you with personalised scheduling and reminders via Telegram since 2022. Tap on /help to learn more about my various features.\n\nTry me now!")

@@ -4,18 +4,23 @@
   "description": "A Telegram bot for automated scheduling and reminders",
   "packageManager": "yarn@3.4.1",
   "dependencies": {
-    "@grammyjs/types": "^2.12.1",
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
     "firebase": "^9.17.1",
     "grammy": "^1.14.1",
     "pg": "^8.9.0",
-    "telegraf": "^4.11.2"
+    "telegraf": "^4.11.2",
+    "tslog": "^4.7.5"
   },
   "devDependencies": {
+    "@grammyjs/types": "^2.12.1",
     "@types/node": "^18.14.1",
-    "husky": "^8.0.3",
-    "lint-staged": "^13.1.2",
+    "@typescript-eslint/eslint-plugin": "^5.54.0",
+    "@typescript-eslint/parser": "^5.54.0",
+    "eslint": "^8.35.0",
+    "eslint-config-prettier": "^8.6.0",
+    "eslint-plugin-import": "^2.27.5",
+    "pre-commit": "^1.2.2",
     "prettier": "^2.8.4",
     "typescript": "^4.9.5"
   },
