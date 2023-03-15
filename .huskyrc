@@ -1,5 +1,0 @@
-{
-    "hooks": {
-      "pre-commit": "tsc -p ./tsconfig.json && lint-staged"
-    }
-  }

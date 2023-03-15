@@ -21,9 +21,9 @@
 //   bot.start((ctx) => {
 //       ctx.reply("Hi there! I am Horace, here to provide you with personalised scheduling and reminders via Telegram since 2022. Tap on /help to learn more about my various features.\n\nTry me now!")
 //   })
-    
+
 //   bot.help((ctx) => ctx.reply('Send me a sticker'))
-  
+
 //   bot.command('info', (ctx) => {
 //     ctx.reply(ctx.message.text.split(" ").toLocaleString())
 //   })
@@ -62,7 +62,7 @@
 
 //   // Telegram passport events
 //   bot.on('passport_data', (ctx) => ctx.reply('Telegram passport connected'))
-  
+
 //   // Random location on some text messages
 //   bot.on('text', (ctx, next) => {
 //     if (Math.random() > 0.2) {
@@ -84,7 +84,7 @@
 //     console.log(msg);
 //     ctx.reply(msg.text.toLocaleString())
 //   })
-  
+
 //   bot.command('roll', (ctx) => {
 //     ctx.replyWithDice()
 //   })

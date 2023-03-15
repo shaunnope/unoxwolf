@@ -140,3 +140,6 @@ dist
 
 # vscode
 .vscode
+
+# prisma output
+src/generated
