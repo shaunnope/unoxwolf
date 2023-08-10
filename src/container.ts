@@ -1,20 +1,19 @@
-import { createContainer } from 'iti'
-import { config } from '~/config'
-import { createLogger } from '~/logger'
-import { createPrisma } from '~/prisma'
+import Redis from "ioredis";
+import { config } from "~/config";
+import { createLogger } from "~/logger";
+import { createPrisma } from "~/prisma";
 
-export const createAppContainer = () =>
-  createContainer()
-    .add({
-      config: () => config,
-    })
-    .add(items => ({
-      logger: () => createLogger(items.config),
-    }))
-    .add(items => ({
-      prisma: () => createPrisma(items.logger),
-    }))
+export const createAppContainer = () => {
+  const logger = createLogger(config);
+  const prisma = createPrisma(logger);
+  const redis = new Redis(config.REDIS_URL);
 
-export type Container = ReturnType<typeof createAppContainer>
+  return {
+    config,
+    logger,
+    prisma,
+    redis,
+  };
+};
 
-export const container = createAppContainer()
+export type Container = ReturnType<typeof createAppContainer>;
