@@ -10,6 +10,8 @@ import { logHandle } from './helpers/logging'
 import { isMultipleLocales } from './i18n'
 import { i18n, metrics, session, setScope, updateLogger } from './middlewares'
 
+import { helpFeature } from '~/game/info/help.feature'
+
 type Dependencies = {
   container: Container
   sessionStorage: StorageAdapter<unknown>
@@ -49,6 +51,8 @@ export const createBot = (
 
   bot.use(lgtbFeature)
   bot.use(miscFeature)
+
+  bot.use(helpFeature)
 
   if (isMultipleLocales) {
     bot.use(languageFeature)
