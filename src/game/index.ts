@@ -1,7 +1,8 @@
 import { Composer } from 'grammy'
 import type { Context } from '~/bot/context'
 
-import { helpFeature, gameFeature } from "./features";
+import { helpFeature, gameFeature } from './features'
+
 export { Game } from './game'
 
 const composer = new Composer<Context>()

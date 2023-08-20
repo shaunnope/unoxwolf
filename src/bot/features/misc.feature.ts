@@ -13,11 +13,11 @@ feature.command('roll', logHandle('command-rng'), async ctx => {
 feature.command('ping', logHandle('command-ping'), async ctx => {
   const start = Date.now()
   let ts = start - ctx.msg.date * 1000
-  let message = ctx.t('ping_command.ping', { ts: ts})
+  let message = ctx.t('ping_command.ping', { ts })
   const msg = await ctx.reply(message)
 
   ts = Date.now() - start
-  message += '\n' + ctx.t('ping_command.pong', { ts: ts })
+  message += `\n${ctx.t('ping_command.pong', { ts })}`
   await msg.editText(message)
 })
 

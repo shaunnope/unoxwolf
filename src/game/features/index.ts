@@ -1,2 +1,2 @@
-export { helpFeature } from "./help.feature";
-export { gameFeature } from "./game.feature";
+export { helpFeature } from './help.feature'
+export { gameFeature } from './game.feature'

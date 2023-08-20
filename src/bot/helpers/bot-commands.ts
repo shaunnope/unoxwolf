@@ -56,7 +56,7 @@ const ALL_COMMANDS = new Map<string, { command: string; description: string }>(
 )
 
 const getCommand = (key: string, localeCode: string = DEFAULT_LANGUAGE_CODE) => {
-  let command = ALL_COMMANDS.get(key)
+  const command = ALL_COMMANDS.get(key)
   if (command === undefined) {
     return {
       command: key,
@@ -69,12 +69,8 @@ const getCommand = (key: string, localeCode: string = DEFAULT_LANGUAGE_CODE) => 
   }
 }
 
-
 export const getPrivateChatCommands = (options: { localeCode: string; includeLanguageCommand: boolean }) => {
-  const commands = [
-    getCommand('start', options.localeCode),
-    getCommand('ping', options.localeCode),
-  ]
+  const commands = [getCommand('start', options.localeCode), getCommand('ping', options.localeCode)]
 
   if (options.includeLanguageCommand) {
     commands.push(getCommand('language', options.localeCode))
@@ -84,10 +80,7 @@ export const getPrivateChatCommands = (options: { localeCode: string; includeLan
 }
 
 export const getPrivateChatAdminCommands = (options: { localeCode: string; includeLanguageCommand: boolean }) => {
-  const commands = [
-    getCommand('stats', options.localeCode), 
-    getCommand('setcommands', options.localeCode)
-  ]
+  const commands = [getCommand('stats', options.localeCode), getCommand('setcommands', options.localeCode)]
 
   return commands
 }

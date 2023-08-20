@@ -16,7 +16,7 @@ repos:
   hooks:
     - id: lint
       name: lint
-      entry: npx eslint -c .eslintrc.js --ext .ts,.tsx --fix
+      entry: npx eslint -c .eslintrc.cjs --ext .ts,.tsx --fix
       files: src/.*\.[jt]sx?$
       types: [file]
       language: system

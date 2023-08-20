@@ -9,14 +9,14 @@ const composer = new Composer<Context>()
 
 composer.command('debug', logHandle('command-debug'), ctx => {
   ctx.reply(JSON.stringify(ctx.session))
-  console.log(ctx.session)
-  console.log(ctx.games.size)
+  // console.log(ctx.session)
+  // console.log(ctx.games.size)
 })
 
 const feature = composer.chatType(['group', 'supergroup'])
 
 feature.command('startgame', logHandle('command-startgame'), ctx => {
-  //check if game is already started
+  // check if game is already started
   if (getGame(ctx) !== undefined) {
     ctx.reply(ctx.t('game.already_started'))
     return
@@ -40,7 +40,6 @@ feature.command('join', logHandle('command-join'), async ctx => {
   if (!game._players.has(ctx.from?.id)) {
     game.addPlayer(ctx)
   }
-
 })
 
 feature.command('leave', logHandle('command-leave'), async ctx => {
