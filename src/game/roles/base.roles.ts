@@ -116,7 +116,7 @@ export const Hunter: Role = {
 export const Doppelganger: Role = {
     ...Villager,
     name: "Doppelganger",
-    descCommand: "roleDoppelganger",
+    descCommand: "roleDG",
     description: "role_desc.doppelganger",
 
     actions: [],

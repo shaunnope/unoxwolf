@@ -1,3 +1,5 @@
+import type { Context } from '~/bot/context'
+
 export enum Team {
     Village = "village",
     Werewolf = "werewolf",
@@ -36,15 +38,28 @@ export type Player = {
 };
 
 export type GameSettings = {
+    joinTimeout: number;
+    duskTimeout?: number;
+    nightTimeout: number;
+    dayTimeout?: number;
+    voteTimeout: number;
+    
     loneWolf: boolean;
+    revealHistory?: boolean;
 
     roles: Role[];
     marks: Mark[];
 };
 
-export type Game = {
-    id: number;
+export type GameInfo = {
+    id: string;
+    ctx: Context;
+    createdTime: Date;
+    endTime: Date | undefined;
+
     players: Player[];
-    state: "lobby" | "dusk" | "night" | "day" | "end";
+    state: "lobby" | "starting" | "dusk" | "night" | "day" | "end";
     winners: Team[];
+
+    settings: GameSettings;
 };

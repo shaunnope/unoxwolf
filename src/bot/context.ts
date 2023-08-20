@@ -10,6 +10,8 @@ import { I18nFlavor } from "@grammyjs/i18n";
 import { ParseModeFlavor } from "@grammyjs/parse-mode";
 import { PrismaClientX } from "~/prisma";
 
+import type { Game } from "~/game";
+
 type ScopeUser = Omit<
   UserPayload<PrismaClientX["$extends"]["extArgs"]>["scalars"],
   "updatedAt" | "createdAt"
@@ -24,6 +26,8 @@ type ExtendedContextFlavor = {
   prisma: PrismaClientX;
   logger: Logger;
   scope: ContextScope;
+
+  games: Map<string, Game>
 };
 
 export type ContextScopeWith<P extends keyof ContextScope> = Record<
@@ -33,6 +37,7 @@ export type ContextScopeWith<P extends keyof ContextScope> = Record<
 
 type SessionData = {
   // field?: string;
+  games: {[key: string]: string}; // map of topicId to gameId
 };
 
 export type Context = ParseModeFlavor<
@@ -56,39 +61,35 @@ function toArray(e: any) {
 const customChecker = DefaultContext.has;
 customChecker.command = function<S extends string>(command: MaybeArray<StringWithSuggestions<S | "start" | "help" | "settings">>): <C extends DefaultContext>(ctx: C) => ctx is CommandContext<C> {
   const hasEntities = customChecker.filterQuery(":entities:bot_command");
-  const atCommands = new Set();
-  const noAtCommands = new Set();
+  const atCommands = new Set<string>();
+  const noAtCommands = new Set<string>();
   toArray(command).forEach((cmd) => {
       if (cmd.startsWith("/")) {
-          throw new Error(`Do not include '/' when registering command handlers (use '${cmd.substring(1)}' not '${cmd}')`);
+          throw new Error(
+              `Do not include '/' when registering command handlers (use '${
+                  cmd.substring(1)
+              }' not '${cmd}')`,
+          );
       }
       const set = cmd.indexOf("@") === -1 ? noAtCommands : atCommands;
       set.add(cmd);
   });
-  return (ctx) => {
-      var _a, _b;
-      if (!hasEntities(ctx))
-          return false;
-      const msg = (_a = ctx.message) !== null && _a !== void 0 ? _a : ctx.channelPost;
-      if (!msg) return false;
-      const txt = (_b = msg.text) !== null && _b !== void 0 ? _b : msg.caption;
-      if (!txt) return false;
+  return <C extends DefaultContext>(ctx: C): ctx is CommandContext<C> => {
+      if (!hasEntities(ctx)) return false;
+      const msg = ctx.message ?? ctx.channelPost;
+      const txt = msg.text ?? msg.caption;
       return msg.entities.some((e) => {
-          if (e.type !== "bot_command")
-              return false;
-          if (e.offset !== 0)
-              return false;
+          if (e.type !== "bot_command") return false;
+          if (e.offset !== 0) return false;
           const cmd = txt.substring(1, e.length);
           if (noAtCommands.has(cmd) || atCommands.has(cmd)) {
               ctx.match = txt.substring(cmd.length + 1).trimStart();
               return true;
           }
           const index = cmd.indexOf("@");
-          if (index === -1)
-              return false;
+          if (index === -1) return false;
           const atTarget = cmd.substring(index + 1);
-          if (atTarget.toLowerCase() !== ctx.me.username.toLowerCase())
-              return false;
+          if (atTarget.toLowerCase() !== ctx.me.username.toLowerCase()) return false;
           const atCommand = cmd.substring(0, index);
           if (noAtCommands.has(atCommand)) {
               ctx.match = txt.substring(cmd.length + 1).trimStart();
@@ -107,6 +108,8 @@ export function createContextConstructor(container: Container) {
     logger: Logger;
     scope: ContextScope;
 
+    games: Map<string, Game>;
+
     static has = customChecker; // HACK: Override `ctx.has.command`
 
     constructor(update: Update, api: Api, me: UserFromGetMe) {
@@ -118,6 +121,8 @@ export function createContextConstructor(container: Container) {
         update_id: this.update.update_id,
       });
       this.scope = {};
+
+      this.games = container.games;
     }
   } as unknown as new (update: Update, api: Api, me: UserFromGetMe) => Context;
 }
