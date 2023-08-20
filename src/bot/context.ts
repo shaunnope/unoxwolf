@@ -42,7 +42,7 @@ export type Context = ParseModeFlavor<
 type MaybeArray<T> = T | T[]
 type StringWithSuggestions<S extends string> = (string & Record<never, never>) | S
 
-function toArray(e: any) {
+function toArray<E>(e: MaybeArray<E>): E[] {
   return Array.isArray(e) ? e : [e]
 }
 
