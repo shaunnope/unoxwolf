@@ -1,3 +1,27 @@
+language =
+    .select = Please, select your language
+    .changed = Language successfully changed!
+admin =
+    .user-not-found = User not found
+
+    .select-user = Please, select a user to change role
+    .select-user-btn = Select user
+    .your-role-changed = You're {$role ->
+        *[USER] a regular user
+        [ADMIN] an administrator
+    } now.
+    .user-role-changed = User with ID {$id} is now {$role ->
+        *[USER] a regular user
+        [ADMIN] an administrator
+    }.
+
+    .commands-updated = Commands updated.
+
+gmgm =
+    .no-set-name = No sticker set name
+
+unhandled = Unrecognized command. Try /start
+
 start_command =
     .description = Start the bot
 language_command =
@@ -56,6 +80,7 @@ game_init = {$user} has started a new game!
         [one] {$time} second left to join
         *[other] {$time} seconds left to join
     }
+    .not_enough_players = Not enough players to start the game!
     .starting = Starting game...
 
 game =
@@ -65,6 +90,11 @@ game =
     .no_leave = You cannot leave the game now!
     .player_flee = {$user} has left the game!
     .end = Game ended!
+
+
+game_error =
+    .err_assign_roles = Error while assigning roles. Please start a new game.
+
 
 roles =
     .villager = Villager 👱
@@ -414,7 +444,7 @@ role_desc =
     <em> The Mortician is on the {roles.team_mortician} team.</em>
 
     .aura_seer =
-    The Aura Seer learns all the players who viewed or shifted a role or mark at night.
+    The Aura Seer learns all the players who viewed or shifted a role at night.
 
     <em> The Aura Seer is on the {roles.team_village} team.</em>
     .cursed =
@@ -455,26 +485,212 @@ role_desc =
     <em> The Empath is on the {roles.team_village} team.</em>
 
 
-language =
-    .select = Please, select your language
-    .changed = Language successfully changed!
-admin =
-    .user-not-found = User not found
+role_message =
+    .villager = You are a simple {roles.villager}. Rest well tonight and don't let the werewolves bite!
 
-    .select-user = Please, select a user to change role
-    .select-user-btn = Select user
-    .your-role-changed = You're {$role ->
-        *[USER] a regular user
-        [ADMIN] an administrator
-    } now.
-    .user-role-changed = User with ID {$id} is now {$role ->
-        *[USER] a regular user
-        [ADMIN] an administrator
-    }.
+    .werewolf = You are a {roles.werewolf}! Arise at night to meet your fellow lycantrophic brethren.
+    .werewolf_reveal = Your fellow werewolves are { $wolves }.
+    .werewolf_lone = You are the only werewolf.
+    .werewolf_lone2 = One of the unassigned roles is a { $role }.
 
-    .commands-updated = Commands updated.
+    .seer = You are the {roles.seer}. Tonight, you may look at one other player's role or two of the unassigned roles.
+    .seer_action = Whose role would you like to look at?
+    .seer_reveal = { $user } is a { $role }.
+    .seer_reveal2 = A { $role1 } and a { $role2 } are unassigned tonight.
 
-gmgm =
-    .no-set-name = No sticker set name
+    .robber = You are the {roles.robber}. Tonight, you may rob another player's role, exchanging it with your own. You may then look at your new role.
+    .robber_action = Whose role would you like to rob?
 
-unhandled = Unrecognized command. Try /start
+    .troublemaker = You are the {roles.troublemaker}. Tonight, you may switch the roles of two other players without looking at those roles.
+    .troublemaker_action = Whose roles would you like to switch?
+
+    .tanner = You are the {roles.tanner}. Sick of your job, you only win if you are killed tonight.
+
+    .drunk = You are the {roles.drunk}. After having one drink too many, your role will be exchanged with an unassigned role by the end of the night.
+    .drunk_secret = {role_message.villager}
+
+    .insomniac = You are the {roles.insomniac}. With news of werewolves hiding in your midst, it would be a miracle if you were able to sleep soundly tonight.
+
+    .hunter = You are the {roles.hunter}. If you are killed tonight, the player you vote for will also die.
+
+    .mason = You are a {roles.mason}. At night, you may meet your fellow masons.
+    .mason_reveal = Your fellow masons are { $masons }.
+
+    .minion = You are the {roles.minion}. At night, you may meet your revered werewolves.
+    .minion_reveal = The werewolves are { $wolves }.
+    .minion_none = There are no werewolves tonight. Survive the morning and you will win.
+
+    .doppelganger = You are the {roles.doppelganger}.
+    .doppelganger_action = Whose role would you like to copy?
+    .doppelganger_reveal = You are now a { $role }.
+
+    .sentinel = You are the {roles.sentinel}. Tonight, you may protect another player from being robbed, switched, or looked at by other players.
+    .sentinel_action = Who would you like to protect?
+    .sentinel_poke = As you drift off to sleep, you feel a sense of security, knowing that you will be safe from harm tonight.
+    .sentinel_reveal = { $user } was protected by the Sentinel.
+
+    .apprentice_seer = You are the {roles.apprentice_seer}. Tonight, you may look at one of the unassigned roles.
+    .apprentice_seer_reveal = A { $role } is unassigned tonight.
+
+    .paranormal_investigator = You are the {roles.paranormal_investigator}. Tonight, you may view the roles of two other players, one at a time. If you view a role that is not on the {roles.team_village} team, you must stop looking and join the team of the role you viewed.
+    .pi_action = Who would you like to visit?
+    .pi_reveal_vg = {role_message.seer_reveal}
+    .pi_reveal_other = { $user } is a { $role }! You have joined the { $team } team.
+
+    .revealer = You are the {roles.revealer}. Tonight, you may reveal the role of one player. If the revealed role is not on the {roles.team_village} team, the role is not revealed.
+    .revealer_action = Whose role would you like to reveal?
+    .revealer_reveal = {role_message.seer_reveal}
+    .revealer_fail = You cautiously back away, hoping that { $user } did not notice you.
+
+    .curator = You are the {roles.curator}. A collector of ancient wares, you may give any player an unrevealed artifact at the end of the night. You may not give an artifact to a protected player.
+    .curator_action = Who would you like to give an artifact to?
+    .curator_result = You gave { $user } an artifact.
+    .curator_poke = As the sun peeks through your window, you glimpse a mysterious figure leaving your house. Looking around, you notice a small artifact on your bedside table. It is a { $artifact }. You are now a { $role }!
+
+    .witch = You are the {roles.witch}. Tonight, you may look at one of the unassigned roles. If you do, you must exchange that role with any player's role, including your own. You may not look at the role you are exchanging.
+    .witch_action = Would you like to look at a role?
+    .witch_action2 = You see a { $role }. Who would you like to exchange this role with?
+
+    .village_idiot = You are the {roles.village_idiot}. Tonight, you may move all roles but your own one position to the left or right.
+    .village_idiot_action = Would you like to move the roles left or right?
+
+    .bodyguard = You are the {roles.bodyguard}. Tomorrow, you will protect the player you vote for. If that player received the most votes, the player with the next most votes is killed instead.
+
+    .alpha_wolf = You are the {roles.alpha_wolf}. Tonight, you may convert a non-werewolf into a werewolf.
+    .alpha_wolf_action = Who would you like to convert?
+    .alpha_wolf_result = { $user } was turned into a werewolf!
+
+    .mystic_wolf = You are the {roles.mystic_wolf}. Tonight, you may learn the role of one non-werewolf player.
+    .mystic_wolf_action = {role_message.seer_action}
+    .mystic_wolf_result = {role_message.seer_result}
+
+    .dream_wolf = You are the {roles.dream_wolf}. Inflicted with a rare variant of narcolepsy, you have never been able to stay awake at night. At least the other members of your pack know who you are.
+
+    .copycat = You are the {roles.copycat}, but not for long! Rummaging through the unassigned roles, you find one that you like. You are now a { $role }.
+
+    .vampire = You are a {roles.vampire}! Arise at dusk to meet your fellow bloodsucking compadres and convert one other player into a vampire.
+    .vampire_reveal = Your fellow vampires are { $vampires }.
+    .vampire_none = There are no other vampires tonight.
+    .vampire_action = {role_message.alpha_wolf_action}
+    .vampire_result = After much deliberation, { $user } was turned into a vampire!
+
+    .vampire_master = You are the {roles.vampire_master}. If a player on the {roles.team_vampire} team votes for you, you are protected and the player with the next most votes is killed instead.
+
+    .vampire_count = You are the {roles.vampire_count}. At dusk, you may instill fear in a non-vampire player, preventing them from performing their night action.
+    .vampire_count_action = Who would you like to instill fear in?
+    .vampire_count_result = { $user } will be too afraid to perform their night action.
+    .vampire_count_poke = You feel a sense of dread as you drift off to sleep. You will be too afraid to perform your night action tonight.
+
+    .renfield = You are the {roles.renfield}. At dusk, you will learn who the vampires are. Subsequently, you will turn into a bat.
+    .renfield_reveal = The vampires are { $vampires }.
+    .renfield_none = There are no vampires tonight.
+    .renfield_bat = You turn into a bat and fly away.
+
+    .cupid = You are {roles.cupid}. As night falls, you may choose two players to fall in love. If one of those players dies, the other dies of a broken heart.
+    .cupid_action = Who would you like to make fall in love?
+    .cupid_result = { $user } and { $user2 } are now in love.
+    .lovers_reveal = As you drift into sleep, you are engulfed by a warm, fuzzy feeling. You are deeply in love with { $lover } and are not sure how you would cope if they were to die.
+    .lovers_die = You feel a sharp pain in your chest. { $lover } is dead! You die of a broken heart.
+
+    .diseased = You are the {roles.diseased}. At dusk, you may spread your affliction to one player beside you. Any player who votes for you or your victim cannot win.
+    .diseased_action = Who would you like to infect?
+    .diseased_result = { $user } is now diseased.
+
+    .instigator = You are the {roles.instigator}. At dusk, you may brand any player as a traitor. The traitor only wins if someone else on their team is killed, unless they are the only player on their team.
+    .instigator_action = Who would you like to brand as a traitor?
+    .instigator_result = { $user } is now a traitor.
+    .instigator_poke = You feel a sense of hatred as you drift off to sleep. You are now a traitor.
+
+    .priest = You are the {roles.priest}. At dusk, you will annoint yourself and up to one other player with a Mark of Clarity.
+    .priest_action = Who would you like to annoint?
+    .priest_result = { $user } is now marked with a Mark of Clarity.
+
+    .assassin = You are the {roles.assassin}. At dusk, you may select a player as your target. You only win if your target is killed.
+    .assassin_action = Who would you like to make your target?
+    .assassin_result = { $user } is now your target.
+    .assassin_reveal = { $user } is the {roles.apprentice_assassin}. Watch out, as they will be vying for your death!
+
+    .apprentice_assassin = You are the {roles.apprentice_assassin}.
+    .app_assassin_reveal = { $user } is the {roles.assassin}. Fueled by vengeance, you only win if they are killed!
+    .app_assassin_none = You don't see the {roles.assassin} tonight.
+    .app_assassin_none2 = Was your drive for revenge all for naught? If there are no {roles.assassin} by the end of the night, you will only win if you are killed.
+
+    .marksman = You are the {roles.marksman}. Tonight, you may look at the role of one player, and the mark of another.
+    .marksman_action = Whose role would you like to look at?
+    .marksman_action2 = Whose mark would you like to look at?
+    .marksman_result = {role_message.seer_reveal}
+    .marksman_result2 = { $user } is marked with a { $mark }.
+
+    .pickpocket = You are the {roles.pickpocket}. Tonight, you may swap your mark with the mark of another player and view your new mark.
+    .pickpocket_action = Whose mark would you like to swap with?
+    .pickpocket_result = You swapped your mark with { $user } and are now marked with a { $mark }.
+
+    .gremlin = You are the {roles.gremlin}. Tonight, you may swap the marks or roles of two players, but not both. You may not look at the marks or roles you are swapping.
+    .gremlin_action = Will you swap marks or roles?
+    .gremlin_action2 = Which players' { $status } would you like to swap?
+    .gremlin_result = You swapped the { $status }s of { $user } and { $user2 }.
+
+    .oracle = You are the {roles.oracle}. Tonight, you may answer a question.
+
+    .alien = You are an {roles.alien}! Gather at night to meet your other extraterrestrial beings and cause havoc to the space-time continuum.
+    .alien_reveal = Your fellow aliens are { $aliens }.
+
+    .synthetic_alien = You are a {roles.synthetic_alien}. Burdened by extreme self-awareness, you know that it is best for you to die. You only win if you are killed.
+
+    .cow = You are a {roles.cow}. If you are next to an alien, you will be tipped over.
+    .cow_reveal = You were tipped over by { $user }.
+
+    .groob = You are {roles.groob}. You just can't with {roles.zerb} and will do anything you can to get rid of them. If they show up at night, you only win if {roles.zerb} is killed and you survive.
+    .groob_reveal = { $user } is {roles.zerb}! They must die for you to win.
+
+    .zerb = You are {roles.zerb}. You just can't with {roles.groob} and will do anything you can to get rid of them. If they show up at night, you only win if {roles.groob} is killed and you survive.
+    .zerb_reveal = { $user } is {roles.groob}! They must die for you to win.
+
+    .leader = You are the {roles.leader}. Tonight, you will learn the identities of the {roles.team_alien}s. If {roles.groob} and {roles.zerb} are not both in play, you only win if the aliens lose. Otherwise, you only win if both {roles.groob} and {roles.zerb} survive. If all members of the {roles.team_alien} team vote for you, the {roles.team_village} team loses.
+    .leader_reveal = The aliens are { $aliens }.
+    .leader_reveal2 = { $groob } is {roles.groob} and { $zerb } is {roles.zerb}! Ensure that both survive to win.
+
+    .psychic = You are the {roles.psychic}. Tonight, you may learn the roles of one or more players. The roles which may be learned are random.
+
+    .rascal = You are the {roles.rascal}. Tonight, you may swap two or more players' roles. The roles which may be swapped are random.
+
+    .exposer = You are the {roles.exposer}. Before the end of the night, you may reveal some or all of the unassigned roles. The number of roles which may be revealed is random.
+
+    .blob = You are the {roles.blob}. Tonight, you will grow, subsuming the players next to you. The number of players that join you is random. You only win if all players that are part of the blob survive.
+    .blob_reveal = { $users } are now part of the blob.
+    .blob_poke = You are now part of the blob.
+
+    .mortician = You are the {roles.mortician}. Tonight, you may learn the roles of the players next to you. The number of roles which may be learned is random. You only win if at least one player next to you dies.
+
+    .aura_seer = You are the {roles.aura_seer}. Tonight, you will learn all the players who viewed or shifted a role at night.
+    .aura_seer_reveal = { $users } viewed or shifted a role last night.
+
+    .cursed = You are the {roles.cursed}. You are on the {roles.team_village} team, unless a werewolf or vampire votes for you, in which case you join them.
+
+    .prince = You are the {roles.prince}. You cannot be voted for execution. If you receive the most votes, the player with the next most votes is killed instead.
+
+    .apprentice_tanner = You are the {roles.apprentice_tanner}.
+    .app_tanner_reveal = { $user } is the {roles.tanner}. You only win if they are killed.
+    .app_tanner_none = You don't see the {roles.tanner} tonight. If they do not show up in the morning, you would rather die!
+
+    .beholder = You are the {roles.beholder}. At the end of the night, you will check the roles of the Seer and Apprentice Seer.
+    .beholder_reveal = { $user } is the { $role }.
+
+    .squire = You are the {roles.squire}. At the end of the night, you will learn who the werewolves are and check their roles.
+
+    .thing = You are the {roles.thing}. At night, you may tap the player to your right or left.
+    .thing_action = Who would you like to tap?
+    .thing_result = You tapped { $user } in their slumber.
+    .thing_poke = You feel something cold brush your shoulder. The {roles.thing} is next to you!
+
+    .nostradamus = You are {roles.nostradamus}. At night, you may look at the roles of up to three players, and join the team of the last player you look at. The team you join will be revealed to all players.
+    .nostradamus_action = Whose role would you like to look at?
+    .nostradamus_reveal = {role_message.seer_reveal}
+    .nostradamus_reveal2 = You are now on the { $team } team.
+    .nostradamus_announce = { $user } is now on the { $team } team.
+
+    .body_snatcher = You are the {roles.body_snatcher}. At night, you may exchange your role with a non-alien player and learn their new role. The snatched role is now an alien.
+    .body_snatcher_action = Whose body would you like to snatch?
+    .body_snatcher_reveal = You snatched { $user }'s body. They were a { $role }.
+
+    .empath = You are the {roles.empath}. At night, you may watch the actions of random players.
