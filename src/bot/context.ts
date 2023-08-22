@@ -1,6 +1,7 @@
 import { Update, UserFromGetMe } from '@grammyjs/types'
 import { UserPayload } from '@prisma/client'
 import { Context as DefaultContext, SessionFlavor, type Api, type CommandContext } from 'grammy'
+import { type Conversation, type ConversationFlavor, conversations, createConversation } from '@grammyjs/conversations'
 
 import { AutoChatActionFlavor } from '@grammyjs/auto-chat-action'
 import { HydrateFlavor } from '@grammyjs/hydrate'

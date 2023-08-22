@@ -19,6 +19,23 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@deno/shim-deno-test@npm:^0.4.0":
+  version: 0.4.0
+  resolution: "@deno/shim-deno-test@npm:0.4.0"
+  checksum: 37397110e88f7f0f450f2e44a529ca1b240f5063783cc2e29b740ddd653ecca628a3764b935069569bd8a2830dad8ba1460351579a723e81e346eff420622708
+  languageName: node
+  linkType: hard
+
+"@deno/shim-deno@npm:~0.16.1":
+  version: 0.16.1
+  resolution: "@deno/shim-deno@npm:0.16.1"
+  dependencies:
+    "@deno/shim-deno-test": ^0.4.0
+    which: ^2.0.2
+  checksum: 35f08fd7a09e958128cee5a167f6a16b17fd36b0b973a6ac0fed0cea7314180ea4fbc464e82b27d5b70d5ebfbedba1a111c4f6c9bff8bfea52f22e85342d72c9
+  languageName: node
+  linkType: hard
+
 "@deno/shim-deno@npm:~0.9.0":
   version: 0.9.0
   resolution: "@deno/shim-deno@npm:0.9.0"
@@ -125,6 +142,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@grammyjs/conversations@npm:^1.1.2":
+  version: 1.1.2
+  resolution: "@grammyjs/conversations@npm:1.1.2"
+  dependencies:
+    "@grammyjs/types": ^3.1.1
+    debug: ^4.3.4
+    o-son: ^1.0.1
+  peerDependencies:
+    grammy: ^1.10.0
+  checksum: fd9c5fd0ba5cfaaa1ef8cefe93040d23be03f785df0e9b7dec42b6f76096f3cc3b0db17ad7262540eac7c48cb38b706bcb48b4d0d806483c15bd6fbecc0378be
+  languageName: node
+  linkType: hard
+
 "@grammyjs/hydrate@npm:^1.3.1":
   version: 1.3.1
   resolution: "@grammyjs/hydrate@npm:1.3.1"
@@ -165,6 +195,13 @@ __metadata:
   version: 3.1.2
   resolution: "@grammyjs/types@npm:3.1.2"
   checksum: afbf678ca14079e16d37c7b721c90eb90a5d18110b331e49980b4f88966c85995ce1b97a0c64226949f1bdd208ce8b62b348a9b2d2197c2c98ec1925697e752a
+  languageName: node
+  linkType: hard
+
+"@grammyjs/types@npm:^3.1.1":
+  version: 3.2.0
+  resolution: "@grammyjs/types@npm:3.2.0"
+  checksum: b088ed53f9431c970452427b341f999e81965722372e969d0a4a6984f80f3270d40db5ffce5a5f709266f5a792327fe26e81872c8e2a41d1bf3c9fa72aeb5817
   languageName: node
   linkType: hard
 
@@ -2357,6 +2394,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"o-son@npm:^1.0.1":
+  version: 1.0.2
+  resolution: "o-son@npm:1.0.2"
+  dependencies:
+    "@deno/shim-deno": ~0.16.1
+  checksum: 8eaa5a05cc1ea024c0789f61702df6ea86149d59f3f571f5ae70b24b7e140388408a0895630db97fa158019a3b5eeb897b2932a0b0714393c5dde51a194e48e9
+  languageName: node
+  linkType: hard
+
 "object-inspect@npm:^1.12.2, object-inspect@npm:^1.12.3, object-inspect@npm:^1.9.0":
   version: 1.12.3
   resolution: "object-inspect@npm:1.12.3"
@@ -2449,6 +2495,7 @@ __metadata:
   resolution: "onuwolf@workspace:."
   dependencies:
     "@grammyjs/auto-chat-action": ^0.1.1
+    "@grammyjs/conversations": ^1.1.2
     "@grammyjs/hydrate": ^1.3.1
     "@grammyjs/i18n": ^1.0.1
     "@grammyjs/parse-mode": ^1.7.1

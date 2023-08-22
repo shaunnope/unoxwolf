@@ -26,7 +26,9 @@ feature.on(':sticker', async ctx => {
 
 async function bread(ctx: CommandContext<Context>) {
   const sticker = stickers[Math.floor(Math.random() * stickers.length)]
-  ctx.api.sendSticker(ctx.msg.chat.id, sticker.file_id, { reply_to_message_id: ctx.msg.message_id })
+  ctx.api.sendSticker(ctx.msg.chat.id, sticker.file_id, {
+    reply_to_message_id: ctx.msg.message_id,
+  })
 }
 
 feature.command('gmgm_lgtb', logHandle('command-gmgm'), bread)
