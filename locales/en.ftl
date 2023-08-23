@@ -70,6 +70,8 @@ welcome =
 game_init = {$user} has started a new game!
     .unknown_user = Someone
     .join = Join
+    .join_prompt = Click here to join the game!
+    .join_success = You joined the game in { $chat }!
     .player_count = <strong>No. of players:</strong> {$count}
     .joined_game = { $users } joined the game in the last 30 seconds.
     .minutes_left = { $time ->
@@ -90,10 +92,20 @@ game =
     .no_leave = You cannot leave the game now!
     .player_flee = {$user} has left the game!
     .end = Game ended!
+    .timer_skipped = <em>Skipping forward...</em>
+    .times_up = Time's up!
+    .voting_started = Voting has started!
+    .voting_qn = Who do you want to vote for?
+    .already_voted = You have already voted!
+    .vote_cast = You voted for {$user}.
+    .voting_end = Voting has ended!
+    .voting_tally = Tallying votes...
 
 
 game_error =
     .err_assign_roles = Error while assigning roles. Please start a new game.
+    .vote_invalid = Invalid target: {$user}.
+    .not_in_game = You are not in the game in {$chat}!
 
 
 roles =

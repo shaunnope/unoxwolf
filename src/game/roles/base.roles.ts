@@ -1,10 +1,11 @@
-import { Role, Team } from '~/game/types'
+import { Role, Team } from '~/game/models/types'
 
 export const Villager: Role = {
-  name: 'Villager',
+  name: 'roles.villager',
   team: Team.Village,
   descCommand: 'roleVG',
   description: 'role_desc.villager',
+  lore: 'role_message.villager',
 
   actions: [],
   doppleActions: [],
@@ -12,10 +13,11 @@ export const Villager: Role = {
 
 export const Werewolf: Role = {
   ...Villager,
-  name: 'Werewolf',
+  name: 'roles.werewolf',
   team: Team.Werewolf,
   descCommand: 'roleWW',
   description: 'role_desc.werewolf',
+  lore: 'role_message.werewolf',
 
   actions: [],
   doppleActions: [],
@@ -23,9 +25,10 @@ export const Werewolf: Role = {
 
 export const Seer: Role = {
   ...Villager,
-  name: 'Seer',
+  name: 'roles.seer',
   descCommand: 'roleSeer',
   description: 'role_desc.seer',
+  lore: 'role_message.seer',
 
   actions: [],
   doppleActions: [],
@@ -33,9 +36,10 @@ export const Seer: Role = {
 
 export const Robber: Role = {
   ...Villager,
-  name: 'Robber',
+  name: 'roles.robber',
   descCommand: 'roleRobber',
   description: 'role_desc.robber',
+  lore: 'role_message.robber',
 
   actions: [],
   doppleActions: [],
@@ -43,9 +47,10 @@ export const Robber: Role = {
 
 export const Troublemaker: Role = {
   ...Villager,
-  name: 'Troublemaker',
+  name: 'roles.troublemaker',
   descCommand: 'roleTM',
   description: 'role_desc.troublemaker',
+  lore: 'role_message.troublemaker',
 
   actions: [],
   doppleActions: [],
@@ -53,9 +58,10 @@ export const Troublemaker: Role = {
 
 export const Drunk: Role = {
   ...Villager,
-  name: 'Drunk',
+  name: 'roles.drunk',
   descCommand: 'roleDrunk',
   description: 'role_desc.drunk',
+  lore: 'role_message.drunk',
 
   actions: [],
   doppleActions: [],
@@ -63,9 +69,10 @@ export const Drunk: Role = {
 
 export const Insomniac: Role = {
   ...Villager,
-  name: 'Insomniac',
+  name: 'roles.insomniac',
   descCommand: 'roleInsomniac',
   description: 'role_desc.insomniac',
+  lore: 'role_message.insomniac',
 
   actions: [],
   doppleActions: [],
@@ -73,9 +80,10 @@ export const Insomniac: Role = {
 
 export const Mason: Role = {
   ...Villager,
-  name: 'Mason',
+  name: 'roles.mason',
   descCommand: 'roleMason',
   description: 'role_desc.mason',
+  lore: 'role_message.mason',
 
   actions: [],
   doppleActions: [],
@@ -83,9 +91,10 @@ export const Mason: Role = {
 
 export const Minion: Role = {
   ...Werewolf,
-  name: 'Minion',
+  name: 'roles.minion',
   descCommand: 'roleMinion',
   description: 'role_desc.minion',
+  lore: 'role_message.minion',
 
   actions: [],
   doppleActions: [],
@@ -93,10 +102,11 @@ export const Minion: Role = {
 
 export const Tanner: Role = {
   ...Villager,
-  name: 'Tanner',
+  name: 'roles.tanner',
   team: Team.Tanner,
   descCommand: 'roleTanner',
   description: 'role_desc.tanner',
+  lore: 'role_message.tanner',
 
   actions: [],
   doppleActions: [],
@@ -104,9 +114,10 @@ export const Tanner: Role = {
 
 export const Hunter: Role = {
   ...Villager,
-  name: 'Hunter',
+  name: 'roles.hunter',
   descCommand: 'roleHunter',
   description: 'role_desc.hunter',
+  lore: 'role_message.hunter',
 
   actions: [],
   doppleActions: [],
@@ -114,9 +125,10 @@ export const Hunter: Role = {
 
 export const Doppelganger: Role = {
   ...Villager,
-  name: 'Doppelganger',
+  name: 'roles.doppelganger',
   descCommand: 'roleDG',
   description: 'role_desc.doppelganger',
+  lore: 'role_message.doppelganger',
 
   actions: [],
   doppleActions: [],

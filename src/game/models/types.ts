@@ -1,4 +1,5 @@
 import type { Context } from '~/bot/context'
+import type { Game } from '~/game'
 
 export enum Team {
   Village = 'village',
@@ -9,11 +10,21 @@ export enum Team {
   Alien = 'alien',
   Synth = 'synth',
   Symbiote = 'symbiote',
-  Mortician = 'Mortician',
+  Mortician = 'mortician',
 }
 
 export type Action = {
-  fn: object // TODO: define more specific type
+  fallback: (game: Game, player: Player) => void
+  setup: (game: Game, player: Player) => void
+  fn: (game: Game, playerContext: Context, targets?: Player[]) => void
+}
+
+export type GameEvent = {
+  type: 'none' | 'vote' | 'swap' | 'peek' | 'copy'
+  author: Player
+  targets: Player[]
+  priority: number
+  fn: () => void
 }
 
 export type Role = {
@@ -21,6 +32,7 @@ export type Role = {
   team: Team
   descCommand: string
   description: string
+  lore: string
 
   actions: Action[]
   doppleActions: Action[]
@@ -36,6 +48,8 @@ export type Player = {
   role: Role
   mark: Mark
   actions: Action[]
+
+  ctx?: Context
 }
 
 export type GameSettings = {
@@ -45,8 +59,16 @@ export type GameSettings = {
   dayTimeout?: number
   voteTimeout: number
 
-  loneWolf: boolean
-  revealHistory?: boolean
+  minPlayers: number
+  maxPlayers: number
+  extraRoles: number
+
+  loneWolf?: true
+  revealHistory?: true
+  selfVote?: true
+
+  secretVote?: true
+  secretDrunk?: true
 
   roles: Role[]
   marks: Mark[]
@@ -63,4 +85,14 @@ export type GameInfo = {
   winners: Team[]
 
   settings: GameSettings
+}
+
+export type GameFlags = {
+  killTimer?: true
+  timerRunning?: true
+}
+
+export type InlineKBMetaData = {
+  text: string
+  callback_data?: string
 }

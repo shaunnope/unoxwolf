@@ -1,6 +1,7 @@
 import { autoChatAction } from '@grammyjs/auto-chat-action'
 import { hydrate } from '@grammyjs/hydrate'
 import { hydrateReply, parseMode } from '@grammyjs/parse-mode'
+import { conversations } from '@grammyjs/conversations'
 import { Bot as TelegramBot, BotConfig, StorageAdapter } from 'grammy'
 import type { Container } from '~/container'
 import { gameFeature } from '~/game'
@@ -42,16 +43,17 @@ export const createBot = (
   bot.use(session(sessionStorage))
   bot.use(setScope())
   bot.use(i18n())
+  bot.use(conversations())
 
   // Handlers
+
+  bot.use(gameFeature)
 
   bot.use(botAdminFeature)
   bot.use(welcomeFeature)
 
   bot.use(lgtbFeature)
   bot.use(miscFeature)
-
-  bot.use(gameFeature)
 
   if (isMultipleLocales) {
     bot.use(languageFeature)

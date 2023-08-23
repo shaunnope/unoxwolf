@@ -1,7 +1,7 @@
 import { Update, UserFromGetMe } from '@grammyjs/types'
 import { UserPayload } from '@prisma/client'
 import { Context as DefaultContext, SessionFlavor, type Api, type CommandContext } from 'grammy'
-import { type Conversation, type ConversationFlavor, conversations, createConversation } from '@grammyjs/conversations'
+import { type Conversation as DefaultConversation, type ConversationFlavor } from '@grammyjs/conversations'
 
 import { AutoChatActionFlavor } from '@grammyjs/auto-chat-action'
 import { HydrateFlavor } from '@grammyjs/hydrate'
@@ -36,8 +36,17 @@ type SessionData = {
 }
 
 export type Context = ParseModeFlavor<
-  HydrateFlavor<DefaultContext & ExtendedContextFlavor & SessionFlavor<SessionData> & I18nFlavor & AutoChatActionFlavor>
+  HydrateFlavor<
+    DefaultContext &
+      ExtendedContextFlavor &
+      SessionFlavor<SessionData> &
+      I18nFlavor &
+      AutoChatActionFlavor &
+      ConversationFlavor
+  >
 >
+
+export type Conversation = DefaultConversation<Context>
 
 // HACK: Override the implementation of `ctx.has.command` for case-insensitive handling of bot commands
 type MaybeArray<T> = T | T[]
