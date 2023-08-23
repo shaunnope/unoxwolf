@@ -137,3 +137,10 @@ dist
 
 # js files from ts
 *.js
+*.cjs
+
+# vscode
+.vscode
+
+# prisma output
+src/generated

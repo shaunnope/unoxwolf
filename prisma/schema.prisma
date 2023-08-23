@@ -1,0 +1,50 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = ["metrics"]
+  binaryTargets   = ["native", "debian-openssl-1.1.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+  OWNER
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  telegramId   BigInt   @unique @map("telegram_id")
+  languageCode String?  @map("language_code")
+  role         Role     @default(USER)
+  updatedAt    DateTime @updatedAt @map("updated_at")
+  createdAt    DateTime @default(now()) @map("created_at")
+  stats        Stats?
+
+  @@map(name: "users")
+}
+
+model Stats {
+  id           Int      @id @default(autoincrement())
+  userId       BigInt   @unique @map("user_id")
+  user         User     @relation(fields: [userId], references: [telegramId])
+  chatId       BigInt   @map("chat_id")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+  createdAt    DateTime @default(now()) @map("created_at")
+  villagerWin  Int      @default(0) @map("villager_win")
+  villagerLose Int      @default(0) @map("villager_lose")
+  werewolfWin  Int      @default(0) @map("werewolf_win")
+  werewolfLose Int      @default(0) @map("werewolf_lose")
+  tannerWin    Int      @default(0) @map("tanner_win")
+  tannerLose   Int      @default(0) @map("tanner_lose")
+  vampireWin   Int      @default(0) @map("vampire_win")
+  vampireLose  Int      @default(0) @map("vampire_lose")
+
+  @@map(name: "stats")
+}
