@@ -3,7 +3,7 @@ import _ from 'lodash'
 import { GameInfo } from '~/game/models/game'
 import { Team } from '~/game/models/enums'
 import { Role, RoleInfo, Player } from '~/game/models/player'
-import { createVoteKB, createOptions } from '../helpers/game.convos'
+import { createVoteKB, getOptions, sendActionPrompt } from '../helpers/game.convos'
 
 export class Villager extends Role {
   static readonly info: RoleInfo = {
@@ -54,25 +54,35 @@ export class Seer extends Villager {
     if (player.ctx === undefined) {
       return
     }
-    const options = createOptions(game.players, other => other.id !== player.id)
+    const options = getOptions(game.players, other => other.id !== player.id)
     const kb = createVoteKB(options, `peek${game.id}`)
 
     const extraOptions = [[game.ctx.t('misc.unassigned', { count: 2 }), `peek${game.id}+un`]]
     kb.text(extraOptions[0][0], extraOptions[0][1])
 
-    game.privateMsgs.set(
-      player.id,
-      game.ctx.api.sendMessage(player.id, game.ctx.t('role_message.seer_action'), {
-        reply_markup: kb,
-      })
-    )
+    game.privateMsgs.set(player.id, sendActionPrompt(player, 'role_message.seer_action', kb)!)
   }
 }
 
-// export class Robber extends Villager {
-//   static roleName = 'robber'
-//   static descCommand = 'roleRobber'
-// }
+export class Robber extends Villager {
+  static readonly info: RoleInfo = {
+    name: 'robber',
+    team: Team.Village,
+    descCommand: 'roleRobber',
+    priority: 3,
+  }
+
+  doNight(player: Player, game: GameInfo) {
+    if (player.ctx === undefined) {
+      return
+    }
+    const options = getOptions(game.players, other => other.id !== player.id)
+    const kb = createVoteKB(options, `swap${game.id}`)
+    // TODO: add pass option
+
+    game.privateMsgs.set(player.id, sendActionPrompt(player, 'role_message.robber_action', kb)!)
+  }
+}
 
 // export class Troublemaker extends Villager {
 //   static roleName = 'troublemaker'

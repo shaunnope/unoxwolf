@@ -8,6 +8,7 @@ export type RoleInfo = {
   team: Team
   isAide?: boolean
   descCommand: string
+  priority?: number
 }
 
 export class Role {
@@ -43,6 +44,10 @@ export class Role {
 
   get info() {
     return (<typeof Role>this.constructor).info
+  }
+
+  get priority() {
+    return this.info.priority || -1
   }
 
   status: Status = Status.NORMAL

@@ -18,6 +18,31 @@ export const Vote = (player: Player, targets: Player[], game: Game) => {
   } as GameEvent
 }
 
+export const Swap = (player: Player, targets: Player[], game: Game, priority: number = 0) => {
+  if (targets.length !== 2) throw new Error('Invalid targets')
+  // TODO: change these checks
+  if (!game.playerMap.has(player.id)) throw new Error('Player not in game')
+  if (!game.playerMap.has(targets[0].id)) throw new Error('Target 1 not in game')
+  if (!game.playerMap.has(targets[1].id)) throw new Error('Target 2 not in game')
+
+  return {
+    type: 'swap',
+    author: player,
+    targets,
+    priority,
+    fn: () => {
+      targets[0].swapRoles(targets[1])
+      player.ctx?.reply(
+        player.ctx.t(`role_message.${player.role.info.name}_swap`, {
+          user1: targets[0].name,
+          user2: targets[1].name,
+          role: player.ctx.t(targets[0].currentRole.name),
+        })
+      )
+    },
+  } as GameEvent
+}
+
 export const Reveal = (player: Player, targets: Player[], game: Game) => {
   if (targets.length !== 1) throw new Error('Invalid targets')
 

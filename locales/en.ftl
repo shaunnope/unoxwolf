@@ -110,9 +110,13 @@ game_error =
     .err_assign_roles = Error while assigning roles. Please start a new game.
     .vote_invalid = Invalid target: {$user}.
     .not_in_game = You are not in the game in {$chat}!
+    .wrong_qn = This question is not for you!
 
 misc =
     .unassigned = Unassigned roles ({$count})
+    .peek_role = { $user } is a { $role }
+    .self_role_changed = You are now a {$role}
+    .self_team_changed = You are now on the {$team} team.
 
 
 roles =
@@ -312,7 +316,7 @@ role_desc =
     <em>The Doppelgänger is on the team of the role they copy.</em>
 
     .sentinel =
-    At night, the Sentinel may choose to protect another player from being robbed, switched, or looked at by other players.
+    At night, the Sentinel may choose to protect another player's role from being robbed, switched, or looked at by other players.
 
     <em>The Sentinel is on the {roles.team_village} team.</em>
     .apprentice_seer =
@@ -520,14 +524,16 @@ role_message =
         You are the {roles.seer}.
         Tonight, you may look at one other player's role or two of the unassigned roles.
     .seer_action = Whose role would you like to look at?
-    .seer_reveal = { $user } is a { $role }
+    .seer_reveal = { misc.peek_role }
     .seer_reveal2 = A { $role1 } and a { $role2 } are unassigned tonight.
 
     .robber = You are the {roles.robber}. Tonight, you may rob another player's role, exchanging it with your own. You may then look at your new role.
     .robber_action = Whose role would you like to rob?
+    .robber_swap = You stole { $user2 }'s role. { misc.self_role_changed }
 
     .troublemaker = You are the {roles.troublemaker}. Tonight, you may switch the roles of two other players without looking at those roles.
     .troublemaker_action = Whose roles would you like to switch?
+    .troublemaker_swap = You switched { $user1 }'s role with { $user2 }'s role.
 
     .tanner = You are the {roles.tanner}. Sick of your job, you only win if you are killed tonight.
 
@@ -547,7 +553,7 @@ role_message =
 
     .doppelganger = You are the {roles.doppelganger}.
     .doppelganger_action = Whose role would you like to copy?
-    .doppelganger_reveal = You are now a { $role }.
+    .doppelganger_reveal = { misc.self_role_changed }
 
     .sentinel = You are the {roles.sentinel}. Tonight, you may protect another player from being robbed, switched, or looked at by other players.
     .sentinel_action = Who would you like to protect?
@@ -560,7 +566,7 @@ role_message =
     .paranormal_investigator = You are the {roles.paranormal_investigator}. Tonight, you may view the roles of two other players, one at a time. If you view a role that is not on the {roles.team_village} team, you must stop looking and join the team of the role you viewed.
     .pi_action = Who would you like to visit?
     .pi_reveal_vg = {role_message.seer_reveal}
-    .pi_reveal_other = { $user } is a { $role }! You have joined the { $team } team.
+    .pi_reveal_other = {misc.peek_role} ! { misc.self_team_changed }
 
     .revealer = You are the {roles.revealer}. Tonight, you may reveal the role of one player. If the revealed role is not on the {roles.team_village} team, the role is not revealed.
     .revealer_action = Whose role would you like to reveal?
@@ -570,7 +576,7 @@ role_message =
     .curator = You are the {roles.curator}. A collector of ancient wares, you may give any player an unrevealed artifact at the end of the night. You may not give an artifact to a protected player.
     .curator_action = Who would you like to give an artifact to?
     .curator_result = You gave { $user } an artifact.
-    .curator_poke = As the sun peeks through your window, you glimpse a mysterious figure leaving your house. Looking around, you notice a small artifact on your bedside table. It is a { $artifact }. You are now a { $role }!
+    .curator_poke = As the sun peeks through your window, you glimpse a mysterious figure leaving your house. Looking around, you notice a small artifact on your bedside table. It is a { $artifact }. { misc.self_role_changed }
 
     .witch = You are the {roles.witch}. Tonight, you may look at one of the unassigned roles. If you do, you must exchange that role with any player's role, including your own. You may not look at the role you are exchanging.
     .witch_action = Would you like to look at a role?
@@ -591,7 +597,7 @@ role_message =
 
     .dream_wolf = You are the {roles.dream_wolf}. Inflicted with a rare variant of narcolepsy, you have never been able to stay awake at night. At least the other members of your pack know who you are.
 
-    .copycat = You are the {roles.copycat}, but not for long! Rummaging through the unassigned roles, you find one that you like. You are now a { $role }.
+    .copycat = You are the {roles.copycat}, but not for long! Rummaging through the unassigned roles, you find one that you like. { misc.self_role_changed }
 
     .vampire = You are a {roles.vampire}! Arise at dusk to meet your fellow bloodsucking compadres and convert one other player into a vampire.
     .vampire_reveal = Your fellow vampires are { $vampires }.
@@ -624,7 +630,7 @@ role_message =
     .instigator = You are the {roles.instigator}. At dusk, you may brand any player as a traitor. The traitor only wins if someone else on their team is killed, unless they are the only player on their team.
     .instigator_action = Who would you like to brand as a traitor?
     .instigator_result = { $user } is now a traitor.
-    .instigator_poke = You feel a sense of hatred as you drift off to sleep. You are now a traitor.
+    .instigator_poke = You feel a sense of hatred as you drift off to sleep. You are now a traitor!
 
     .priest = You are the {roles.priest}. At dusk, you will annoint yourself and up to one other player with a Mark of Clarity.
     .priest_action = Who would you like to annoint?
@@ -711,7 +717,7 @@ role_message =
     .nostradamus = You are {roles.nostradamus}. At night, you may look at the roles of up to three players, and join the team of the last player you look at. The team you join will be revealed to all players.
     .nostradamus_action = Whose role would you like to look at?
     .nostradamus_reveal = {role_message.seer_reveal}
-    .nostradamus_reveal2 = You are now on the { $team } team.
+    .nostradamus_reveal2 = { misc.self_team_changed }
     .nostradamus_announce = { $user } is now on the { $team } team.
 
     .body_snatcher = You are the {roles.body_snatcher}. At night, you may exchange your role with a non-alien player and learn their new role. The snatched role is now an alien.

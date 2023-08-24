@@ -4,9 +4,8 @@ import type { Context } from '~/bot/context'
 import { logHandle } from '~/bot/helpers/logging'
 
 import { Game } from '~/game'
-import { getChatTitle, getGame, setGame } from '~/game/helpers/game.context'
-import * as Actions from '~/game/roles/base.actions'
-import * as Roles from '~/game/roles'
+import { getGame, setGame } from '~/game/helpers/game.context'
+import { gameActions } from './game.actions'
 
 const composer = new Composer<Context>()
 
@@ -78,56 +77,6 @@ feature.command('nextphase', logHandle('command-nextphase'), async ctx => {
   }
 })
 
-pmFeature.callbackQuery(/vote(.+)\+(.+)/, logHandle('callback-vote'), async ctx => {
-  const [, gameId, userId] = ctx.match
-  const game = ctx.games.get(gameId)
-  if (game === undefined) {
-    ctx.reply(ctx.t('game.not_started'))
-    return
-  }
-  if (!game.playerMap.has(ctx.from?.id)) {
-    ctx.reply(ctx.t('game_error.not_in_game', { chat: getChatTitle(game.ctx) }))
-    return
-  }
-  const target = game.playerMap.get(Number(userId))
-  if (target === undefined) {
-    ctx.answerCallbackQuery(ctx.t('game_error.vote_invalid', { user: userId }))
-    return
-  }
-
-  Actions.Vote.fn(game, ctx, [target])
-})
-
-pmFeature.callbackQuery(/peek(.+)\+(.+)/, logHandle('callback-peek'), async ctx => {
-  const [, gameId, userId] = ctx.match
-  const game = ctx.games.get(gameId)
-  if (game === undefined) {
-    ctx.reply(ctx.t('game.not_started'))
-    return
-  }
-  const player = game.playerMap.get(ctx.from?.id)
-  if (player === undefined) {
-    ctx.reply(ctx.t('game_error.not_in_game', { chat: getChatTitle(game.ctx) }))
-    return
-  }
-  let msg = ''
-  if (player.role instanceof Roles.Seer) {
-    if (userId === 'un') {
-      const [role1, role2] = _.sampleSize(game.unassignedRoles, 2)
-      msg = ctx.t('role_message.seer_reveal2', { role1: ctx.t(role1.name), role2: ctx.t(role2.name) })
-    } else {
-      const target = game.playerMap.get(Number(userId))
-      if (target === undefined) {
-        ctx.answerCallbackQuery(ctx.t('game_error.vote_invalid', { user: userId }))
-        return
-      }
-      msg = ctx.t('role_message.seer_reveal', { user: target.name, role: ctx.t(target.role.name) })
-    }
-    game.privateMsgs.get(player.id)?.then(oldMsg => {
-      ctx.api.editMessageText(player.id, oldMsg.message_id, msg)
-    })
-    game.privateMsgs.delete(player.id)
-  }
-})
+composer.use(gameActions)
 
 export { composer as gameFeature }

@@ -2,6 +2,7 @@ import type { Context } from '~/bot/context'
 
 import { getForumTopicId } from '~/bot/helpers/forum'
 import { Game } from '~/game'
+import { Player } from '~/game/models/player'
 
 export const getGame = (ctx: Context) => ctx.games.get(ctx.session.games[getForumTopicId(ctx) || -1])
 export const setGame = (ctx: Context, game: Game) => {
@@ -35,4 +36,21 @@ export const getChatTitle = (ctx: Context) => {
       groupTitle = 'null'
   }
   return groupTitle
+}
+
+export const validateCallbackQuery = (ctx: Context) => {
+  if (ctx.match === undefined) return undefined
+  const [, gameId, userId] = ctx.match
+  const game = ctx.games.get(gameId)
+  if (game === undefined) {
+    ctx.reply(ctx.t('game.not_started'))
+    return undefined
+  }
+  if (ctx.from?.id === undefined) return undefined
+  const player = game.playerMap.get(ctx.from?.id)
+  if (player === undefined) {
+    ctx.reply(ctx.t('game_error.not_in_game', { chat: getChatTitle(game.ctx) }))
+    return undefined
+  }
+  return [game, player, userId] as [Game, Player, string]
 }

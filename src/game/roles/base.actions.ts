@@ -1,9 +1,20 @@
+import _ from 'lodash'
 import type { Player } from '~/game/models/player'
 import type { Game } from '~/game'
 
 import * as Events from '~/game/models/events'
 import { Context } from '~/bot/context'
-import { createVoteKB, createOptions } from '../helpers/game.convos'
+import { createVoteKB, getOptions, sendActionPrompt } from '../helpers/game.convos'
+
+export type ActionOptions = {
+  priority: number
+  required?: true
+  swapSelf?: true
+}
+
+const DEFAULT_ACTION_OPTIONS: ActionOptions = {
+  priority: 0,
+}
 
 /**
  * @property {Function} fallback - Select a random option when the player does not respond in time
@@ -11,9 +22,10 @@ import { createVoteKB, createOptions } from '../helpers/game.convos'
  * @property {Function} fn - Handle the player's response
  */
 export type Action = {
-  fallback: (game: Game, player: Player) => void
-  setup: (game: Game, player: Player) => void
-  fn: (game: Game, playerContext: Context, targets?: Player[]) => void
+  fallback: (game: Game, player: Player, other?: ActionOptions) => void
+  setup: (game: Game, player: Player, other?: ActionOptions) => void
+  // TODO: consider if targets should be optional
+  fn: (game: Game, playerContext: Context, targets?: Player[], other?: ActionOptions) => void
 }
 
 /**
@@ -21,17 +33,16 @@ export type Action = {
  */
 export const Vote: Action = {
   fallback: (game: Game, player: Player) => {
-    const options = createOptions(game.players, other => other.id !== player.id)
+    const options = getOptions(game.players, other => other.id !== player.id)
 
     game.events.push(Events.Vote(player, [options[Math.floor(Math.random() * options.length)]], game))
   },
   setup: (game: Game, player: Player) => {
-    const options = createOptions(game.players, other => other.id !== player.id)
+    if (player.ctx === undefined || !game.playerMap.has(player.id)) return
+    const options = getOptions(game.players, other => other.id !== player.id)
     game.privateMsgs.set(
       player.id,
-      game.ctx.api.sendMessage(player.id, game.ctx.t('game.voting_qn'), {
-        reply_markup: createVoteKB(options, `vote${game.id}`),
-      })
+      sendActionPrompt(player, 'game.voting_qn', createVoteKB(options, `vote${game.id}`))!
     )
   },
   fn: (game: Game, playerCtx: Context, targets?: Player[]) => {
@@ -39,7 +50,7 @@ export const Vote: Action = {
     const player = game.playerMap.get(playerCtx.from?.id)
     if (player === undefined) return
     if (game.privateMsgs.get(player.id) === undefined) {
-      playerCtx.reply(playerCtx.t('game_error.vote_no_qn'))
+      playerCtx.reply(playerCtx.t('game_error.wrong_qn'))
       return
     }
     if (targets === undefined || targets.length !== 1) {
@@ -59,16 +70,51 @@ export const Vote: Action = {
 }
 
 /**
+ * Swap roles between players
+ */
+export const Swap: Action = {
+  fallback: (game: Game, player: Player, other: ActionOptions = DEFAULT_ACTION_OPTIONS) => {
+    const options = getOptions(game.players, p => p.id !== player.id)
+    const targets = _.sampleSize(options, 2)
+    if (other.swapSelf) targets[0] = player
+
+    game.events.push(Events.Swap(player, targets, game, other.priority))
+  },
+  setup: (game: Game, player: Player) => {
+    if (player.ctx === undefined || !game.playerMap.has(player.id)) return
+    const options = getOptions(game.players, p => p.id !== player.id)
+    game.privateMsgs.set(
+      player.id,
+      sendActionPrompt(player, `role_message.${player.role.info.name}_action`, createVoteKB(options, `swap${game.id}`))!
+    )
+  },
+  fn: (game: Game, playerCtx: Context, targets?: Player[], other: ActionOptions = DEFAULT_ACTION_OPTIONS) => {
+    if (playerCtx.from?.id === undefined) return
+    const player = game.playerMap.get(playerCtx.from?.id)
+    if (player === undefined) return
+    if (targets === undefined || targets.length !== 2) {
+      playerCtx.answerCallbackQuery(
+        playerCtx.t('game_error.vote_invalid', { user: targets?.toString() || 'undefined' })
+      )
+      return
+    }
+
+    game.events.push(Events.Swap(player, targets, game, other.priority))
+    playerCtx.answerCallbackQuery()
+  },
+}
+
+/**
  * Peek at a player's role
  */
 export const Peek: Action = {
   fallback: (game: Game, player: Player) => {
-    const options = createOptions(game.players, (other: Player) => other.id !== player.id)
+    const options = getOptions(game.players, (other: Player) => other.id !== player.id)
 
     game.events.push(Events.Vote(player, [options[Math.floor(Math.random() * options.length)]], game))
   },
   setup: (game: Game, player: Player) => {
-    const options = createOptions(game.players, other => other.id !== player.id)
+    const options = getOptions(game.players, other => other.id !== player.id)
     game.privateMsgs.set(
       player.id,
       game.ctx.api.sendMessage(player.id, game.ctx.t('game.voting_qn'), {
@@ -81,7 +127,7 @@ export const Peek: Action = {
     const player = game.playerMap.get(playerCtx.from?.id)
     if (player === undefined) return
     if (game.privateMsgs.get(player.id) === undefined) {
-      playerCtx.reply(playerCtx.t('game_error.vote_no_qn'))
+      playerCtx.reply(playerCtx.t('game_error.wrong_qn'))
       return
     }
     if (targets === undefined || targets.length !== 1) {
@@ -107,7 +153,7 @@ export const Peek: Action = {
 export const Reveal: Action = {
   fallback: (game: Game, player: Player) => {},
   setup: (game: Game, player: Player) => {
-    const options = createOptions(game.players, other => other.id !== player.id)
+    const options = getOptions(game.players, other => other.id !== player.id)
     game.privateMsgs.set(
       player.id,
       game.ctx.api.sendMessage(player.id, game.ctx.t('game.voting_qn'), {
@@ -120,7 +166,7 @@ export const Reveal: Action = {
     const player = game.playerMap.get(playerCtx.from?.id)
     if (player === undefined) return
     if (game.privateMsgs.get(player.id) === undefined) {
-      playerCtx.reply(playerCtx.t('game_error.vote_no_qn'))
+      playerCtx.reply(playerCtx.t('game_error.wrong_qn'))
       return
     }
     if (targets === undefined || targets.length !== 1) {
@@ -138,12 +184,6 @@ export const Reveal: Action = {
     playerCtx.answerCallbackQuery()
   },
 }
-
-// export const Swap: Action = {
-//   fn: (game: Game) => {
-//     return () => {}
-//   },
-// }
 
 // export const Peek: Action = {
 //   fn: (game: Game) => {

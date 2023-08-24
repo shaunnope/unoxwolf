@@ -29,7 +29,7 @@ const defaultSettings: GameSettings = {
     Roles.Villager,
     Roles.Werewolf,
     Roles.Seer,
-    // Roles.Robber,
+    Roles.Robber,
     // Roles.Troublemaker,
     // Roles.Mason,
     // Roles.Drunk,
@@ -147,6 +147,7 @@ export class Game implements GameInfo {
     )
 
     await this.assignRolesAndNotify()
+    await sleep(2 * this.tickRate)
 
     await this.night()
 
@@ -180,8 +181,7 @@ export class Game implements GameInfo {
 
     let count = this.playerMap.size
     let ts = 0
-    this.flags.timerRunning = true
-    delete this.flags.killTimer
+    this.setupTimer()
     for (let i = 0; i < this.settings.joinTimeout; i++) {
       if (this.flags.killTimer) {
         delete this.flags.timerRunning
@@ -261,11 +261,9 @@ export class Game implements GameInfo {
 
     this.players.forEach(p => p.role.doNight(p, this))
 
-    this.flags.timerRunning = true
-    delete this.flags.killTimer
+    this.setupTimer()
     for (let i = 0; i < this.settings.nightTimeout; i++) {
-      // if (this.flags.killTimer || this.privateMsgs.size === 0) {
-      if (this.flags.killTimer) {
+      if (this.flags.killTimer || this.privateMsgs.size === 0) {
         delete this.flags.timerRunning
         break
       }
@@ -274,7 +272,10 @@ export class Game implements GameInfo {
 
       await sleep(this.tickRate)
     }
+    this.cleanupPMs()
     this.ctx.reply(this.ctx.t('game.night_end'))
+    this.events.sort((a, b) => a.priority - b.priority).forEach(e => e.fn())
+
     await sleep(10 * this.tickRate)
   }
 
@@ -297,6 +298,7 @@ export class Game implements GameInfo {
       Actions.Vote.setup(this, p)
     })
 
+    this.setupTimer()
     for (let i = 0; i < this.settings.voteTimeout; i++) {
       if (this.flags.killTimer || this.privateMsgs.size === 0) {
         delete this.flags.timerRunning
@@ -308,21 +310,8 @@ export class Game implements GameInfo {
       await sleep(this.tickRate)
     }
 
-    Array.from(this.privateMsgs.entries()).forEach(([playerId, promise]) => {
-      const player = this.playerMap.get(playerId)
-      if (player === undefined) return // NOTE: for coverage, this should never happen
-      promise.then(msg => {
-        this.ctx.api.editMessageText(playerId, msg.message_id, this.ctx.t('game.times_up'))
-        Actions.Vote.fallback(this, player)
-      })
-    })
+    this.cleanupPMs()
 
-    this.players.forEach(p => {
-      if (p.ctx === undefined) return
-      this.privateMsgs.get(p.id)?.then(msg => {
-        this.ctx.api.editMessageText(p.id, msg.message_id, this.ctx.t('game.times_up'))
-      })
-    })
     const voteResultsMsg = this.ctx.reply(`${this.ctx.t('game.voting_end')} ${this.ctx.t('game.voting_tally')}`)
 
     this.events.sort((a, b) => a.priority - b.priority).forEach(e => e.fn())
@@ -372,5 +361,21 @@ export class Game implements GameInfo {
   cleanupMsgs() {
     this.serviceMsgs.forEach(p => p.then(msg => this.ctx.api.deleteMessage(this.chatId, msg.message_id)))
     this.serviceMsgs = []
+  }
+
+  cleanupPMs() {
+    Array.from(this.privateMsgs.entries()).forEach(([playerId, promise]) => {
+      const player = this.playerMap.get(playerId)
+      if (player === undefined) return // NOTE: for coverage, this should never happen
+      promise.then(msg => {
+        this.ctx.api.editMessageText(playerId, msg.message_id, this.ctx.t('game.times_up'))
+        Actions.Vote.fallback(this, player)
+      })
+    })
+  }
+
+  setupTimer() {
+    this.flags.timerRunning = true
+    delete this.flags.killTimer
   }
 }

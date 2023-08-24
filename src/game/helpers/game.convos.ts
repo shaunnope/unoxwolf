@@ -2,7 +2,7 @@ import { InlineKeyboard } from 'grammy'
 
 import { Player } from '~/game/models/player'
 
-export const createOptions = (options: Player[], predicate: (option: Player) => boolean) => {
+export const getOptions = (options: Player[], predicate: (option: Player) => boolean) => {
   // TODO: check if options is empty
   return options.filter(predicate)
 }
@@ -17,4 +17,8 @@ export const createVoteKB = (options: Player[], prefix: string = 'vote', columns
   })
 
   return kb
+}
+
+export const sendActionPrompt = (player: Player, textKey: string, keyboard?: InlineKeyboard) => {
+  return player.ctx?.reply(player.ctx.t(textKey), { reply_markup: keyboard })
 }
