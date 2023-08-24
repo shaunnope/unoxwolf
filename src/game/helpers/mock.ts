@@ -1,20 +1,10 @@
-import { Player, Role, Mark } from '~/game/models/types'
+import { Player } from '~/game/models/player'
 import * as Roles from '~/game/roles'
 
-export const createPlayer = (id: number, name: string, role: Role, mark: Mark) => {
-  return {
-    id,
-    name,
-    role,
-    mark,
-    actions: [],
-  } as Player
-}
-
 export const createPlayers = (count: number) => {
-  const players = []
+  const players = new Array<Player>(count)
   for (let i = 0; i < count; i++) {
-    players.push(createPlayer(i, `Player ${i}`, Roles.Villager, { name: '' }))
+    players[i] = new Player(i, `Player ${i}`, Roles.Villager)
   }
   return players
 }

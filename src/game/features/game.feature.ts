@@ -65,6 +65,7 @@ feature.command('leave', logHandle('command-leave'), async ctx => {
   }
 })
 
+// FIXME: this does not seem to work
 feature.command('nextphase', logHandle('command-nextphase'), async ctx => {
   const game = getGame(ctx)
   if (game === undefined) return
@@ -76,7 +77,7 @@ feature.command('nextphase', logHandle('command-nextphase'), async ctx => {
 })
 
 pmFeature.callbackQuery(/vote(.+)\+(.+)/, logHandle('callback-vote'), async ctx => {
-  const [_, gameId, userId] = ctx.match
+  const [, gameId, userId] = ctx.match
   const game = ctx.games.get(gameId)
   if (game === undefined) {
     ctx.reply(ctx.t('game.not_started'))

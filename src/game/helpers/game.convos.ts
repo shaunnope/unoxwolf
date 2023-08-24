@@ -1,6 +1,6 @@
 import { InlineKeyboard } from 'grammy'
 
-import { Player } from '../models/types'
+import { Player } from '~/game/models/player'
 
 export const createOptions = (options: Player[], predicate: (option: Player) => boolean) => {
   return options.filter(predicate)

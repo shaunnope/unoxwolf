@@ -22,7 +22,7 @@ feature.command('rolelist', logHandle('command-rolelist'), ctx => {
 })
 
 Object.values(Roles).forEach(role => {
-  feature.command(role.descCommand, logHandle(`command-${role.descCommand}`), ctx => {
+  feature.command(role.info.descCommand, logHandle(`command-${role.info.descCommand}`), ctx => {
     ctx.reply(ctx.t(role.description))
   })
 })

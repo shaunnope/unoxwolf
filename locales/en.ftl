@@ -94,6 +94,9 @@ game =
     .end = Game ended!
     .timer_skipped = <em>Skipping forward...</em>
     .times_up = Time's up!
+
+    .night_started = Night falls...
+
     .voting_started = Voting has started!
     .voting_qn = Who do you want to vote for?
     .already_voted = You have already voted!
@@ -254,7 +257,7 @@ roles =
 
 role_desc =
     .villager =
-    You are a simple Villager. You have no special abilities, but are definitely not a werewolf.
+    A Villager has no special abilities, but is definitely not a werewolf.
 
     <em>The Villager is on the {roles.team_village} team.</em>
     .werewolf =
@@ -498,14 +501,20 @@ role_desc =
 
 
 role_message =
-    .villager = You are a simple {roles.villager}. Rest well tonight and don't let the werewolves bite!
+    .villager =
+        You are a simple {roles.villager}.
+        Rest well tonight and don't let the werewolves bite!
 
-    .werewolf = You are a {roles.werewolf}! Arise at night to meet your fellow lycantrophic brethren.
+    .werewolf =
+        You are a {roles.werewolf}!
+        Arise at night to meet your fellow lycantrophic brethren.
     .werewolf_reveal = Your fellow werewolves are { $wolves }.
     .werewolf_lone = You are the only werewolf.
     .werewolf_lone2 = One of the unassigned roles is a { $role }.
 
-    .seer = You are the {roles.seer}. Tonight, you may look at one other player's role or two of the unassigned roles.
+    .seer =
+        You are the {roles.seer}.
+        Tonight, you may look at one other player's role or two of the unassigned roles.
     .seer_action = Whose role would you like to look at?
     .seer_reveal = { $user } is a { $role }.
     .seer_reveal2 = A { $role1 } and a { $role2 } are unassigned tonight.

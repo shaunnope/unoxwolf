@@ -3,7 +3,10 @@ import { InlineKeyboard } from 'grammy'
 
 import type { Message } from '@grammyjs/types'
 
-import { Player, Team, GameSettings, GameInfo, GameEvent, GameFlags } from '~/game/models/types'
+import { Team } from '~/game/models/enums'
+import { Role, Player } from '~/game/models/player'
+import { GameSettings, GameInfo, GameEvent, GameFlags } from '~/game/models/game'
+
 import * as Roles from '~/game/roles'
 
 import { Context } from '~/bot/context'
@@ -11,6 +14,7 @@ import { getForumTopicId } from '~/bot/helpers/forum'
 import { sleep } from '~/game/helpers/timer'
 import * as Actions from '~/game/roles/base.actions'
 import { deleteGame, getChatTitle } from './helpers/game.context'
+import { generateRoles } from './roles/builder'
 
 const defaultSettings: GameSettings = {
   joinTimeout: 180,
@@ -24,15 +28,15 @@ const defaultSettings: GameSettings = {
   roles: [
     Roles.Villager,
     Roles.Werewolf,
-    Roles.Seer,
-    Roles.Robber,
-    Roles.Troublemaker,
-    Roles.Mason,
-    Roles.Drunk,
-    Roles.Insomniac,
-    Roles.Hunter,
-    Roles.Tanner,
-    Roles.Doppelganger,
+    // Roles.Seer,
+    // Roles.Robber,
+    // Roles.Troublemaker,
+    // Roles.Mason,
+    // Roles.Drunk,
+    // Roles.Insomniac,
+    // Roles.Hunter,
+    // Roles.Tanner,
+    // Roles.Doppelganger,
   ],
   marks: [],
 }
@@ -46,13 +50,17 @@ export class Game implements GameInfo {
 
   ctx: Context
 
-  private _new_players: Map<number, Player>
+  private _new_players: Map<number, Player> = new Map()
 
-  _players: Map<number, Player>
+  _players: Map<number, Player> = new Map()
+
+  teams: Map<Team, Player[]> = new Map()
+
+  unassignedRoles: Role[] = []
 
   state: 'lobby' | 'starting' | 'dusk' | 'night' | 'day' | 'end'
 
-  winners: Team[]
+  winners: Team[] = []
 
   settings: GameSettings
 
@@ -77,10 +85,7 @@ export class Game implements GameInfo {
     this.id = createHash('sha256').update(`${this.chatId.toString()}-${Date.now()}`).digest('hex').slice(0, 20)
     this.createdTime = new Date()
 
-    this._new_players = new Map()
-    this._players = new Map()
     this.state = 'lobby'
-    this.winners = []
     this.settings = settings
     this.tickRate = ctx.container.config.isDev ? 200 : this.tickRate
 
@@ -107,14 +112,7 @@ export class Game implements GameInfo {
     const sender = ctx.from
     if (!sender) return
     if (this._players.has(sender.id)) return
-    const player: Player = {
-      id: sender.id,
-      name: sender.first_name,
-      role: Roles.Villager,
-      mark: { name: '' },
-      actions: [],
-      ctx,
-    }
+    const player = new Player(sender.id, sender.first_name, undefined, ctx)
     this._new_players.set(sender.id, player)
     this._players.set(sender.id, player)
 
@@ -151,6 +149,8 @@ export class Game implements GameInfo {
     )
 
     await this.assignRolesAndNotify()
+
+    await this.night()
 
     await this.collectVotes()
 
@@ -251,6 +251,36 @@ export class Game implements GameInfo {
   }
 
   /**
+   * Run night phase.
+   *
+   */
+  async night() {
+    this.privateMsgs = new Map()
+    this.serviceMsgs = [this.ctx.reply(this.ctx.t('game.night_started'))]
+
+    this.events = []
+    this.aggregator = new Map()
+
+    this.players.forEach(p => {
+      if (p.role.info.team === Team.Werewolf) {
+        p.role.doNight(p, this)
+      }
+    })
+
+    for (let i = 0; i < this.settings.nightTimeout; i++) {
+      // if (this.flags.killTimer || this.privateMsgs.size === 0) {
+      if (this.flags.killTimer) {
+        delete this.flags.timerRunning
+        break
+      }
+
+      // TODO: announce time left
+
+      await sleep(this.tickRate)
+    }
+  }
+
+  /**
    * Wait for players to vote, then tally the votes and announce the results
    */
   async collectVotes() {
@@ -320,10 +350,15 @@ export class Game implements GameInfo {
    * Assign roles to players and send them their role description
    */
   async assignRolesAndNotify() {
-    const deck = Array(this.players.length + this.settings.extraRoles).fill(Roles.Villager)
-
+    const deck = generateRoles(this.players.length, this.settings.roles, this.settings.extraRoles)
     this.players.forEach((p, i) => {
-      p.role = deck[i]
+      p.setup(deck[i])
+
+      // collate players by team
+      const teamMembers = this.teams.get(p.role.info.team)
+      if (teamMembers === undefined) this.teams.set(p.role.info.team, [p])
+      else teamMembers.push(p)
+
       if (p.ctx === undefined) return
       this.ctx.api.sendMessage(p.id, this.ctx.t(p.role.lore))
     })
