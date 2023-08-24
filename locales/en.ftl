@@ -95,7 +95,8 @@ game =
     .timer_skipped = <em>Skipping forward...</em>
     .times_up = Time's up!
 
-    .night_started = Night falls...
+    .night_start = Night falls...
+    .night_end = The sun rises...
 
     .voting_started = Voting has started!
     .voting_qn = Who do you want to vote for?
@@ -109,6 +110,9 @@ game_error =
     .err_assign_roles = Error while assigning roles. Please start a new game.
     .vote_invalid = Invalid target: {$user}.
     .not_in_game = You are not in the game in {$chat}!
+
+misc =
+    .unassigned = Unassigned roles ({$count})
 
 
 roles =
@@ -516,7 +520,7 @@ role_message =
         You are the {roles.seer}.
         Tonight, you may look at one other player's role or two of the unassigned roles.
     .seer_action = Whose role would you like to look at?
-    .seer_reveal = { $user } is a { $role }.
+    .seer_reveal = { $user } is a { $role }
     .seer_reveal2 = A { $role1 } and a { $role2 } are unassigned tonight.
 
     .robber = You are the {roles.robber}. Tonight, you may rob another player's role, exchanging it with your own. You may then look at your new role.

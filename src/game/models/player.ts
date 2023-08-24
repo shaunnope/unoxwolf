@@ -47,10 +47,10 @@ export class Role {
 
   status: Status = Status.NORMAL
 
-  /* eslint-disable class-methods-use-this */ // TODO: remove this when we have more roles
+  /* eslint-disable class-methods-use-this */
   doNight(player: Player, game: GameInfo) {
-    if (player.ctx === undefined) return
-    player.ctx.reply(game.ctx.t('role_message.night'))
+    // TODO: expand this and maybe remove eslint-disable
+    // if (player.ctx === undefined) return
   }
   /* eslint-enable class-methods-use-this */
 }

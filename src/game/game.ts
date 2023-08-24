@@ -5,7 +5,7 @@ import type { Message } from '@grammyjs/types'
 
 import { Team } from '~/game/models/enums'
 import { Role, Player } from '~/game/models/player'
-import { GameSettings, GameInfo, GameEvent, GameFlags } from '~/game/models/game'
+import type { GameSettings, GameInfo, GameEvent, GameFlags } from '~/game/models/game'
 
 import * as Roles from '~/game/roles'
 
@@ -18,7 +18,7 @@ import { generateRoles } from './roles/builder'
 
 const defaultSettings: GameSettings = {
   joinTimeout: 180,
-  nightTimeout: 30,
+  nightTimeout: 300,
   voteTimeout: 300,
 
   minPlayers: 3,
@@ -28,7 +28,7 @@ const defaultSettings: GameSettings = {
   roles: [
     Roles.Villager,
     Roles.Werewolf,
-    // Roles.Seer,
+    Roles.Seer,
     // Roles.Robber,
     // Roles.Troublemaker,
     // Roles.Mason,
@@ -50,9 +50,9 @@ export class Game implements GameInfo {
 
   ctx: Context
 
-  private _new_players: Map<number, Player> = new Map()
+  private newPlayers: Map<number, Player> = new Map()
 
-  _players: Map<number, Player> = new Map()
+  playerMap: Map<number, Player> = new Map()
 
   teams: Map<Team, Player[]> = new Map()
 
@@ -78,8 +78,6 @@ export class Game implements GameInfo {
 
   aggregator: Map<number, Player[]> = new Map() // TODO: specify type
 
-  timer: NodeJS.Timeout | null = null
-
   constructor(ctx: Context, settings: GameSettings = defaultSettings) {
     this.ctx = ctx
     this.id = createHash('sha256').update(`${this.chatId.toString()}-${Date.now()}`).digest('hex').slice(0, 20)
@@ -101,7 +99,7 @@ export class Game implements GameInfo {
   }
 
   get players(): Player[] {
-    return Array.from(this._players.values())
+    return Array.from(this.playerMap.values())
   }
 
   /**
@@ -111,27 +109,27 @@ export class Game implements GameInfo {
   addPlayer(ctx: Context) {
     const sender = ctx.from
     if (!sender) return
-    if (this._players.has(sender.id)) return
+    if (this.playerMap.has(sender.id)) return
     const player = new Player(sender.id, sender.first_name, undefined, ctx)
-    this._new_players.set(sender.id, player)
-    this._players.set(sender.id, player)
+    this.newPlayers.set(sender.id, player)
+    this.playerMap.set(sender.id, player)
 
     ctx.reply(ctx.t('game_init.join_success', { chat: getChatTitle(this.ctx) }))
   }
 
   addPlayers(players: Player[]) {
     players.forEach(p => {
-      this._new_players.set(p.id, p)
-      this._players.set(p.id, p)
+      this.newPlayers.set(p.id, p)
+      this.playerMap.set(p.id, p)
     })
   }
 
   removePlayer(ctx: Context) {
     const sender = ctx.from
     if (!sender) return
-    if (!this._players.has(sender.id)) return
-    this._new_players.delete(sender.id)
-    this._players.delete(sender.id)
+    if (!this.playerMap.has(sender.id)) return
+    this.newPlayers.delete(sender.id)
+    this.playerMap.delete(sender.id)
   }
 
   /**
@@ -179,29 +177,29 @@ export class Game implements GameInfo {
         }
       ),
     ]
+
+    let count = this.playerMap.size
+    let ts = 0
     this.flags.timerRunning = true
     delete this.flags.killTimer
-
-    let count = this._players.size
-    let ts = 0
     for (let i = 0; i < this.settings.joinTimeout; i++) {
       if (this.flags.killTimer) {
         delete this.flags.timerRunning
         break
       }
 
-      if (count !== this._players.size) {
+      if (count !== this.playerMap.size) {
         i = Math.min(i, Math.max(120, i - 30))
-        count = this._players.size
+        count = this.playerMap.size
       }
 
-      if (ts % 30 === 0 && this._new_players.size > 0) {
-        const joinedPlayers = Array.from(this._new_players.values())
+      if (ts % 30 === 0 && this.newPlayers.size > 0) {
+        const joinedPlayers = Array.from(this.newPlayers.values())
           .map(p => p.name)
           .join(', ')
         // TODO: add user links
         this.ctx.reply(this.ctx.t('game_init.joined_game', { users: joinedPlayers }))
-        this._new_players.clear()
+        this.newPlayers.clear()
       }
 
       if ([10, 30, 60].map(x => this.settings.joinTimeout - x).includes(i)) {
@@ -237,7 +235,7 @@ export class Game implements GameInfo {
     await sleep(2 * this.tickRate) // wait for last players to join
 
     // check if enough players
-    if (this._players.size < this.settings.minPlayers) {
+    if (this.playerMap.size < this.settings.minPlayers) {
       await this.ctx.reply(
         this.ctx.t('game_init.not_enough_players', {
           count: this.settings.minPlayers,
@@ -256,17 +254,15 @@ export class Game implements GameInfo {
    */
   async night() {
     this.privateMsgs = new Map()
-    this.serviceMsgs = [this.ctx.reply(this.ctx.t('game.night_started'))]
+    this.serviceMsgs = [this.ctx.reply(this.ctx.t('game.night_start'))]
 
     this.events = []
     this.aggregator = new Map()
 
-    this.players.forEach(p => {
-      if (p.role.info.team === Team.Werewolf) {
-        p.role.doNight(p, this)
-      }
-    })
+    this.players.forEach(p => p.role.doNight(p, this))
 
+    this.flags.timerRunning = true
+    delete this.flags.killTimer
     for (let i = 0; i < this.settings.nightTimeout; i++) {
       // if (this.flags.killTimer || this.privateMsgs.size === 0) {
       if (this.flags.killTimer) {
@@ -278,6 +274,8 @@ export class Game implements GameInfo {
 
       await sleep(this.tickRate)
     }
+    this.ctx.reply(this.ctx.t('game.night_end'))
+    await sleep(10 * this.tickRate)
   }
 
   /**
@@ -311,7 +309,7 @@ export class Game implements GameInfo {
     }
 
     Array.from(this.privateMsgs.entries()).forEach(([playerId, promise]) => {
-      const player = this._players.get(playerId)
+      const player = this.playerMap.get(playerId)
       if (player === undefined) return // NOTE: for coverage, this should never happen
       promise.then(msg => {
         this.ctx.api.editMessageText(playerId, msg.message_id, this.ctx.t('game.times_up'))
@@ -334,7 +332,7 @@ export class Game implements GameInfo {
 
     let i = 0
     Array.from(this.aggregator.entries()).forEach(([playerId, voters]) => {
-      const player = this._players.get(playerId)
+      const player = this.playerMap.get(playerId)
       if (player === undefined) return
       numVotes[i++] = [player, voters.length]
 
@@ -362,6 +360,7 @@ export class Game implements GameInfo {
       if (p.ctx === undefined) return
       this.ctx.api.sendMessage(p.id, this.ctx.t(p.role.lore))
     })
+    this.unassignedRoles = deck.slice(this.players.length)
   }
 
   async end() {

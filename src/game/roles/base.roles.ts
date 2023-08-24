@@ -1,7 +1,9 @@
+/* eslint-disable class-methods-use-this */ // TODO: consider how to refactor methods to avoid this
 import _ from 'lodash'
 import { GameInfo } from '~/game/models/game'
 import { Team } from '~/game/models/enums'
 import { Role, RoleInfo, Player } from '~/game/models/player'
+import { createVoteKB, createOptions } from '../helpers/game.convos'
 
 export class Villager extends Role {
   static readonly info: RoleInfo = {
@@ -41,10 +43,31 @@ export class Werewolf extends Role {
   }
 }
 
-// export class Seer extends Villager {
-//   static roleName = 'seer'
-//   static descCommand = 'roleSeer'
-// }
+export class Seer extends Villager {
+  static readonly info: RoleInfo = {
+    name: 'seer',
+    team: Team.Village,
+    descCommand: 'roleSeer',
+  }
+
+  doNight(player: Player, game: GameInfo) {
+    if (player.ctx === undefined) {
+      return
+    }
+    const options = createOptions(game.players, other => other.id !== player.id)
+    const kb = createVoteKB(options, `peek${game.id}`)
+
+    const extraOptions = [[game.ctx.t('misc.unassigned', { count: 2 }), `peek${game.id}+un`]]
+    kb.text(extraOptions[0][0], extraOptions[0][1])
+
+    game.privateMsgs.set(
+      player.id,
+      game.ctx.api.sendMessage(player.id, game.ctx.t('role_message.seer_action'), {
+        reply_markup: kb,
+      })
+    )
+  }
+}
 
 // export class Robber extends Villager {
 //   static roleName = 'robber'
