@@ -1,3 +1,4 @@
+import _ from 'lodash'
 import { Composer, InlineKeyboard } from 'grammy'
 import { createConversation } from '@grammyjs/conversations'
 import type { Context } from '~/bot/context'
@@ -27,7 +28,7 @@ feature.command('startgame', logHandle('command-startgame-dev'), ctx => {
   setGame(ctx, game)
 
   if (Number(ctx.match) && Number(ctx.match) > 0) {
-    game.addPlayers(createPlayers(Number(ctx.match)))
+    game.addPlayers(createPlayers(_.clamp(Number(ctx.match), 0, 10)))
   }
 })
 

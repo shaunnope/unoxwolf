@@ -37,10 +37,11 @@ export type GameInfo = {
   topicId: number | undefined
 
   players: Player[]
+  playerMap: Map<number, Player>
   state: 'lobby' | 'starting' | 'dusk' | 'night' | 'day' | 'end'
   winners: Team[]
   teams: Map<Team, Player[]>
-  unassignedRoles: Role[]
+  unassignedRoles: Player[]
 
   settings: GameSettings
 

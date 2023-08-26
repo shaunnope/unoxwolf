@@ -120,10 +120,12 @@ game_error =
     .wrong_qn = This question is not for you!
 
 misc =
+    .unassigned_role = Role {$idx}
     .unassigned = Unassigned roles ({$count})
     .peek_role = { $user } is a { $role }
+    .self_swap_roles = You swapped roles with { $user }
     .self_role_changed = You are now a {$role}
-    .self_team_changed = You are now on the {$team} team.
+    .self_team_changed = You are now on the {$team} team
 
 
 roles =
@@ -545,15 +547,19 @@ role_message =
 
     .tanner = You are the {roles.tanner}. Sick of your job, you only win if you are killed tonight.
 
-    .drunk = You are the {roles.drunk}. After having one drink too many, your role will be exchanged with an unassigned role by the end of the night.
+    .drunk = You are the {roles.drunk}. After having had one drink too many, you will somehow wake up with a different role tomorrow.
+    .drunk_action = In your drunken stupor, you swapped your role with { $role }
     .drunk_secret = {role_message.villager}
 
     .insomniac = You are the {roles.insomniac}. With news of werewolves hiding in your midst, it would be a miracle if you were able to sleep soundly tonight.
+    .insomniac_true = You are still the {roles.insomniac}
+    .insomniac_false = You are now a { $role }
 
     .hunter = You are the {roles.hunter}. If you are killed tonight, the player you vote for will also die.
 
     .mason = You are a {roles.mason}. At night, you may meet your fellow masons.
-    .mason_reveal = Your fellow masons are { $masons }.
+    .mason_lone = You are the only mason.
+    .mason_reveal = You are masons together with { $masons }.
 
     .minion = You are the {roles.minion}. At night, you may meet your revered werewolves.
     .minion_reveal = The werewolves are { $wolves }.

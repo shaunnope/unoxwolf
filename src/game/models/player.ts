@@ -73,7 +73,7 @@ export class Player {
 
   name: string
 
-  role: Role = new Roles.Villager()
+  role: Role
 
   currentRole: Role
 
@@ -81,13 +81,11 @@ export class Player {
 
   ctx?: Context
 
-  constructor(id: number, name: string, PlayerRole?: typeof Role, ctx?: Context) {
+  constructor(id: number, name: string, role?: Role, ctx?: Context) {
     this.id = id
     this.name = name
 
-    if (PlayerRole !== undefined && PlayerRole !== Roles.Villager) {
-      this.role = new PlayerRole()
-    }
+    this.role = role ?? new Roles.Villager()
     this.currentRole = this.role
 
     this.mark = { name: 'mark' }

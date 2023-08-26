@@ -7,7 +7,7 @@ export const getOptions = <T>(options: T[], predicate: (option: T) => boolean) =
   return options.filter(predicate)
 }
 
-export const createVoteKB = (options: Player[], prefix: string = 'vote', columns: number = 3) => {
+export const createVoteKB = <T extends Player>(options: T[], prefix: string = 'vote', columns: number = 3) => {
   const kb = new InlineKeyboard()
 
   let count = 0

@@ -61,16 +61,18 @@ feature.callbackQuery(/swap(.+)\+(.+)/, logHandle('callback-swap'), async ctx =>
   const res = validateCallbackQuery(ctx)
   if (res === undefined) return
   const [game, player, userId] = res
+  if (game.privateMsgs.get(player.id) === undefined) {
+    ctx.reply(ctx.t('game_error.wrong_qn'))
+    return
+  }
+
   if (player.role instanceof Roles.Robber) {
     const target = game.playerMap.get(Number(userId))
     if (target === undefined) {
       ctx.answerCallbackQuery(ctx.t('game_error.vote_invalid', { user: userId }))
       return
     }
-    if (game.privateMsgs.get(player.id) === undefined) {
-      ctx.reply(ctx.t('game_error.wrong_qn'))
-      return
-    }
+
     game.privateMsgs.get(player.id)?.then(msg => {
       game.ctx.api.editMessageText(player.id, msg.message_id, game.ctx.t('game.vote_cast', { user: target.name }))
     })
@@ -86,10 +88,7 @@ feature.callbackQuery(/swap(.+)\+(.+)/, logHandle('callback-swap'), async ctx =>
       ctx.answerCallbackQuery(ctx.t('game_error.vote_invalid', { user: userId }))
       return
     }
-    if (game.privateMsgs.get(player.id) === undefined) {
-      ctx.reply(ctx.t('game_error.wrong_qn'))
-      return
-    }
+
     ctx.session.actions = [
       {
         name: 'swap',

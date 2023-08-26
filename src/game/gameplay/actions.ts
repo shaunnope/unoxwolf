@@ -1,9 +1,9 @@
 import _ from 'lodash'
 import type { Player } from '~/game/models/player'
-import type { Game } from '~/game'
 
 import * as Events from '~/game/models/events'
 import { Context } from '~/bot/context'
+import type { GameInfo as Game } from '../models/game'
 import { createVoteKB, getOptions, sendActionPrompt } from '../helpers/keyboards'
 
 export type ActionChoice = {
@@ -17,6 +17,10 @@ export type ActionOptions = {
   priority: number
   required?: true
   swapSelf?: true
+  swapUnassigned?: true
+  isAuto?: true
+  predicate?: (player: Player) => boolean
+  eventCallback?: () => void
 }
 
 const DEFAULT_ACTION_OPTIONS: ActionOptions = {
@@ -100,14 +104,15 @@ export const Swap: Action = {
     const player = game.playerMap.get(playerCtx.from?.id)
     if (player === undefined) return
     if (targets === undefined || targets.length !== 2) {
-      playerCtx.answerCallbackQuery(
-        playerCtx.t('game_error.vote_invalid', { user: targets?.toString() || 'undefined' })
-      )
+      if (!other.isAuto)
+        playerCtx.answerCallbackQuery(
+          playerCtx.t('game_error.vote_invalid', { user: targets?.toString() || 'undefined' })
+        )
       return
     }
 
-    game.events.push(Events.Swap(player, targets, game, other.priority))
-    playerCtx.answerCallbackQuery()
+    game.events.push(Events.Swap(player, targets, game, other.priority, !other.isAuto))
+    if (!other.isAuto) playerCtx.answerCallbackQuery()
   },
 }
 
@@ -168,35 +173,13 @@ export const Reveal: Action = {
       })
     )
   },
-  fn: (game: Game, playerCtx: Context, targets?: Player[]) => {
+  fn: (game: Game, playerCtx: Context, targets?: Player[], other: ActionOptions = DEFAULT_ACTION_OPTIONS) => {
     if (playerCtx.from?.id === undefined) return
     const player = game.playerMap.get(playerCtx.from?.id)
-    if (player === undefined) return
-    if (game.privateMsgs.get(player.id) === undefined) {
-      playerCtx.reply(playerCtx.t('game_error.wrong_qn'))
-      return
-    }
-    if (targets === undefined || targets.length !== 1) {
-      playerCtx.answerCallbackQuery(
-        playerCtx.t('game_error.vote_invalid', { user: targets?.toString() || 'undefined' })
-      )
-      return
-    }
-    game.events.push(Events.Vote(player, targets, game))
-    game.privateMsgs.get(player.id)?.then(msg => {
-      game.ctx.api.editMessageText(player.id, msg.message_id, game.ctx.t('game.vote_cast', { user: targets[0].name }))
-    })
-    game.privateMsgs.delete(player.id)
-
-    playerCtx.answerCallbackQuery()
+    if (player?.ctx === undefined || targets === undefined) return
+    game.events.push(Events.Reveal(player, targets, other.eventCallback, other.priority))
   },
 }
-
-// export const Peek: Action = {
-//   fn: (game: Game) => {
-//     return () => {}
-//   },
-// }
 
 // export const Copy: Action = {
 //   fn: async (self: Player, other: Player) => {

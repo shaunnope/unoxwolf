@@ -3,6 +3,9 @@ import _ from 'lodash'
 import { GameInfo } from '~/game/models/game'
 import { Team } from '~/game/models/enums'
 import { Role, RoleInfo, Player } from '~/game/models/player'
+
+import * as Actions from '~/game/gameplay/actions'
+import * as Events from '~/game/models/events'
 import { createVoteKB, getOptions, sendActionPrompt } from '../helpers/keyboards'
 
 export class Villager extends Role {
@@ -28,7 +31,7 @@ export class Werewolf extends Role {
     if (teamMembers.length === 1) {
       msg = game.ctx.t('role_message.werewolf_lone')
       if (game.settings.loneWolf) {
-        const role = _.sample(game.unassignedRoles)?.info.name || 'null'
+        const role = _.sample(game.unassignedRoles)?.role.info.name || 'null'
         msg += `\n${game.ctx.t('role_message.werewolf_lone2', { role: game.ctx.t(role) })}`
       }
     } else {
@@ -105,10 +108,73 @@ export class Troublemaker extends Villager {
   }
 }
 
-// export class Drunk extends Villager {
-//   static roleName = 'drunk'
-//   static descCommand = 'roleDrunk'
-// }
+export class Drunk extends Villager {
+  static readonly info: RoleInfo = {
+    name: 'drunk',
+    team: Team.Village,
+    descCommand: 'roleDrunk',
+    priority: 12,
+  }
+
+  async doNight(player: Player, game: GameInfo) {
+    const target = game.unassignedRoles[Math.floor(Math.random() * game.unassignedRoles.length)]
+    if (player.ctx === undefined) {
+      game.events.push(Events.Swap(player, [player, target], game, this.priority, false))
+      return
+    }
+    Actions.Swap.fn(game, player.ctx, [player, target], {
+      priority: this.priority,
+      swapSelf: true,
+      isAuto: true,
+    })
+    player.ctx.reply(player.ctx.t('role_message.drunk_action', { role: target.name }))
+  }
+}
+
+export class Mason extends Villager {
+  static readonly info: RoleInfo = {
+    name: 'mason',
+    team: Team.Village,
+    descCommand: 'roleMason',
+  }
+
+  doNight(player: Player, game: GameInfo) {
+    if (player.ctx === undefined) return
+    const teamMembers = game.teams
+      .get(this.info.team)
+      ?.filter(other => other.id !== player.id && other.role instanceof Mason)
+    if (teamMembers === undefined) return // NOTE: for coverage, this should never happen
+    let msg = ''
+    if (teamMembers.length === 1) {
+      msg = game.ctx.t('role_message.mason_lone')
+    } else {
+      msg = game.ctx.t('role_message.mason_reveal', {
+        masons: teamMembers.map(p => p.name).join(', '),
+      })
+    }
+    player.ctx.reply(msg)
+  }
+}
+
+export class Insomniac extends Villager {
+  static readonly info: RoleInfo = {
+    name: 'insomniac',
+    team: Team.Village,
+    descCommand: 'roleInsomniac',
+    priority: 15,
+  }
+
+  doNight(player: Player, game: GameInfo) {
+    if (player.ctx === undefined) return
+
+    Actions.Reveal.fn(game, player.ctx, [player], {
+      priority: this.priority,
+      eventCallback: () => {
+        player.ctx!.reply(player.ctx!.t(`role_message.insomniac_${(player.currentRole === player.role).toString()}`))
+      },
+    })
+  }
+}
 
 // export class Insomniac extends Villager {
 //   static roleName = 'insomniac'

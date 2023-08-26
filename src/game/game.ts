@@ -57,7 +57,7 @@ export class Game implements GameInfo {
 
   teams: Map<Team, Player[]> = new Map()
 
-  unassignedRoles: Role[] = []
+  unassignedRoles: Player[] = []
 
   state: 'lobby' | 'starting' | 'dusk' | 'night' | 'day' | 'end'
 
@@ -333,7 +333,7 @@ export class Game implements GameInfo {
     })
 
     voteResults += `${this.ctx.t('game.voting_unassigned', {
-      roles: this.unassignedRoles.map(r => this.ctx.t(r.name)).join(', '),
+      roles: this.unassignedRoles.map(r => this.ctx.t(r.currentRole.name)).join(', '),
     })}\n\n`
 
     voteResultsMsg.then(msg => this.ctx.api.editMessageText(this.chatId, msg.message_id, voteResults))
@@ -355,7 +355,9 @@ export class Game implements GameInfo {
       if (p.ctx === undefined) return
       this.ctx.api.sendMessage(p.id, this.ctx.t(p.role.lore))
     })
-    this.unassignedRoles = deck.slice(this.players.length)
+    this.unassignedRoles = deck
+      .slice(this.players.length)
+      .map((r, idx) => new Player(idx, this.ctx.t('misc.unassigned_role', { idx: idx + 1 }), r, undefined))
   }
 
   async end() {
