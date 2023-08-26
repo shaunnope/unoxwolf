@@ -12,7 +12,8 @@ import * as Roles from '~/game/roles'
 import { Context } from '~/bot/context'
 import { getForumTopicId } from '~/bot/helpers/forum'
 import { sleep } from '~/game/helpers/timer'
-import * as Actions from '~/game/roles/base.actions'
+import * as Actions from '~/game/gameplay/actions'
+import { config } from '~/config'
 import { deleteGame, getChatTitle } from './helpers/game.context'
 import { generateRoles } from './roles/builder'
 
@@ -85,7 +86,7 @@ export class Game implements GameInfo {
 
     this.state = 'lobby'
     this.settings = settings
-    this.tickRate = ctx.container.config.isDev ? 200 : this.tickRate
+    this.tickRate = config.isDev ? 200 : this.tickRate
 
     this.run()
   }
@@ -272,7 +273,7 @@ export class Game implements GameInfo {
 
       await sleep(this.tickRate)
     }
-    this.cleanupPMs()
+    await this.cleanupPMs()
     this.ctx.reply(this.ctx.t('game.night_end'))
     this.events.sort((a, b) => a.priority - b.priority).forEach(e => e.fn())
 
@@ -310,7 +311,7 @@ export class Game implements GameInfo {
       await sleep(this.tickRate)
     }
 
-    this.cleanupPMs()
+    await this.cleanupPMs()
 
     const voteResultsMsg = this.ctx.reply(`${this.ctx.t('game.voting_end')} ${this.ctx.t('game.voting_tally')}`)
 
@@ -325,10 +326,14 @@ export class Game implements GameInfo {
       if (player === undefined) return
       numVotes[i++] = [player, voters.length]
 
-      voteResults += `<strong>${player.name}:</strong>  (${voters.length})  -  ${this.ctx.t(player.role.name)}\n${voters
-        .map(p => p.name)
-        .join(', ')}\n\n`
+      voteResults += `<strong>${player.name}:</strong>  (${voters.length})  -  ${this.ctx.t(
+        player.currentRole.name
+      )}\n${voters.map(p => p.name).join(', ')}\n\n`
     })
+
+    voteResults += `${this.ctx.t('game.voting_unassigned', {
+      roles: this.unassignedRoles.map(r => this.ctx.t(r.name)).join(', '),
+    })}\n\n`
 
     voteResultsMsg.then(msg => this.ctx.api.editMessageText(this.chatId, msg.message_id, voteResults))
   }
@@ -363,15 +368,18 @@ export class Game implements GameInfo {
     this.serviceMsgs = []
   }
 
-  cleanupPMs() {
-    Array.from(this.privateMsgs.entries()).forEach(([playerId, promise]) => {
+  async cleanupPMs(fallback = Actions.Vote.fallback) {
+    for (const [playerId, promise] of this.privateMsgs.entries()) {
       const player = this.playerMap.get(playerId)
       if (player === undefined) return // NOTE: for coverage, this should never happen
+
+      await player.ctx?.conversation.exit()
+
       promise.then(msg => {
         this.ctx.api.editMessageText(playerId, msg.message_id, this.ctx.t('game.times_up'))
-        Actions.Vote.fallback(this, player)
+        fallback(this, player)
       })
-    })
+    }
   }
 
   setupTimer() {
