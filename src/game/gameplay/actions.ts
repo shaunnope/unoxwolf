@@ -4,7 +4,14 @@ import type { Game } from '~/game'
 
 import * as Events from '~/game/models/events'
 import { Context } from '~/bot/context'
-import { createVoteKB, getOptions, sendActionPrompt } from '../helpers/game.convos'
+import { createVoteKB, getOptions, sendActionPrompt } from '../helpers/keyboards'
+
+export type ActionChoice = {
+  name: string
+  gameId: string
+  playerId: number
+  targetId: string | number
+}
 
 export type ActionOptions = {
   priority: number

@@ -19,6 +19,7 @@ export type GameSettings = {
   loneWolf?: true
   revealHistory?: true
   selfVote?: true
+  noPass?: true
 
   secretVote?: true
   secretDrunk?: true

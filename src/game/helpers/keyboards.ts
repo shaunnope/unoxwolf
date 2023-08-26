@@ -2,7 +2,7 @@ import { InlineKeyboard } from 'grammy'
 
 import { Player } from '~/game/models/player'
 
-export const getOptions = (options: Player[], predicate: (option: Player) => boolean) => {
+export const getOptions = <T>(options: T[], predicate: (option: T) => boolean) => {
   // TODO: check if options is empty
   return options.filter(predicate)
 }

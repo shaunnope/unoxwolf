@@ -1,7 +1,13 @@
 import { Update, UserFromGetMe } from '@grammyjs/types'
 import { UserPayload } from '@prisma/client'
-import { Context as DefaultContext, SessionFlavor, type Api } from 'grammy'
-import { type Conversation as DefaultConversation, type ConversationFlavor } from '@grammyjs/conversations'
+import { Context as DefaultContext, SessionFlavor, type Api, type MiddlewareFn } from 'grammy'
+import {
+  type Conversation as DefaultConversation,
+  type ConversationFlavor,
+  createConversation as defaultCreateConversation,
+  ConversationFn,
+  ConversationConfig,
+} from '@grammyjs/conversations'
 
 import { AutoChatActionFlavor } from '@grammyjs/auto-chat-action'
 import { HydrateFlavor } from '@grammyjs/hydrate'
@@ -11,10 +17,12 @@ import { Logger } from '~/logger'
 import type { Container } from '~/container'
 import { PrismaClientX } from '~/prisma'
 
+import { ActionChoice } from '~/game/gameplay/actions'
 import type { Game } from '~/game'
 
 // HACK: Override `ctx.has.command`
 import { customChecker } from './helpers/hack.bot-command'
+import { logConvoHandle } from './helpers/logging'
 
 type ScopeUser = Omit<UserPayload<PrismaClientX['$extends']['extArgs']>['scalars'], 'updatedAt' | 'createdAt'>
 
@@ -33,8 +41,12 @@ type ExtendedContextFlavor = {
 export type ContextScopeWith<P extends keyof ContextScope> = Record<'scope', Record<P, NonNullable<ContextScope[P]>>>
 
 export type SessionData = {
-  // field?: string;
+  // group data
   games: { [key: string]: string } // map of topicId to gameId
+
+  // user data
+  game: string // gameId
+  actions: ActionChoice[] // pending action choices
 }
 
 export type Context = ParseModeFlavor<
@@ -74,4 +86,21 @@ export function createContextConstructor(container: Container) {
       this.scope = {}
     }
   } as unknown as new (update: Update, api: Api, me: UserFromGetMe) => Context
+}
+
+// TODO: log wrapper doesn't appear to work
+export const createConversation = <C extends DefaultContext>(
+  builder: ConversationFn<C>,
+  config: string | ConversationConfig = {}
+): MiddlewareFn<C & ConversationFlavor> => {
+  const { id = builder.name, maxMillisecondsToWait }: ConversationConfig =
+    typeof config === 'string' ? { id: config } : config
+  return defaultCreateConversation<C>(
+    async (conversation: DefaultConversation<C>, ctx: C) => {
+      logConvoHandle(id, ctx)
+      await builder(conversation, ctx)
+      logConvoHandle(id, ctx, true)
+    },
+    { id, maxMillisecondsToWait }
+  )
 }

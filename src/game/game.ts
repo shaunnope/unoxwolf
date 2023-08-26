@@ -115,6 +115,7 @@ export class Game implements GameInfo {
     this.newPlayers.set(sender.id, player)
     this.playerMap.set(sender.id, player)
 
+    ctx.session.game = this.id
     ctx.reply(ctx.t('game_init.join_success', { chat: getChatTitle(this.ctx) }))
   }
 
@@ -359,7 +360,7 @@ export class Game implements GameInfo {
 
   async end() {
     this.state = 'end'
-    deleteGame(this.ctx)
+    deleteGame(this)
     this.ctx.reply(this.ctx.t('game.end'))
   }
 

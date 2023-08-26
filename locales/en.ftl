@@ -72,6 +72,9 @@ game_init = {$user} has started a new game!
     .join = Join
     .join_prompt = Click here to join the game!
     .join_success = You joined the game in { $chat }!
+    .already_in_game = You have already joined the game in { $chat }!
+    .in_another_game = You are already in another game in { $chat }!
+
     .player_count = <strong>No. of players:</strong> {$count}
     .joined_game = { $users } joined the game in the last 30 seconds.
     .minutes_left = { $time ->
@@ -104,10 +107,14 @@ game =
     .vote_cast = You voted for {$user}.
     .voting_end = Voting has ended!
     .voting_tally = Tallying votes...
+    .voting_unassigned =
+        <strong>Unassigned roles:</strong>
+        {$roles}
 
 
 game_error =
     .err_assign_roles = Error while assigning roles. Please start a new game.
+    .invalid_option = Invalid option
     .vote_invalid = Invalid target: {$user}.
     .not_in_game = You are not in the game in {$chat}!
     .wrong_qn = This question is not for you!
@@ -532,7 +539,8 @@ role_message =
     .robber_swap = You stole { $user2 }'s role. { misc.self_role_changed }
 
     .troublemaker = You are the {roles.troublemaker}. Tonight, you may switch the roles of two other players without looking at those roles.
-    .troublemaker_action = Whose roles would you like to switch?
+    .troublemaker_action = Whose role would you like to switch?
+    .troublemaker_action2 = Who would you like to switch { $user1 }'s role with?
     .troublemaker_swap = You switched { $user1 }'s role with { $user2 }'s role.
 
     .tanner = You are the {roles.tanner}. Sick of your job, you only win if you are killed tonight.

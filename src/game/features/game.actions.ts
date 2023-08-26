@@ -4,7 +4,7 @@ import type { Context } from '~/bot/context'
 import { logHandle } from '~/bot/helpers/logging'
 
 import { validateCallbackQuery } from '~/game/helpers/game.context'
-import * as Actions from '~/game/roles/base.actions'
+import * as Actions from '~/game/gameplay/actions'
 import * as Roles from '~/game/roles'
 
 const composer = new Composer<Context>()
@@ -17,7 +17,7 @@ const feature = composer.chatType('private')
 feature.callbackQuery(/vote(.+)\+(.+)/, logHandle('callback-vote'), async ctx => {
   const res = validateCallbackQuery(ctx)
   if (res === undefined) return
-  const [game, player, userId] = res
+  const [game, , userId] = res
   const target = game.playerMap.get(Number(userId))
   if (target === undefined) {
     ctx.answerCallbackQuery(ctx.t('game_error.vote_invalid', { user: userId }))
@@ -80,6 +80,25 @@ feature.callbackQuery(/swap(.+)\+(.+)/, logHandle('callback-swap'), async ctx =>
       priority: player.role.priority,
       swapSelf: true,
     })
+  } else if (player.role instanceof Roles.Troublemaker) {
+    const target = game.playerMap.get(Number(userId))
+    if (target === undefined) {
+      ctx.answerCallbackQuery(ctx.t('game_error.vote_invalid', { user: userId }))
+      return
+    }
+    if (game.privateMsgs.get(player.id) === undefined) {
+      ctx.reply(ctx.t('game_error.wrong_qn'))
+      return
+    }
+    ctx.session.actions = [
+      {
+        name: 'swap',
+        gameId: game.id,
+        playerId: player.id,
+        targetId: userId,
+      },
+    ]
+    await ctx.conversation.enter('troublemaker')
   }
 })
 

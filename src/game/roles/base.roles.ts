@@ -3,7 +3,7 @@ import _ from 'lodash'
 import { GameInfo } from '~/game/models/game'
 import { Team } from '~/game/models/enums'
 import { Role, RoleInfo, Player } from '~/game/models/player'
-import { createVoteKB, getOptions, sendActionPrompt } from '../helpers/game.convos'
+import { createVoteKB, getOptions, sendActionPrompt } from '../helpers/keyboards'
 
 export class Villager extends Role {
   static readonly info: RoleInfo = {
@@ -84,10 +84,26 @@ export class Robber extends Villager {
   }
 }
 
-// export class Troublemaker extends Villager {
-//   static roleName = 'troublemaker'
-//   static descCommand = 'roleTM'
-// }
+export class Troublemaker extends Villager {
+  static readonly info: RoleInfo = {
+    name: 'troublemaker',
+    team: Team.Village,
+    descCommand: 'roleTM',
+    priority: 3,
+  }
+
+  async doNight(player: Player, game: GameInfo) {
+    if (player.ctx === undefined) {
+      return
+    }
+
+    const options = getOptions(game.players, other => other.id !== player.id)
+    const kb = createVoteKB(options, `swap${game.id}`)
+    // TODO: add pass option
+
+    game.privateMsgs.set(player.id, sendActionPrompt(player, 'role_message.troublemaker_action', kb)!)
+  }
+}
 
 // export class Drunk extends Villager {
 //   static roleName = 'drunk'

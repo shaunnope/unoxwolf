@@ -3,10 +3,10 @@ import { RedisAdapter } from "@grammyjs/storage-redis";
 import { Role } from "@prisma/client";
 import { onShutdown } from "node-graceful-shutdown";
 import { createBot } from "~/bot";
-import { createAppContainer } from "~/container";
+import { container } from "~/container";
 import { createServer } from "~/server";
 
-const container = createAppContainer();
+
 
 try {
   const { config, logger, prisma, redis } = container;

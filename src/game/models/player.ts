@@ -52,6 +52,10 @@ export class Role {
 
   status: Status = Status.NORMAL
 
+  constructor(status?: Status) {
+    this.status = status || Status.NORMAL
+  }
+
   /* eslint-disable class-methods-use-this */
   doNight(player: Player, game: GameInfo) {
     // TODO: expand this and maybe remove eslint-disable

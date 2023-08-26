@@ -4,10 +4,17 @@ import type { Context } from '~/bot/context'
 import { logHandle } from '~/bot/helpers/logging'
 
 import { Game } from '~/game'
-import { getGame, setGame } from '~/game/helpers/game.context'
+import { getChatTitle, getGameFromCtx, playerInGame, setGame } from '~/game/helpers/game.context'
 import { gameActions } from './game.actions'
+import { gameConvos } from './game.convos'
 
 const composer = new Composer<Context>()
+/**
+ * conversations must be registered before `start` command
+ * otherwise player `Context`s will not contain the registered
+ * conversations
+ */
+composer.use(gameConvos)
 
 const feature = composer.chatType(['group', 'supergroup'])
 const pmFeature = composer.chatType('private')
@@ -19,24 +26,28 @@ pmFeature.command('start', logHandle('command-start'), ctx => {
   }
   if (ctx.match.slice(0, 4) === 'join') {
     const game = ctx.games.get(ctx.match.slice(4))
-    if (game === undefined) return
-    game.addPlayer(ctx)
+    if (game === undefined) return // no active game
+
+    const status = playerInGame(game, ctx)
+    if (status === false) {
+      game.addPlayer(ctx)
+      return
+    }
+    ctx.reply(ctx.t(`game_init.${status}`, { chat: getChatTitle(ctx.games.get(ctx.session.game)!.ctx) }))
   }
 })
 
 feature.command('startgame', logHandle('command-startgame'), ctx => {
   // check if game is already started
-  if (getGame(ctx) !== undefined) {
+  if (getGameFromCtx(ctx) !== undefined) {
     ctx.reply(ctx.t('game.already_started'))
     return
   }
-
-  const game = new Game(ctx)
-  setGame(ctx, game)
+  setGame(ctx, new Game(ctx))
 })
 
 feature.command('join', logHandle('command-join'), async ctx => {
-  const game = getGame(ctx)
+  const game = getGameFromCtx(ctx)
   if (game === undefined) {
     ctx.reply(ctx.t('game.not_started'))
     return
@@ -51,7 +62,7 @@ feature.command('join', logHandle('command-join'), async ctx => {
 })
 
 feature.command('leave', logHandle('command-leave'), async ctx => {
-  const game = getGame(ctx)
+  const game = getGameFromCtx(ctx)
   if (game === undefined) {
     ctx.reply(ctx.t('game.not_started'))
     return
@@ -68,7 +79,7 @@ feature.command('leave', logHandle('command-leave'), async ctx => {
 
 // FIXME: this does not seem to work
 feature.command('nextphase', logHandle('command-nextphase'), async ctx => {
-  const game = getGame(ctx)
+  const game = getGameFromCtx(ctx)
   if (game === undefined) return
   // TODO - more conditions: only allow admin/ game owner to skip timer etc.
   if (game.flags.timerRunning) {
