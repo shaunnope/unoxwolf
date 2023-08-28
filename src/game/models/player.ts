@@ -14,7 +14,7 @@ export type RoleInfo = {
 export class Role {
   static readonly info: RoleInfo = {
     name: 'role',
-    team: Team.Village,
+    team: Team.None,
     descCommand: 'rolelist',
   }
 

@@ -8,6 +8,8 @@ import * as Actions from '~/game/gameplay/actions'
 import * as Events from '~/game/models/events'
 import { createVoteKB, getOptions, sendActionPrompt } from '../helpers/keyboards'
 
+import { Copier } from './auxilary.roles'
+
 export class Villager extends Role {
   static readonly info: RoleInfo = {
     name: 'villager',
@@ -225,10 +227,10 @@ export class Tanner extends Villager {
   }
 }
 
-export class Doppelganger extends Role {
+export class Doppelganger extends Copier {
   static readonly info: RoleInfo = {
     name: 'doppelganger',
-    team: Team.Village,
+    team: Team.Copy,
     descCommand: 'roleDG',
   }
 }

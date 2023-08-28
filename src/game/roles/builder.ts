@@ -20,8 +20,8 @@ export const generateRoles = (n: number, roles: (typeof Role)[] | Set<typeof Rol
     Roles.Drunk,
     Roles.Insomniac,
     Roles.Hunter,
-    Roles.Villager,
     Roles.Tanner,
+    Roles.Doppelganger,
   ]
 
   return _.shuffle(deck.slice(0, n + extra)).map(R => new R())

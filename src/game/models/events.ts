@@ -1,5 +1,6 @@
 import { GameEvent, GameInfo as Game } from '~/game/models/game'
-import { Player, Role } from '~/game/models/player'
+import { Player } from '~/game/models/player'
+import { isCopier } from '../roles/auxilary.roles'
 
 export const Vote = (player: Player, target: Player, game: Game) => {
   player.votedFor = target
@@ -88,15 +89,21 @@ export const Off = (player: Player, target: Player, game: Game) => {
 }
 
 export const Copy = (player: Player, target: Player, game: Game) => {
-  player.votedFor = target
-
   return {
     type: 'copy',
     author: player,
     targets: [target],
     priority: 0,
     fn: () => {
-      player.currentRole = new (<typeof Role>target.role.constructor)({ isCopy: true })
+      if (!isCopier(player.role)) return
+      player.role.copiedRole = target.role
+
+      const teamMembers = game.teams.get(target.role.info.team)
+      if (teamMembers === undefined) game.teams.set(target.role.info.team, [player])
+      else teamMembers.push(player)
+
+      if (player.ctx === undefined) return
+      player.ctx.reply(player.ctx.t(target.role.lore))
     },
   } as GameEvent
 }

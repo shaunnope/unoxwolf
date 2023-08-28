@@ -7,7 +7,7 @@ import type { GameInfo as Game } from '../models/game'
 import { createVoteKB, getOptions, sendActionPrompt } from '../helpers/keyboards'
 
 export type ActionChoice = {
-  name: string
+  name: string // TODO: specific strings
   gameId: string
   playerId: number
   targetId: string | number
@@ -184,7 +184,7 @@ export const Copy: Action = {
   fallback: (game: Game, player: Player) => {
     const options = getOptions(game.players, p => p.id !== player.id)
 
-    game.events.push(Events.Copy(player, options[Math.floor(Math.random() * options.length)], game))
+    Events.Copy(player, options[Math.floor(Math.random() * options.length)], game).fn()
   },
   setup: (game: Game, player: Player) => {
     if (player.ctx === undefined || !game.playerMap.has(player.id)) return
@@ -208,12 +208,13 @@ export const Copy: Action = {
       )
       return
     }
-    game.events.push(Events.Copy(player, targets[0], game))
     game.privateMsgs.get(player.id)?.then(msg => {
       game.ctx.api.editMessageText(player.id, msg.message_id, game.ctx.t('game.vote_cast', { user: targets[0].name }))
     })
-    game.privateMsgs.delete(player.id)
+
+    Events.Copy(player, targets[0], game).fn()
 
     playerCtx.answerCallbackQuery()
+    game.privateMsgs.delete(player.id)
   },
 }

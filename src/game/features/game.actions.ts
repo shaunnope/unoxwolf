@@ -101,4 +101,25 @@ feature.callbackQuery(/swap(.+)\+(.+)/, logHandle('callback-swap'), async ctx =>
   }
 })
 
+/**
+ * Copy roles
+ */
+feature.callbackQuery(/copy(.+)\+(.+)/, logHandle('callback-swap'), async ctx => {
+  const res = validateCallbackQuery(ctx)
+  if (res === undefined) return
+  const [game, player, userId] = res
+
+  if (player.role instanceof Roles.Doppelganger) {
+    const target = game.playerMap.get(Number(userId))
+    if (target === undefined) {
+      ctx.answerCallbackQuery(ctx.t('game_error.vote_invalid', { user: userId }))
+      return
+    }
+
+    Actions.Copy.fn(game, ctx, [target], {
+      priority: player.role.priority,
+    })
+  }
+})
+
 export { composer as gameActions }

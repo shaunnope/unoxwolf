@@ -16,9 +16,11 @@ import * as Actions from '~/game/gameplay/actions'
 import { config } from '~/config'
 import { deleteGame, getChatTitle } from './helpers/game.context'
 import { generateRoles } from './roles/builder'
+import { isCopier } from './roles/auxilary.roles'
 
 const defaultSettings: GameSettings = {
   joinTimeout: 180,
+  copyTimeout: 120,
   duskTimeout: 120,
   nightTimeout: 120,
   dayTimeout: 300,
@@ -153,6 +155,9 @@ export class Game implements GameInfo {
     )
 
     await this.assignRolesAndNotify()
+    if (this.teams.has(Team.Copy)) {
+      await this.copyPhase()
+    }
     await sleep(2 * this.tickRate)
 
     await this.nightPhase()
@@ -259,16 +264,20 @@ export class Game implements GameInfo {
    * Run copy phase.
    *
    */
-  async duskPhase() {
+  async copyPhase() {
     this.privateMsgs = new Map()
 
     this.events = []
 
-    this.players.forEach(p => p.role.doDusk(p, this))
+    this.players.forEach(p => {
+      if (isCopier(p.role)) {
+        p.role.copy(p, this)
+      }
+    })
 
     this.setupTimer()
-    for (let i = 0; i < this.settings.duskTimeout; i++) {
-      if (this.flags.killTimer) {
+    for (let i = 0; i < this.settings.copyTimeout; i++) {
+      if (this.flags.killTimer || this.canExit(i)) {
         delete this.flags.timerRunning
         break
       }
@@ -277,9 +286,8 @@ export class Game implements GameInfo {
 
       await sleep(this.tickRate)
     }
-    await this.cleanupPMs()
-    this.ctx.reply(this.ctx.t('game.night_end'))
-    this.events.sort((a, b) => a.priority - b.priority).forEach(e => e.fn())
+    await this.cleanupPMs(Actions.Copy.fallback)
+    this.ctx.reply(this.ctx.t('game.copy_end'))
 
     await sleep(10 * this.tickRate)
   }
@@ -298,7 +306,7 @@ export class Game implements GameInfo {
 
     this.setupTimer()
     for (let i = 0; i < this.settings.nightTimeout; i++) {
-      if (this.flags.killTimer || this.privateMsgs.size === 0) {
+      if (this.flags.killTimer || this.canExit(i)) {
         delete this.flags.timerRunning
         break
       }
@@ -307,7 +315,7 @@ export class Game implements GameInfo {
 
       await sleep(this.tickRate)
     }
-    await this.cleanupPMs()
+    await this.cleanupPMs(() => {})
     this.ctx.reply(this.ctx.t('game.night_end'))
     this.events.sort((a, b) => a.priority - b.priority).forEach(e => e.fn())
 
@@ -335,7 +343,7 @@ export class Game implements GameInfo {
 
     this.setupTimer()
     for (let i = 0; i < this.settings.voteTimeout; i++) {
-      if (this.flags.killTimer || this.privateMsgs.size === 0) {
+      if (this.flags.killTimer || this.canExit(i)) {
         delete this.flags.timerRunning
         break
       }
@@ -435,6 +443,10 @@ export class Game implements GameInfo {
     this.players.forEach((p, i) => {
       p.setup(deck[i])
 
+      // if (config.isDev && p.id === config.BOT_ADMIN_USER_ID) {
+      //   p.setup(new Roles.Doppelganger())
+      // }
+
       // collate players by team
       const teamMembers = this.teams.get(p.role.info.team)
       if (teamMembers === undefined) this.teams.set(p.role.info.team, [p])
@@ -476,5 +488,9 @@ export class Game implements GameInfo {
   setupTimer() {
     this.flags.timerRunning = true
     delete this.flags.killTimer
+  }
+
+  canExit(ts: number) {
+    return this.privateMsgs.size === 0 && ts > 10
   }
 }

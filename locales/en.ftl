@@ -98,13 +98,15 @@ game =
     .timer_skipped = <em>Skipping forward...</em>
     .times_up = Time's up!
 
+    .copy_end = As the sun sets, rumors of identity theft spread through the village.
+
     .night_start = Night falls...
     .night_end = The sun rises...
 
     .voting_started = Voting has started!
     .voting_qn = Who do you want to vote for?
     .already_voted = You have already voted!
-    .vote_cast = You voted for {$user}.
+    .vote_cast = You voted for {$user}
     .voting_end = Voting has ended!
     .voting_tally = Tallying votes...
     .voting_unassigned =
@@ -574,7 +576,6 @@ role_message =
 
     .doppelganger = You are the {roles.doppelganger}.
     .doppelganger_action = Whose role would you like to copy?
-    .doppelganger_reveal = { misc.self_role_changed }
 
     .sentinel = You are the {roles.sentinel}. Tonight, you may protect another player from being robbed, switched, or looked at by other players.
     .sentinel_action = Who would you like to protect?

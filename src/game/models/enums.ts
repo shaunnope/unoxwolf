@@ -1,7 +1,9 @@
 export enum Team {
+  None,
   Village,
   Werewolf,
   Tanner,
+  Copy,
   Vampire,
   Assassin,
   Alien,

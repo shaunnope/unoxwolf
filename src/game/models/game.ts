@@ -7,6 +7,7 @@ import type { Role, Mark, Player } from './player'
 
 export type GameSettings = {
   joinTimeout: number
+  copyTimeout: number
   duskTimeout: number
   nightTimeout: number
   dayTimeout: number
