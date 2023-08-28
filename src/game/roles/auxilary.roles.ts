@@ -26,7 +26,7 @@ export class Copier extends Role implements CanCopy {
     const kb = createVoteKB(options, `copy${game.id}`)
     // TODO: add pass option
 
-    game.privateMsgs.set(player.id, sendActionPrompt(player, `role_message.${this.info.name}_action`, kb)!)
+    game.privateMsgs.set(player.id, sendActionPrompt(player, `${this.info.name}.action`, kb)!)
   }
 
   doNight(player: Player, game: GameInfo): void {

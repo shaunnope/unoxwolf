@@ -66,13 +66,13 @@ export const Vote: Action = {
     }
     if (targets === undefined || targets.length !== 1) {
       playerCtx.answerCallbackQuery(
-        playerCtx.t('game_error.vote_invalid', { user: targets?.toString() || 'undefined' })
+        playerCtx.t('game_error.invalid_vote', { user: targets?.toString() || 'undefined' })
       )
       return
     }
     game.events.push(Events.Vote(player, targets[0], game))
     game.privateMsgs.get(player.id)?.then(msg => {
-      game.ctx.api.editMessageText(player.id, msg.message_id, game.ctx.t('game.vote_cast', { user: targets[0].name }))
+      game.ctx.api.editMessageText(player.id, msg.message_id, game.ctx.t('vote.cast', { user: targets[0].name }))
     })
     game.privateMsgs.delete(player.id)
 
@@ -96,7 +96,7 @@ export const Swap: Action = {
     const options = getOptions(game.players, p => p.id !== player.id)
     game.privateMsgs.set(
       player.id,
-      sendActionPrompt(player, `role_message.${player.role.info.name}_action`, createVoteKB(options, `swap${game.id}`))!
+      sendActionPrompt(player, `${player.role.info.name}.action`, createVoteKB(options, `swap${game.id}`))!
     )
   },
   fn: (game: Game, playerCtx: Context, targets?: Player[], other: ActionOptions = DEFAULT_ACTION_OPTIONS) => {
@@ -106,7 +106,7 @@ export const Swap: Action = {
     if (targets === undefined || targets.length !== 2) {
       if (!other.isAuto)
         playerCtx.answerCallbackQuery(
-          playerCtx.t('game_error.vote_invalid', { user: targets?.toString() || 'undefined' })
+          playerCtx.t('game_error.invalid_vote', { user: targets?.toString() || 'undefined' })
         )
       return
     }
@@ -140,13 +140,13 @@ export const Peek: Action = {
     }
     if (targets === undefined || targets.length !== 1) {
       playerCtx.answerCallbackQuery(
-        playerCtx.t('game_error.vote_invalid', { user: targets?.toString() || 'undefined' })
+        playerCtx.t('game_error.invalid_vote', { user: targets?.toString() || 'undefined' })
       )
       return
     }
     game.events.push(Events.Vote(player, targets[0], game))
     game.privateMsgs.get(player.id)?.then(msg => {
-      game.ctx.api.editMessageText(player.id, msg.message_id, game.ctx.t('game.vote_cast', { user: targets[0].name }))
+      game.ctx.api.editMessageText(player.id, msg.message_id, game.ctx.t('vote.cast', { user: targets[0].name }))
     })
     game.privateMsgs.delete(player.id)
 
@@ -191,7 +191,7 @@ export const Copy: Action = {
     const options = getOptions(game.players, other => other.id !== player.id)
     game.privateMsgs.set(
       player.id,
-      sendActionPrompt(player, `role_message.${player.role.info.name}_action`, createVoteKB(options, `copy${game.id}`))!
+      sendActionPrompt(player, `${player.role.info.name}.action`, createVoteKB(options, `copy${game.id}`))!
     )
   },
   fn: (game: Game, playerCtx: Context, targets?: Player[]) => {
@@ -204,12 +204,12 @@ export const Copy: Action = {
     }
     if (targets === undefined || targets.length !== 1) {
       playerCtx.answerCallbackQuery(
-        playerCtx.t('game_error.vote_invalid', { user: targets?.toString() || 'undefined' })
+        playerCtx.t('game_error.invalid_vote', { user: targets?.toString() || 'undefined' })
       )
       return
     }
     game.privateMsgs.get(player.id)?.then(msg => {
-      game.ctx.api.editMessageText(player.id, msg.message_id, game.ctx.t('game.vote_cast', { user: targets[0].name }))
+      game.ctx.api.editMessageText(player.id, msg.message_id, game.ctx.t('vote.cast', { user: targets[0].name }))
     })
 
     Events.Copy(player, targets[0], game).fn()

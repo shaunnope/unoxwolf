@@ -19,15 +19,15 @@ export class Role {
   }
 
   static get description() {
-    return `role_desc.${this.info.name}`
+    return `${this.info.name}.desc`
   }
 
   static get lore() {
-    return `role_message.${this.info.name}`
+    return `${this.info.name}.lore`
   }
 
   static get roleName() {
-    return `roles.${this.info.name}`
+    return `${this.info.name}.name`
   }
 
   get description() {

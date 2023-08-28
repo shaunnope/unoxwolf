@@ -40,7 +40,7 @@ export const Swap = (
       targets[0].swapRoles(targets[1])
       if (sendReply) {
         player.ctx?.reply(
-          player.ctx.t(`role_message.${player.role.info.name}_swap`, {
+          player.ctx.t(`${player.role.info.name}.swap`, {
             user1: targets[0].name,
             user2: targets[1].name,
             role: player.ctx.t(targets[0].currentRole.name),
@@ -79,7 +79,7 @@ export const Off = (player: Player, target: Player, game: Game) => {
     fn: () => {
       target.currentRole.unalive(target, game)
       game.ctx.reply(
-        game.ctx.t(`role_message.${player.currentRole.info.name}_off`, {
+        game.ctx.t(`${player.currentRole.info.name}.off`, {
           user1: player.name,
           user2: target.name,
         })

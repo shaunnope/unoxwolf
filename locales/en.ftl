@@ -1,5 +1,5 @@
 language =
-    .select = Please, select your language
+    .select = Select your language
     .changed = Language successfully changed!
 admin =
     .user-not-found = User not found
@@ -20,7 +20,7 @@ admin =
 gmgm =
     .no-set-name = No sticker set name
 
-unhandled = Unrecognized command. Try /start
+unhandled = Unrecognized update. Try /start
 
 start_command =
     .description = Start the bot
@@ -54,7 +54,7 @@ ping_command =
     .pong = <strong>Time to send pong:</strong> {$ts} ms
 
 welcome =
-    👋🏻 Hi there, I am Unox! Add me to a group to moderate games of One Night Ultimate Werewolf.
+    👋🏻 Hi there, I am Unox! Add me to a group to moderate games of Unoxian Werewolf.
     Try me now! 🐺
 
     {welcome.help}
@@ -67,16 +67,31 @@ welcome =
     .prompt_start_bot =
         Hi {$user}! Before you can join a game, you need to start the bot.
 
-game_init = {$user} has started a new game!
-
-    .join = Join
-    .join_prompt = Click here to join the game!
-    .join_success = You joined the game in { $chat }!
+join = Join
+    .prompt = Click here to join the game!
+    .success = You joined the game in { $chat }!
     .already_in_game = You have already joined the game in { $chat }!
     .in_another_game = You are already in another game in { $chat }!
+    .failure = You cannot join the game now!
+    .count = <strong>Number of players:</strong> {$count}
+    .recent_list = { $users } joined the game in the last 30 seconds.
+    .flee = {$user} has left the game!
 
-    .player_count = <strong>No. of players:</strong> {$count}
-    .joined_game = { $users } joined the game in the last 30 seconds.
+leave =
+    .success = {$user} has left the game!
+    .failure = You cannot leave the game now!
+
+
+game_init = {$user} has started a new game!
+
+    .join = {join}
+    .join_prompt = {join.prompt}
+    .join_success = {join.success}
+    .already_in_game = {join.already_in_game}
+    .in_another_game = {join.in_another_game}
+
+    .player_count = {join.count}
+    .joined_game = {join.recent_list}
     .minutes_left = { $time ->
         [one] {$time} minute left to join
         *[other] {$time} minutes left to join
@@ -88,41 +103,59 @@ game_init = {$user} has started a new game!
     .not_enough_players = Not enough players to start the game!
     .starting = Starting game...
 
+copy =
+    .start = {""}
+    .end = As the sun sets, rumors of identity theft spread through the village.
+
+night =
+    .start = Night falls...
+    .end = The sun rises...
+
+vote = Who do you want to vote for?
+    .start = Voting has started!
+    .end = Voting has ended!
+    .cast = You voted for {$user}
+    .repeat = You have already voted!
+    .tally = Tallying votes...
+    .unassigned =
+        <strong>Unassigned roles:</strong>
+        {$roles}
+    .draw = No one received more than one vote!
+    .results = At the end of the vote, {$users} { $num ->
+                    [one] was
+                    *[other] were
+                } executed!
+
 game =
     .not_started = No game has been started yet!
     .already_started = A game has already been started!
-    .no_join = You cannot join the game now!
-    .no_leave = You cannot leave the game now!
-    .player_flee = {$user} has left the game!
+    .no_join = {join.failure}
+    .no_leave = {leave.failure}
+    .player_flee = {leave.success}
     .end = Game ended!
     .timer_skipped = <em>Skipping forward...</em>
     .times_up = Time's up!
 
-    .copy_end = As the sun sets, rumors of identity theft spread through the village.
+    .copy_end = {copy.end}
 
-    .night_start = Night falls...
-    .night_end = The sun rises...
+    .night_start = {night.start}
+    .night_end = {night.end}
 
-    .voting_started = Voting has started!
-    .voting_qn = Who do you want to vote for?
-    .already_voted = You have already voted!
-    .vote_cast = You voted for {$user}
-    .voting_end = Voting has ended!
-    .voting_tally = Tallying votes...
-    .voting_unassigned =
-        <strong>Unassigned roles:</strong>
-        {$roles}
-    .vote_draw = No one received more than one vote!
-    .vote_results = At the end of the vote, {$users} { $num ->
-                    [one] was
-                    *[other] were
-                } executed!
+    .voting_started = {vote.start}
+    .voting_qn = {vote}
+    .already_voted = {vote.repeat}
+    .vote_cast = {vote.cast}
+    .voting_end = {vote.end}
+    .voting_tally = {vote.tally}
+    .voting_unassigned = {vote.unassigned}
+    .vote_draw = {vote.draw}
+    .vote_results = {vote.results}
 
 
 game_error =
     .err_assign_roles = Error while assigning roles. Please start a new game.
     .invalid_option = Invalid option
-    .vote_invalid = Invalid target: {$user}.
+    .invalid_vote = Invalid target: {$user}.
     .not_in_game = You are not in the game in {$chat}!
     .wrong_qn = This question is not for you!
 
@@ -131,36 +164,199 @@ misc =
     .unassigned = Unassigned roles ({$count})
     .peek_role = { $user } is a { $role }
     .self_swap_roles = You swapped roles with { $user }
+    .self_role_same = You are still a {$role}
     .self_role_changed = You are now a {$role}
     .self_team_changed = You are now on the {$team} team
     .unknown_user = Someone
 
+team =
+    .village = Village
+    .werewolf = Werewolf
+    .tanner = Tanner
+    .vampire = Vampire
+    .assassin = Assassin
+    .alien = Alien
+    .synth = Synthetic Alien
+    .blob = Blob
+    .mortician = Mortician
+
+role = Role
+    .name = {role} {role.emoji}
+    .emoji = 🎲
+    .desc =
+        A generic role. This role has no special abilities.
+    .lore =
+        You are a {role.name}
+        You have no special abilities.
+
+villager = Villager
+    .name = {villager} {villager.emoji}
+    .emoji = 👱
+    .desc =
+        The Villager leads a simple life. Vote out the non-villagers in the morning.
+
+        <em>Villagers are on the {team.village} team.</em>
+    .lore =
+        You are a simple {villager.name}
+        Rest well tonight and don't let the werewolves bite!
+
+werewolf = Werewolf
+    .name = {werewolf} {werewolf.emoji}
+    .emoji = 🐺
+    .desc =
+        At night, the Werewolves reveal themselves to each other.
+
+        <strong>Lone Wolf Mode:</strong> If no other Werewolves are in play, the lone Werewolf may look at an unassigned role.
+
+        <em>Werewolves are on the {team.werewolf} team.</em>
+    .lore =
+        You are a {werewolf.name}!
+        Arise at night to meet your fellow lycantrophic brethren.
+    .reveal = Your fellow werewolves are { $wolves }.
+    .lone = You are the only werewolf.
+    .lone2 = One of the unassigned roles is a { $role }.
+
+seer = Seer
+    .name = {seer} {seer.emoji}
+    .emoji = 👳
+    .desc =
+        At night, the Seer may look at one other player's role or two of the unassigned roles.
+
+        <em>The Seer is on the {team.village} team.</em>
+    .lore =
+        You are the {seer.name}
+        At night, you may look at one other player's role or two of the unassigned roles.
+    .action = Whose role would you like to look at?
+    .reveal = { misc.peek_role }
+    .reveal2 = A { $role1 } and a { $role2 } are unassigned tonight.
+
+robber = Robber
+    .name = {robber} {robber.emoji}
+    .emoji = 😈
+    .desc =
+        At night, the Robber may choose to rob another player's role, swapping it with their own. The Robber then looks at their new role.
+
+        <em>The Robber is on the {team.village} team.</em>
+    .lore =
+        You are the {robber.name}
+        Tonight, you may rob another player's role, exchanging it with your own.
+    .action = Whose role would you like to rob?
+    .swap = You stole { $user2 }'s role. { misc.self_role_changed }
+
+troublemaker = Troublemaker
+    .name = {troublemaker} {troublemaker.emoji}
+    .emoji = 🙅
+    .desc =
+        At night, the Troublemaker may choose to switch the roles of two other players without looking at those roles.
+
+        <em>The Troublemaker is on the {team.village} team.</em>
+    .lore =
+        You are the {troublemaker.name}
+        Tonight, you may switch the roles of two other players without looking at those roles.
+    .action = Whose roles would you like to switch?
+    .action2 = Who would you like to switch { $user1 }'s role with?
+    .swap = You swapped { $user1 }'s role with { $user2 }'s role.
+
+tanner = Tanner
+    .name = {tanner} {tanner.emoji}
+    .emoji = 👺
+    .desc =
+        The Tanner wins only if they are killed.
+
+        <em>The Tanner is on the {team.tanner} team.</em>
+    .lore =
+        You are the {tanner.name}
+        Sick of your job, you only win if you are killed tonight.
+
+drunk = Drunk
+    .name = {drunk} {drunk.emoji}
+    .emoji = 🍺
+    .desc =
+        At night, the Drunk exchanges their role with an unassigned role without knowing what that role is.
+
+        <em>The Drunk is on the {team.village} team.</em>
+    .lore =
+        You are the {drunk.name}
+        Of course, you're not usually drunk. You just had a few too many drinks tonight.
+        At night, you will stumble upon your actual role among the unassigned roles.
+    .action = In your drunken stupor, you swapped your role with { $role }
+    .secret = {villager.lore}
+
+insomniac = Insomniac
+    .name = {insomniac} {insomniac.emoji}
+    .emoji = 😴
+    .desc =
+        Before the end of the night, the Insomniac wakes up and looks at their own role.
+
+        <em>The Insomniac is on the {team.village} team.</em>
+    .lore =
+        You are the {insomniac.name}
+        With news of werewolves hiding in your midst, it would be a miracle if you were able to sleep soundly tonight.
+    .true = You are still the {roles.insomniac}
+    .false = {misc.self_role_changed}
+
+hunter = Hunter
+    .name = {hunter} {hunter.emoji}
+    .emoji = 🔫
+    .desc =
+        If the Hunter dies, the player they vote for also dies.
+
+        <em>The Hunter is on the {team.village} team.</em>
+    .lore =
+        You are the {hunter.name}
+        If you are killed tonight, the player you vote for will also die.
+    .off = With their dying breath, { $user1 } drew their gun and shot { $user2 }.
+
+mason = Mason
+    .name = {mason} {mason.emoji}
+    .emoji = 👷
+    .desc =
+        At night, the Masons reveal themselves to each other.
+
+        <em>The Masons are on the {team.village} team.</em>
+    .lore =
+        You are a {mason.name}
+        At night, you will meet your fellow masons.
+    .lone = You are the only mason.
+    .reveal = You are masons together with { $masons }.
+
+minion = Minion
+    .name = {minion} {minion.emoji}
+    .emoji = 👹
+    .desc =
+        At night, the Minion learns who the Werewolves are.
+
+        <em>The Minion is on the {team.werewolf} team. If there are no Werewolves in play, the Minion wins if they are not killed.</em>
+    .lore =
+        You are the {minion.name}
+        At night, you may meet your revered werewolves.
+    .reveal = The werewolves are { $wolves }.
+    .lone = There are no werewolves tonight. If none show up in the morning, survive the vote and you will win.
+
+doppelganger = Doppelgänger
+    .name = {doppelganger} {doppelganger.emoji}
+    .emoji = 🎭
+    .desc =
+        At dusk, the Doppelgänger assumes another player's role.
+
+        <em>The Doppelgänger is on the team of the role they copy.</em>
+    .lore =
+        You are the {doppelganger.name}
+        At dusk, you will assume another player's role.
+    .action = Whose role would you like to copy?
 
 roles =
-    .villager = Villager 👱
-    .werewolf = Werewolf 🐺
-    .seer = Seer 👳
-    .robber = Robber 😈
-    .troublemaker = Troublemaker 🙅
-    .tanner = Tanner 👺
-    .drunk = Drunk 🍺
-    .insomniac = Insomniac 😴
-    .hunter = Hunter 🔫
-    .mason = Mason 👷
-    .minion = Minion 👹
-    .doppelganger = Doppelganger 🎭
-
     .sentinel = Sentinel 🚨
     .apprentice_seer = Apprentice Seer 👳
     .paranormal_investigator = Paranormal Investigator 👻
     .revealer = Revealer 📖
     .curator = Curator 📜
     .witch = Witch 🧙
-    .village_idiot = Village Idiot 🤡
+    .fool = Fool 🤡
     .bodyguard = Bodyguard 🛡
-    .alpha_wolf = Alpha Wolf ⚡️
-    .mystic_wolf = Mystic Wolf 🐺
-    .dream_wolf = Dream Wolf 🐺
+    .alpha_wolf = Alpha Wolf ⚡️🐺
+    .mystic_wolf = Mystic Wolf 🔮🐺
+    .dream_wolf = Dream Wolf 💤🐺
 
     .copycat = Copycat 🐱
     .vampire = Vampire 🧛
@@ -201,15 +397,15 @@ roles =
     .empath = Empath 🧠
     .body_snatcher = Body Snatcher 👤
 
-    .team_village = Village
-    .team_werewolf = Werewolf
-    .team_tanner = Tanner
-    .team_vampire = Vampire
-    .team_assassin = Assassin
-    .team_alien = Alien
-    .team_synth = Synthetic Alien
-    .team_blob = Blob
-    .team_mortician = Mortician
+    .team_village = {team.village}
+    .team_werewolf = {team.werewolf}
+    .team_tanner = {team.tanner}
+    .team_vampire = {team.vampire}
+    .team_assassin = {team.assassin}
+    .team_alien = {team.alien}
+    .team_synth = {team.synth}
+    .team_blob = {team.blob}
+    .team_mortician = {team.mortician}
 
     .page_base =
         /roleVG - {roles.villager}
@@ -232,7 +428,7 @@ roles =
         /roleRevealer - {roles.revealer}
         /roleCurator - {roles.curator}
         /roleWitch - {roles.witch}
-        /roleVI - {roles.village_idiot}
+        /roleFool - {roles.fool}
         /roleBG - {roles.bodyguard}
         /roleAW - {roles.alpha_wolf}
         /roleMW - {roles.mystic_wolf}
@@ -281,57 +477,6 @@ roles =
         /roleEmpath - {roles.empath}
 
 role_desc =
-    .villager =
-    You lead a simple life. Vote out the non-villagers in the morning.
-
-    <em>Villagers are on the {roles.team_village} team.</em>
-    .werewolf =
-    At night, all Werewolves reveal themselves to each other.
-
-    <strong>Lone Wolf Mode:</strong> If no other Werewolves are in play, the lone Werewolf may look at an unassigned role.
-
-    <em>Werewolves are on the {roles.team_werewolf} team.</em>
-    .seer =
-    At night, the Seer may look at one other player's role or two of the unassigned roles.
-
-    <em>The Seer is on the {roles.team_village} team.</em>
-    .robber =
-    At night, the Robber may choose to rob another player's role, swapping it with their own. The Robber then looks at his new role.
-
-    <em>The Robber is on the {roles.team_village} team.</em>
-    .troublemaker =
-    At night, the Troublemaker may choose to switch the roles of two other players without looking at those roles.
-
-    <em>The Troublemaker is on the {roles.team_village} team.</em>
-    .tanner =
-    The Tanner wins only if they are killed.
-
-    <em>The Tanner is on the {roles.team_tanner} team.</em>
-    .drunk =
-    At night, the Drunk must exchange their role with an unassigned role without knowing what that role is.
-
-    <em>The Drunk is on the {roles.team_village} team.</em>
-    .insomniac =
-    Before the end of the night, the Insomniac wakes up and looks at their own role.
-
-    <em>The Insomniac is on the {roles.team_village} team.</em>
-    .hunter =
-    If the Hunter dies, the player they vote for also dies.
-
-    <em>The Hunter is on the {roles.team_village} team.</em>
-    .mason =
-    At night, the Masons reveal themselves to each other.
-
-    <em>The Masons are on the {roles.team_village} team.</em>
-    .minion =
-    At night, the Minion learns who the Werewolves are.
-
-    <em>The Minion is on the {roles.team_werewolf} team. If there are no Werewolves in play, the Minion wins if they are not killed.</em>
-    .doppelganger =
-    At dusk, the Doppelgänger assumes another player's role.
-
-    <em>The Doppelgänger is on the team of the role they copy.</em>
-
     .sentinel =
     At night, the Sentinel may choose to protect another player's role from being robbed, switched, or looked at by other players.
 
@@ -356,10 +501,13 @@ role_desc =
     At night, the Witch may look at one of the unassigned roles. If they do, they must exchange that role with any player's role, including their own. They may not look at the role they are exchanging.
 
     <em>The Witch is on the {roles.team_village} team.</em>
-    .village_idiot =
-    The Village Idiot may move all roles but their own one position to the left or right.
+    .fool =
+    The Fool is delulu. They believe that they have the mystical abilities of the {seer.name}, but their foresight is random at best. Also, if they choose to view a role, they will end up messing up everyone's roles instead.
 
-    <em>The Village Idiot is on the {roles.team_village} team.</em>
+    If they attempt to view a player role, all movable player roles but their own will be shifted one position to the left.
+    If they attempt to view an unassigned role, all movable player roles but their own will be shifted one position to the right.
+
+    <em>The Fool is on the {roles.team_village} team.</em>
     .bodyguard =
     The player the bodyguard votes for cannot be killed. If that player received the most votes, the player with the next most votes is killed.
 
@@ -526,57 +674,6 @@ role_desc =
 
 
 role_message =
-    .villager =
-        You are a simple {roles.villager}.
-        Rest well tonight and don't let the werewolves bite!
-
-    .werewolf =
-        You are a {roles.werewolf}!
-        Arise at night to meet your fellow lycantrophic brethren.
-    .werewolf_reveal = Your fellow werewolves are { $wolves }.
-    .werewolf_lone = You are the only werewolf.
-    .werewolf_lone2 = One of the unassigned roles is a { $role }.
-
-    .seer =
-        You are the {roles.seer}.
-        Tonight, you may look at one other player's role or two of the unassigned roles.
-    .seer_action = Whose role would you like to look at?
-    .seer_reveal = { misc.peek_role }
-    .seer_reveal2 = A { $role1 } and a { $role2 } are unassigned tonight.
-
-    .robber = You are the {roles.robber}. Tonight, you may rob another player's role, exchanging it with your own. You may then look at your new role.
-    .robber_action = Whose role would you like to rob?
-    .robber_swap = You stole { $user2 }'s role. { misc.self_role_changed }
-
-    .troublemaker = You are the {roles.troublemaker}. Tonight, you may switch the roles of two other players without looking at those roles.
-    .troublemaker_action = Whose role would you like to switch?
-    .troublemaker_action2 = Who would you like to switch { $user1 }'s role with?
-    .troublemaker_swap = You switched { $user1 }'s role with { $user2 }'s role.
-
-    .tanner = You are the {roles.tanner}. Sick of your job, you only win if you are killed tonight.
-
-    .drunk = You are the {roles.drunk}. After having had one drink too many, you will somehow wake up with a different role tomorrow.
-    .drunk_action = In your drunken stupor, you swapped your role with { $role }
-    .drunk_secret = {role_message.villager}
-
-    .insomniac = You are the {roles.insomniac}. With news of werewolves hiding in your midst, it would be a miracle if you were able to sleep soundly tonight.
-    .insomniac_true = You are still the {roles.insomniac}
-    .insomniac_false = You are now a { $role }
-
-    .hunter = You are the {roles.hunter}. If you are killed tonight, the player you vote for will also die.
-    .hunter_off = With their dying breath, { $user1 } drew their gun and shot { $user2 }.
-
-    .mason = You are a {roles.mason}. At night, you may meet your fellow masons.
-    .mason_lone = You are the only mason.
-    .mason_reveal = You are masons together with { $masons }.
-
-    .minion = You are the {roles.minion}. At night, you may meet your revered werewolves.
-    .minion_reveal = The werewolves are { $wolves }.
-    .minion_none = There are no werewolves tonight. If none show up in the morning, survive the vote and you will win.
-
-    .doppelganger = You are the {roles.doppelganger}.
-    .doppelganger_action = Whose role would you like to copy?
-
     .sentinel = You are the {roles.sentinel}. Tonight, you may protect another player from being robbed, switched, or looked at by other players.
     .sentinel_action = Who would you like to protect?
     .sentinel_poke = As you drift off to sleep, you feel a sense of security, knowing that you will be safe from harm tonight.
@@ -587,12 +684,12 @@ role_message =
 
     .paranormal_investigator = You are the {roles.paranormal_investigator}. Tonight, you may view the roles of two other players, one at a time. If you view a role that is not on the {roles.team_village} team, you must stop looking and join the team of the role you viewed.
     .pi_action = Who would you like to visit?
-    .pi_reveal_vg = {role_message.seer_reveal}
+    .pi_reveal_vg = {seer.reveal}
     .pi_reveal_other = {misc.peek_role} ! { misc.self_team_changed }
 
     .revealer = You are the {roles.revealer}. Tonight, you may reveal the role of one player. If the revealed role is not on the {roles.team_village} team, the role is not revealed.
     .revealer_action = Whose role would you like to reveal?
-    .revealer_reveal = {role_message.seer_reveal}
+    .revealer_reveal = {seer.reveal}
     .revealer_fail = You cautiously back away, hoping that { $user } did not notice you.
 
     .curator = You are the {roles.curator}. A collector of ancient wares, you may give any player an unrevealed artifact at the end of the night. You may not give an artifact to a protected player.
@@ -614,8 +711,8 @@ role_message =
     .alpha_wolf_result = { $user } was turned into a werewolf!
 
     .mystic_wolf = You are the {roles.mystic_wolf}. Tonight, you may learn the role of one non-werewolf player.
-    .mystic_wolf_action = {role_message.seer_action}
-    .mystic_wolf_result = {role_message.seer_result}
+    .mystic_wolf_action = {seer.action}
+    .mystic_wolf_result = {seer.result}
 
     .dream_wolf = You are the {roles.dream_wolf}. Inflicted with a rare variant of narcolepsy, you have never been able to stay awake at night. At least the other members of your pack know who you are.
 
@@ -671,7 +768,7 @@ role_message =
     .marksman = You are the {roles.marksman}. Tonight, you may look at the role of one player, and the mark of another.
     .marksman_action = Whose role would you like to look at?
     .marksman_action2 = Whose mark would you like to look at?
-    .marksman_result = {role_message.seer_reveal}
+    .marksman_result = {seer.reveal}
     .marksman_result2 = { $user } is marked with a { $mark }.
 
     .pickpocket = You are the {roles.pickpocket}. Tonight, you may swap your mark with the mark of another player and view your new mark.
@@ -738,7 +835,7 @@ role_message =
 
     .nostradamus = You are {roles.nostradamus}. At night, you may look at the roles of up to three players, and join the team of the last player you look at. The team you join will be revealed to all players.
     .nostradamus_action = Whose role would you like to look at?
-    .nostradamus_reveal = {role_message.seer_reveal}
+    .nostradamus_reveal = {seer.reveal}
     .nostradamus_reveal2 = { misc.self_team_changed }
     .nostradamus_announce = { $user } is now on the { $team } team.
 

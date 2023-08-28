@@ -21,11 +21,11 @@ export const troublemaker = async (conversation: Conversation, ctx: Context) => 
     // const leftOptions = game.players.filter(other => other.id !== playerId && other.id !== target.id)
     const leftKb = createVoteKB(leftOptions, `swap${game.id}`)
     game.privateMsgs.get(playerId)?.then(msg => {
-      ctx.api.editMessageText(playerId, msg.message_id, game.ctx.t('game.vote_cast', { user: target.name }))
+      ctx.api.editMessageText(playerId, msg.message_id, game.ctx.t('vote.cast', { user: target.name }))
     })
     game.privateMsgs.set(
       playerId,
-      ctx.reply(ctx.t('role_message.troublemaker_action2', { user1: target.name }), { reply_markup: leftKb })
+      ctx.reply(ctx.t('troublemaker.action2', { user1: target.name }), { reply_markup: leftKb })
     )
   })
 
@@ -50,7 +50,7 @@ export const troublemaker = async (conversation: Conversation, ctx: Context) => 
       return [game.id, player.id, target.id] as [string, number, number]
     })
     if (res === undefined) {
-      await actionCtx.answerCallbackQuery(ctx.t('game_error.vote_invalid', { user: actionCtx.match[2] }))
+      await actionCtx.answerCallbackQuery(ctx.t('game_error.invalid_vote', { user: actionCtx.match[2] }))
       continue
     }
     await actionCtx.answerCallbackQuery()
@@ -66,7 +66,7 @@ export const troublemaker = async (conversation: Conversation, ctx: Context) => 
     const target2 = game.playerMap.get(Number(targetId2))
     if (player === undefined || target1 === undefined || target2 === undefined) return false
     game.privateMsgs.get(playerId)?.then(msg => {
-      ctx.api.editMessageText(playerId, msg.message_id, game.ctx.t('game.vote_cast', { user: target2.name }))
+      ctx.api.editMessageText(playerId, msg.message_id, game.ctx.t('vote.cast', { user: target2.name }))
     })
     game.privateMsgs.delete(playerId)
 

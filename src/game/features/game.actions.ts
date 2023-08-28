@@ -20,7 +20,7 @@ feature.callbackQuery(/vote(.+)\+(.+)/, logHandle('callback-vote'), async ctx =>
   const [game, , userId] = res
   const target = game.playerMap.get(Number(userId))
   if (target === undefined) {
-    ctx.answerCallbackQuery(ctx.t('game_error.vote_invalid', { user: userId }))
+    ctx.answerCallbackQuery(ctx.t('game_error.invalid_vote', { user: userId }))
     return
   }
 
@@ -38,14 +38,14 @@ feature.callbackQuery(/peek(.+)\+(.+)/, logHandle('callback-peek'), async ctx =>
   if (player.role instanceof Roles.Seer) {
     if (userId === 'un') {
       const [role1, role2] = _.sampleSize(game.unassignedRoles, 2)
-      msg = ctx.t('role_message.seer_reveal2', { role1: ctx.t(role1.name), role2: ctx.t(role2.name) })
+      msg = ctx.t('seer.reveal2', { role1: ctx.t(role1.name), role2: ctx.t(role2.name) })
     } else {
       const target = game.playerMap.get(Number(userId))
       if (target === undefined) {
-        ctx.answerCallbackQuery(ctx.t('game_error.vote_invalid', { user: userId }))
+        ctx.answerCallbackQuery(ctx.t('game_error.invalid_vote', { user: userId }))
         return
       }
-      msg = ctx.t('role_message.seer_reveal', { user: target.name, role: ctx.t(target.role.name) })
+      msg = ctx.t('seer.reveal', { user: target.name, role: ctx.t(target.role.name) })
     }
     game.privateMsgs.get(player.id)?.then(oldMsg => {
       ctx.api.editMessageText(player.id, oldMsg.message_id, msg)
@@ -69,12 +69,12 @@ feature.callbackQuery(/swap(.+)\+(.+)/, logHandle('callback-swap'), async ctx =>
   if (player.role instanceof Roles.Robber) {
     const target = game.playerMap.get(Number(userId))
     if (target === undefined) {
-      ctx.answerCallbackQuery(ctx.t('game_error.vote_invalid', { user: userId }))
+      ctx.answerCallbackQuery(ctx.t('game_error.invalid_vote', { user: userId }))
       return
     }
 
     game.privateMsgs.get(player.id)?.then(msg => {
-      game.ctx.api.editMessageText(player.id, msg.message_id, game.ctx.t('game.vote_cast', { user: target.name }))
+      game.ctx.api.editMessageText(player.id, msg.message_id, game.ctx.t('vote.cast', { user: target.name }))
     })
     game.privateMsgs.delete(player.id)
 
@@ -85,7 +85,7 @@ feature.callbackQuery(/swap(.+)\+(.+)/, logHandle('callback-swap'), async ctx =>
   } else if (player.role instanceof Roles.Troublemaker) {
     const target = game.playerMap.get(Number(userId))
     if (target === undefined) {
-      ctx.answerCallbackQuery(ctx.t('game_error.vote_invalid', { user: userId }))
+      ctx.answerCallbackQuery(ctx.t('game_error.invalid_vote', { user: userId }))
       return
     }
 
@@ -112,7 +112,7 @@ feature.callbackQuery(/copy(.+)\+(.+)/, logHandle('callback-swap'), async ctx =>
   if (player.role instanceof Roles.Doppelganger) {
     const target = game.playerMap.get(Number(userId))
     if (target === undefined) {
-      ctx.answerCallbackQuery(ctx.t('game_error.vote_invalid', { user: userId }))
+      ctx.answerCallbackQuery(ctx.t('game_error.invalid_vote', { user: userId }))
       return
     }
 

@@ -82,7 +82,7 @@ export const validateCallbackQuery = (ctx: Context) => {
 export const validateTarget = (ctx: Context, game: Game, player: Player, userId: string) => {
   const target = game.playerMap.get(Number(userId))
   if (target === undefined) {
-    ctx.answerCallbackQuery(ctx.t('game_error.vote_invalid', { user: userId }))
+    ctx.answerCallbackQuery(ctx.t('game_error.invalid_vote', { user: userId }))
     return undefined
   }
   if (game.privateMsgs.get(player.id) === undefined) {

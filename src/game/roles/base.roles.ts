@@ -33,13 +33,13 @@ export class Werewolf extends Role {
     if (teamMembers === undefined) return // NOTE: for coverage, this should never happen
     let msg = ''
     if (teamMembers.length === 1) {
-      msg = game.ctx.t('role_message.werewolf_lone')
+      msg = game.ctx.t('werewolf.lone')
       if (game.settings.loneWolf) {
         const role = _.sample(game.unassignedRoles)?.role.info.name || 'null'
-        msg += `\n${game.ctx.t('role_message.werewolf_lone2', { role: game.ctx.t(role) })}`
+        msg += `\n${game.ctx.t('werewolf.lone2', { role: game.ctx.t(role) })}`
       }
     } else {
-      msg = game.ctx.t('role_message.werewolf_reveal', {
+      msg = game.ctx.t('werewolf.reveal', {
         wolves: teamMembers.map(p => p.name).join(', '),
       })
     }
@@ -64,7 +64,7 @@ export class Seer extends Villager {
     const extraOptions = [[game.ctx.t('misc.unassigned', { count: 2 }), `peek${game.id}+un`]]
     kb.text(extraOptions[0][0], extraOptions[0][1])
 
-    game.privateMsgs.set(player.id, sendActionPrompt(player, 'role_message.seer_action', kb)!)
+    game.privateMsgs.set(player.id, sendActionPrompt(player, 'seer.action', kb)!)
   }
 }
 
@@ -85,7 +85,7 @@ export class Robber extends Villager {
     const kb = createVoteKB(options, `swap${game.id}`)
     // TODO: add pass option
 
-    game.privateMsgs.set(player.id, sendActionPrompt(player, 'role_message.robber_action', kb)!)
+    game.privateMsgs.set(player.id, sendActionPrompt(player, 'robber.action', kb)!)
   }
 }
 
@@ -106,7 +106,7 @@ export class Troublemaker extends Villager {
     const kb = createVoteKB(options, `swap${game.id}`)
     // TODO: add pass option
 
-    game.privateMsgs.set(player.id, sendActionPrompt(player, 'role_message.troublemaker_action', kb)!)
+    game.privateMsgs.set(player.id, sendActionPrompt(player, 'troublemaker.action', kb)!)
   }
 }
 
@@ -129,7 +129,7 @@ export class Drunk extends Villager {
       swapSelf: true,
       isAuto: true,
     })
-    player.ctx.reply(player.ctx.t('role_message.drunk_action', { role: target.name }))
+    player.ctx.reply(player.ctx.t('drunk.action', { role: target.name }))
   }
 }
 
@@ -148,9 +148,9 @@ export class Mason extends Villager {
     if (teamMembers === undefined) return // NOTE: for coverage, this should never happen
     let msg = ''
     if (teamMembers.length === 1) {
-      msg = game.ctx.t('role_message.mason_lone')
+      msg = game.ctx.t('mason.lone')
     } else {
-      msg = game.ctx.t('role_message.mason_reveal', {
+      msg = game.ctx.t('mason.reveal', {
         masons: teamMembers.map(p => p.name).join(', '),
       })
     }
@@ -172,7 +172,7 @@ export class Insomniac extends Villager {
     Actions.Reveal.fn(game, player.ctx, [player], {
       priority: this.priority,
       eventCallback: () => {
-        player.ctx!.reply(player.ctx!.t(`role_message.insomniac_${(player.currentRole === player.role).toString()}`))
+        player.ctx!.reply(player.ctx!.t(`insomniac.${(player.currentRole === player.role).toString()}`))
       },
     })
   }
@@ -194,9 +194,9 @@ export class Minion extends Werewolf {
     if (teamMembers === undefined) return // NOTE: for coverage, this should never happen
     let msg = ''
     if (teamMembers.length === 0) {
-      msg = game.ctx.t('role_message.minion_none')
+      msg = game.ctx.t('minion.lone')
     } else {
-      msg = game.ctx.t('role_message.minion_reveal', {
+      msg = game.ctx.t('minion.reveal', {
         wolves: teamMembers.map(p => p.name).join(', '),
       })
     }

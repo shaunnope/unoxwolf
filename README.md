@@ -1,9 +1,12 @@
 # ONUWolf Telegram Bot
-ONUWolf is a Telegram bot to moderate One Night Ultimate Werewolf games. It is currently in development.
+ONUWolf is a Telegram bot to moderate Unoxian Werewolf games. It is currently in development.
 
-## Requirements
-- `.env` file with Telegram bot token `BOT_TOKEN` and Firebase config `FB_CONFIG`
+## Getting Started
+Make a copy of the `example.env` file and rename it to `.env`. Fill in the values for the environment variables.
+```bash
+cp example.env .env
+```
 
 
 ## Acknowledgements
-The initial bot template was adapted from [Telegram Bot Template](https://github.com/bot-base/telegram-bot-template)
+The initial template for this project was adapted from [Telegram Bot Template](https://github.com/bot-base/telegram-bot-template)
