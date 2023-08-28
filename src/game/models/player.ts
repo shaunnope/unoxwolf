@@ -7,7 +7,7 @@ export type RoleInfo = {
   name: string
   team: Team
   isAide?: boolean
-  descCommand: string
+  command: string
   priority?: number
 }
 
@@ -15,19 +15,27 @@ export class Role {
   static readonly info: RoleInfo = {
     name: 'role',
     team: Team.None,
-    descCommand: 'rolelist',
+    command: 'rolelist',
+  }
+
+  static locale(key: string) {
+    return `${this.info.name}.${key}`
   }
 
   static get description() {
-    return `${this.info.name}.desc`
+    return this.locale('desc')
   }
 
   static get lore() {
-    return `${this.info.name}.lore`
+    return this.locale('lore')
   }
 
   static get roleName() {
-    return `${this.info.name}.name`
+    return this.locale('name')
+  }
+
+  static get emoji() {
+    return this.locale('emoji')
   }
 
   get description() {

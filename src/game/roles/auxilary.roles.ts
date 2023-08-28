@@ -12,7 +12,7 @@ export class Copier extends Role implements CanCopy {
   static readonly info: RoleInfo = {
     name: 'role',
     team: Team.Copy,
-    descCommand: 'rolelist',
+    command: 'rolelist',
   }
 
   copiedRole?: Role

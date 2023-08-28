@@ -14,7 +14,7 @@ export class Villager extends Role {
   static readonly info: RoleInfo = {
     name: 'villager',
     team: Team.Village,
-    descCommand: 'roleVG',
+    command: 'roleVG',
   }
 }
 
@@ -22,7 +22,7 @@ export class Werewolf extends Role {
   static readonly info: RoleInfo = {
     name: 'werewolf',
     team: Team.Werewolf,
-    descCommand: 'roleWW',
+    command: 'roleWW',
   }
 
   doNight(player: Player, game: GameInfo) {
@@ -51,7 +51,7 @@ export class Seer extends Villager {
   static readonly info: RoleInfo = {
     name: 'seer',
     team: Team.Village,
-    descCommand: 'roleSeer',
+    command: 'roleSeer',
   }
 
   doNight(player: Player, game: GameInfo) {
@@ -72,7 +72,7 @@ export class Robber extends Villager {
   static readonly info: RoleInfo = {
     name: 'robber',
     team: Team.Village,
-    descCommand: 'roleRobber',
+    command: 'roleRobber',
     priority: 3,
   }
 
@@ -93,7 +93,7 @@ export class Troublemaker extends Villager {
   static readonly info: RoleInfo = {
     name: 'troublemaker',
     team: Team.Village,
-    descCommand: 'roleTM',
+    command: 'roleTM',
     priority: 3,
   }
 
@@ -114,7 +114,7 @@ export class Drunk extends Villager {
   static readonly info: RoleInfo = {
     name: 'drunk',
     team: Team.Village,
-    descCommand: 'roleDrunk',
+    command: 'roleDrunk',
     priority: 12,
   }
 
@@ -137,7 +137,7 @@ export class Mason extends Villager {
   static readonly info: RoleInfo = {
     name: 'mason',
     team: Team.Village,
-    descCommand: 'roleMason',
+    command: 'roleMason',
   }
 
   doNight(player: Player, game: GameInfo) {
@@ -162,7 +162,7 @@ export class Insomniac extends Villager {
   static readonly info: RoleInfo = {
     name: 'insomniac',
     team: Team.Village,
-    descCommand: 'roleInsomniac',
+    command: 'roleInsomniac',
     priority: 15,
   }
 
@@ -182,7 +182,7 @@ export class Minion extends Werewolf {
   static readonly info: RoleInfo = {
     name: 'minion',
     team: Team.Werewolf,
-    descCommand: 'roleMinion',
+    command: 'roleMinion',
     isAide: true,
   }
 
@@ -208,7 +208,7 @@ export class Hunter extends Villager {
   static readonly info: RoleInfo = {
     name: 'hunter',
     team: Team.Village,
-    descCommand: 'roleHunter',
+    command: 'roleHunter',
   }
 
   lynch(player: Player, game: GameInfo): boolean {
@@ -223,7 +223,7 @@ export class Tanner extends Villager {
   static readonly info: RoleInfo = {
     name: 'tanner',
     team: Team.Tanner,
-    descCommand: 'roleTanner',
+    command: 'roleTanner',
   }
 }
 
@@ -231,6 +231,6 @@ export class Doppelganger extends Copier {
   static readonly info: RoleInfo = {
     name: 'doppelganger',
     team: Team.Copy,
-    descCommand: 'roleDG',
+    command: 'roleDG',
   }
 }

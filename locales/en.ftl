@@ -352,7 +352,7 @@ roles =
     .revealer = Revealer 📖
     .curator = Curator 📜
     .witch = Witch 🧙
-    .fool = Fool 🤡
+    .fool = Fool 🃏
     .bodyguard = Bodyguard 🛡
     .alpha_wolf = Alpha Wolf ⚡️🐺
     .mystic_wolf = Mystic Wolf 🔮🐺
@@ -397,31 +397,7 @@ roles =
     .empath = Empath 🧠
     .body_snatcher = Body Snatcher 👤
 
-    .team_village = {team.village}
-    .team_werewolf = {team.werewolf}
-    .team_tanner = {team.tanner}
-    .team_vampire = {team.vampire}
-    .team_assassin = {team.assassin}
-    .team_alien = {team.alien}
-    .team_synth = {team.synth}
-    .team_blob = {team.blob}
-    .team_mortician = {team.mortician}
-
-    .page_base =
-        /roleVG - {roles.villager}
-        /roleWW - {roles.werewolf}
-        /roleSeer - {roles.seer}
-        /roleRobber - {roles.robber}
-        /roleTM - {roles.troublemaker}
-        /roleTanner - {roles.tanner}
-        /roleDrunk - {roles.drunk}
-        /roleInsomniac - {roles.insomniac}
-        /roleHunter - {roles.hunter}
-        /roleMason - {roles.mason}
-        /roleMinion - {roles.minion}
-        /roleDG - {roles.doppelganger}
-
-    .page_daybreak =
+    .page_daybreak = 11
         /roleSentinel - {roles.sentinel}
         /roleAppS - {roles.apprentice_seer}
         /rolePI - {roles.paranormal_investigator}
@@ -434,7 +410,7 @@ roles =
         /roleMW - {roles.mystic_wolf}
         /roleDW - {roles.dream_wolf}
 
-    .page_vampire =
+    .page_vampire = 14
         /roleCopycat - {roles.copycat}
         /roleVampire - {roles.vampire}
         /roleMaster - {roles.vampire_master}
@@ -450,7 +426,7 @@ roles =
         /rolePickpocket - {roles.pickpocket}
         /roleGremlin - {roles.gremlin}
 
-    .page_aliens =
+    .page_aliens = 12
         /roleOracle - {roles.oracle}
         /roleAlien - {roles.alien}
         /roleSynthA - {roles.synthetic_alien}
@@ -464,7 +440,7 @@ roles =
         /roleBlob - {roles.blob}
         /roleMortician - {roles.mortician}
 
-    .page_bonus =
+    .page_bonus = 10
         /roleAuraS - {roles.aura_seer}
         /roleCursed - {roles.cursed}
         /rolePrince - {roles.prince}
@@ -480,50 +456,50 @@ role_desc =
     .sentinel =
     At night, the Sentinel may choose to protect another player's role from being robbed, switched, or looked at by other players.
 
-    <em>The Sentinel is on the {roles.team_village} team.</em>
+    <em>The Sentinel is on the {team.village} team.</em>
     .apprentice_seer =
     At night, the Apprentice Seer may look at one of the unassigned roles.
 
-    <em>The Apprentice Seer is on the {roles.team_village} team.</em>
+    <em>The Apprentice Seer is on the {team.village} team.</em>
     .paranormal_investigator =
-    At night, the Paranormal Investigator may view the roles of two other players, one at a time. If they view a role that is not on the {roles.team_village} team, they must stop looking and join the team of the role they viewed.
+    At night, the Paranormal Investigator may view the roles of two other players, one at a time. If they view a role that is not on the {team.village} team, they must stop looking and join the team of the role they viewed.
 
-    <em>The Paranormal Investigator is on the {roles.team_village} team, unless they view a role that is not on the {roles.team_village} team, then they join that team.</em>
+    <em>The Paranormal Investigator is on the {team.village} team, unless they view a role that is not on the {team.village} team, then they join that team.</em>
     .revealer =
-    At the end of the night, the Revealer may choose to reveal the role of one player. If the revealed role is not on the {roles.team_village} team, the role is not revealed.
+    At the end of the night, the Revealer may choose to reveal the role of one player. If the revealed role is not on the {team.village} team, the role is not revealed.
 
-    <em>The Revealer is on the {roles.team_village} team.</em>
+    <em>The Revealer is on the {team.village} team.</em>
     .curator =
     A collector of ancient wares, the Curator may give any player an unrevealed artifact at the end of the night. They may not give an artifact to a protected player.
 
-    <em>The Curator is on the {roles.team_village} team.</em>
+    <em>The Curator is on the {team.village} team.</em>
     .witch =
     At night, the Witch may look at one of the unassigned roles. If they do, they must exchange that role with any player's role, including their own. They may not look at the role they are exchanging.
 
-    <em>The Witch is on the {roles.team_village} team.</em>
+    <em>The Witch is on the {team.village} team.</em>
     .fool =
     The Fool is delulu. They believe that they have the mystical abilities of the {seer.name}, but their foresight is random at best. Also, if they choose to view a role, they will end up messing up everyone's roles instead.
 
     If they attempt to view a player role, all movable player roles but their own will be shifted one position to the left.
     If they attempt to view an unassigned role, all movable player roles but their own will be shifted one position to the right.
 
-    <em>The Fool is on the {roles.team_village} team.</em>
+    <em>The Fool is on the {team.village} team.</em>
     .bodyguard =
     The player the bodyguard votes for cannot be killed. If that player received the most votes, the player with the next most votes is killed.
 
-    <em> The Bodyguard is on the {roles.team_village} team.</em>
+    <em> The Bodyguard is on the {team.village} team.</em>
     .alpha_wolf =
     The Alpha Wolf wakes up with the other werewolves. Subsequently, they will convert a non-werewolf into a werewolf, without learning the player's original role.
 
-    <em> The Alpha Wolf is on the {roles.team_werewolf} team.</em>
+    <em> The Alpha Wolf is on the {team.werewolf} team.</em>
     .mystic_wolf =
     At night, after meeting the other werewolves, the mystic wolf may learn the role of one other player.
 
-    <em> The Mystic Wolf is on the {roles.team_werewolf} team.</em>
+    <em> The Mystic Wolf is on the {team.werewolf} team.</em>
     .dream_wolf =
     The Dream Wolf does not wake up with the other werewolves. Their role is still revealed to the Werewolves and Minions.
 
-    <em> The Dream Wolf is on the {roles.team_werewolf} team.</em>
+    <em> The Dream Wolf is on the {team.werewolf} team.</em>
 
     .copycat =
     At dusk, the Copycat assumes the role of one of the unassigned roles.
@@ -532,132 +508,132 @@ role_desc =
     .vampire =
     At night, all Vampires reveal themselves to each other and convert one other player into a Vampire.
 
-    <em> Vampires are on the {roles.team_vampire} team.</em>
+    <em> Vampires are on the {team.vampire} team.</em>
     .vampire_master =
-    The Vampire Master wakes up with the other Vampires. If a player on the {roles.team_vampire} team votes for the Master, the Master is protected and the player with the next most votes is killed instead.
+    The Vampire Master wakes up with the other Vampires. If a player on the {team.vampire} team votes for the Master, the Master is protected and the player with the next most votes is killed instead.
 
-    <em> The Vampire Master is on the {roles.team_vampire} team.</em>
+    <em> The Vampire Master is on the {team.vampire} team.</em>
     .vampire_count =
     The Count wakes up with the other Vampires. Subsequently, they will instill fear in a non-Vampire player, preventing them from performing their night action.
 
-    <em> The Count is on the {roles.team_vampire} team.</em>
+    <em> The Count is on the {team.vampire} team.</em>
     .renfield =
-    The Renfield wakes up after the Vampires and learns who they are. Subsequently, they will turn into a bat.
+    Renfield wakes up after the Vampires and learns who they are. Subsequently, they will turn into a bat.
 
-    <em> The Renfield is on the {roles.team_vampire} team, but is not a Vampire. If there are no Vampires in play, the Renfield is on the {roles.team_village} team.</em>
+    <em> Renfield is on the {team.vampire} team, but is not a Vampire. If there are no Vampires in play, the Renfield is on the {team.village} team.</em>
     .cupid =
     At night, Cupid may choose two players to fall in love. If one of those players dies, the other dies of a broken heart.
 
-    <em> Cupid is on the {roles.team_village} team.</em>
+    <em> Cupid is on the {team.village} team.</em>
     .diseased =
     At night, the Diseased spreads their affliction to one player beside them. Any player who votes for the Diseased or the Diseased's victim cannot win.
 
-    <em> The Diseased is on the {roles.team_village} team.</em>
+    <em> The Diseased is on the {team.village} team.</em>
     .instigator =
     At night, the Instigator may brand any player as a traitor. The traitor only wins if someone else on their team is killed, unless they are the only player on their team.
 
-    <em> The Instigator is on the {roles.team_village} team.</em>
+    <em> The Instigator is on the {team.village} team.</em>
     .priest =
     At night, the Priest replaces his mark with a Mark of Clarity, and may choose to do the same for one other player.
 
-    <em> The Priest is on the {roles.team_village} team.</em>
+    <em> The Priest is on the {team.village} team.</em>
     .assassin =
     At night, the Assassin selects a player as their target. The Assassin only wins if their target is killed.
 
-    <em> The Assassin is on the {roles.team_assassin} team.</em>
+    <em> The Assassin is on the {team.assassin} team.</em>
     .apprentice_assassin =
     The Apprentice Assassin learns the identity of the Assassin at the start of the game. The Apprentice Assassin only wins if the Assassin is killed. If there is no Assassin, the Apprentice Assassin selects a player as their target, and can only win if both they and their target are killed.
 
-    <em> The Apprentice Assassin is on the {roles.team_assassin} team.</em>
+    <em> The Apprentice Assassin is on the {team.assassin} team.</em>
     .marksman =
     At night, the Marksman learns the role of one player, and the mark of another.
 
-    <em> The Marksman is on the {roles.team_village} team.</em>
+    <em> The Marksman is on the {team.village} team.</em>
     .pickpocket =
     At night, the Pickpocket may swap their mark with the mark of another player and view their new mark.
 
-    <em> The Pickpocket is on the {roles.team_village} team.</em>
+    <em> The Pickpocket is on the {team.village} team.</em>
     .gremlin =
     At night, the Gremlin may swap the marks or roles of two players, but not both. They may not look at the marks or roles they are swapping.
 
-    <em> The Gremlin is on the {roles.team_village} team.</em>
+    <em> The Gremlin is on the {team.village} team.</em>
 
     .oracle =
     The Oracle answers a question at night.
 
-    <em> The Oracle is on the {roles.team_village} team.</em>
+    <em> The Oracle is on the {team.village} team.</em>
     .alien =
     At night, the Aliens reveal themselves to each other and performs a randomised action.
 
-    <em> Aliens are on the {roles.team_alien} team.</em>
+    <em> Aliens are on the {team.alien} team.</em>
     .synthetic_alien =
     The Synthetic Alien wakes up with the other Aliens. However, the Synth only wins if they die.
 
-    <em> The Synthetic Alien is on the {roles.team_synth} team.</em>
+    <em> The Synthetic Alien is on the {team.synth} team.</em>
     .cow =
     If the cow is next to an Alien, they are tipped over.
 
-    <em> The Cow is on the {roles.team_village} team.</em>
+    <em> The Cow is on the {team.village} team.</em>
     .groob =
     Groob and Zerb wake up with the aliens, then subsequently identify each other. If both Groob and Zerb are in play, they only win if the other is killed, while they survive. All other aliens lose if either Groob or Zerb is killed.
 
-    <em> Groob is on the {roles.team_alien} team, unless Zerb is in play, in which case they are on their own teams.</em>
+    <em> Groob is on the {team.alien} team, unless Zerb is in play, in which case they are on their own teams.</em>
     .zerb =
     Groob and Zerb wake up with the aliens, then subsequently identify each other. If both Groob and Zerb are in play, they only win if the other is killed, while they survive. All other aliens lose if either Groob or Zerb is killed.
 
-    <em> Zerb is on the {roles.team_alien} team, unless Groob is in play, in which case they are on their own teams.</em>
+    <em> Zerb is on the {team.alien} team, unless Groob is in play, in which case they are on their own teams.</em>
     .leader =
-    At night, the Leader learns the identities of the Aliens, and whether both Groob and Zerb are in play. If Groob and Zerb are not both in play, the Leader wins with the {roles.team_village} team. Otherwise, the Leader only wins if both Groob and Zerb survive. If all Aliens vote for the Leader, the village team loses.
+    At night, the Leader learns the identities of the Aliens, and whether both Groob and Zerb are in play. If Groob and Zerb are not both in play, the Leader wins with the {team.village} team. Otherwise, the Leader only wins if both Groob and Zerb survive. If all Aliens vote for the Leader, the village team loses.
 
-    <em> The Leader is on the {roles.team_village} team, unless both Groob and Zerb are in play, in which case they only win if both Groob and Zerb survive.</em>
+    <em> The Leader is on the {team.village} team, unless both Groob and Zerb are in play, in which case they only win if both Groob and Zerb survive.</em>
     .psychic =
     At night, the Psychic learns the roles of one or more players. The roles which may be learned are random.
 
-    <em> The Psychic is on the {roles.team_village} team.</em>
+    <em> The Psychic is on the {team.village} team.</em>
     .rascal =
     At night, the Rascal may swap two or more players' roles. The roles which may be swapped are random.
 
-    <em> The Rascal is on the {roles.team_village} team.</em>
+    <em> The Rascal is on the {team.village} team.</em>
     .exposer =
     Before the end of the night, the Exposer may reveal some or all of the unassigned roles. The number of roles which may be revealed is random.
 
-    <em> The Exposer is on the {roles.team_village} team.</em>
+    <em> The Exposer is on the {team.village} team.</em>
     .blob =
     The Blob grows in the night, subsuming the players next to them. The number of players that join the Blob is random. The Blob only wins if all players that are part of the Blob survive.
 
-    <em> The Blob is on the {roles.team_blob} team.</em>
+    <em> The Blob is on the {team.blob} team.</em>
     .mortician =
     At night, the Mortician may learn the roles of the players next to them. The number of roles which may be learned is random. The Mortician only wins if at least one player next to them dies.
 
-    <em> The Mortician is on the {roles.team_mortician} team.</em>
+    <em> The Mortician is on the {team.mortician} team.</em>
 
     .aura_seer =
     The Aura Seer learns all the players who viewed or shifted a role at night.
 
-    <em> The Aura Seer is on the {roles.team_village} team.</em>
+    <em> The Aura Seer is on the {team.village} team.</em>
     .cursed =
-    The Cursed is on the {roles.team_village} team, unless a Werewolf or Vampire votes for them, in which case they join the {roles.team_werewolf} or {roles.team_vampire} team.
+    The Cursed is on the {team.village} team, unless a Werewolf or Vampire votes for them, in which case they join the {team.werewolf} or {team.vampire} team.
 
     .prince =
     The Prince cannot be voted for execution. If the Prince received the most votes, the player with the next most votes is killed instead.
 
-    <em> The Prince is on the {roles.team_village} team.</em>
+    <em> The Prince is on the {team.village} team.</em>
     .apprentice_tanner =
     The Apprentice Tanner learns the identity of the Tanner at the start of the game. The Apprentice Tanner only wins if the Tanner dies. If there is no Tanner, the Apprentice Tanner only wins if they are killed.
 
-    <em> The Apprentice Tanner is on the {roles.team_tanner} team.</em>
+    <em> The Apprentice Tanner is on the {team.tanner} team.</em>
     .beholder =
     The Beholder learns who the Seer and Apprentice Seer are at the start of the game and checks their roles at the end of the night.
 
-    <em> The Beholder is on the {roles.team_village} team.</em>
+    <em> The Beholder is on the {team.village} team.</em>
     .squire =
     The Squire learns who the Werewolves are at the start of the game and checks their roles at the end of the night.
 
-    <em> The Squire is on the {roles.team_werewolf} team.</em>
+    <em> The Squire is on the {team.werewolf} team.</em>
     .thing =
     At night, the Thing may tap the player to their right or left.
 
-    <em> The Thing is on the {roles.team_village} team.</em>
+    <em> The Thing is on the {team.village} team.</em>
     .nostradamus =
     At night, Nostradamus may look at the roles of up to three players, and joins the team of the last player they look at. The team they join is revealed to all players.
     Nostradamus wins if they stay alive and their last viewed team wins. The death of Nostradamus does not cause their team to lose.
@@ -666,11 +642,11 @@ role_desc =
     .body_snatcher =
     At night, the Body Snatcher exchanges their role with a non-Alien player and learns their new role. The snatched role is now an Alien.
 
-    <em> The Body Snatcher is on the {roles.team_alien} team.</em>
+    <em> The Body Snatcher is on the {team.alien} team.</em>
     .empath =
     The Empath watches the actions of random players at night.
 
-    <em> The Empath is on the {roles.team_village} team.</em>
+    <em> The Empath is on the {team.village} team.</em>
 
 
 role_message =
@@ -682,12 +658,12 @@ role_message =
     .apprentice_seer = You are the {roles.apprentice_seer}. Tonight, you may look at one of the unassigned roles.
     .apprentice_seer_reveal = A { $role } is unassigned tonight.
 
-    .paranormal_investigator = You are the {roles.paranormal_investigator}. Tonight, you may view the roles of two other players, one at a time. If you view a role that is not on the {roles.team_village} team, you must stop looking and join the team of the role you viewed.
+    .paranormal_investigator = You are the {roles.paranormal_investigator}. Tonight, you may view the roles of two other players, one at a time. If you view a role that is not on the {team.village} team, you must stop looking and join the team of the role you viewed.
     .pi_action = Who would you like to visit?
     .pi_reveal_vg = {seer.reveal}
     .pi_reveal_other = {misc.peek_role} ! { misc.self_team_changed }
 
-    .revealer = You are the {roles.revealer}. Tonight, you may reveal the role of one player. If the revealed role is not on the {roles.team_village} team, the role is not revealed.
+    .revealer = You are the {roles.revealer}. Tonight, you may reveal the role of one player. If the revealed role is not on the {team.village} team, the role is not revealed.
     .revealer_action = Whose role would you like to reveal?
     .revealer_reveal = {seer.reveal}
     .revealer_fail = You cautiously back away, hoping that { $user } did not notice you.
@@ -724,7 +700,7 @@ role_message =
     .vampire_action = {role_message.alpha_wolf_action}
     .vampire_result = After much deliberation, { $user } was turned into a vampire!
 
-    .vampire_master = You are the {roles.vampire_master}. If a player on the {roles.team_vampire} team votes for you, you are protected and the player with the next most votes is killed instead.
+    .vampire_master = You are the {roles.vampire_master}. If a player on the {team.vampire} team votes for you, you are protected and the player with the next most votes is killed instead.
 
     .vampire_count = You are the {roles.vampire_count}. At dusk, you may instill fear in a non-vampire player, preventing them from performing their night action.
     .vampire_count_action = Who would you like to instill fear in?
@@ -796,7 +772,7 @@ role_message =
     .zerb = You are {roles.zerb}. You just can't with {roles.groob} and will do anything you can to get rid of them. If they show up at night, you only win if {roles.groob} is killed and you survive.
     .zerb_reveal = { $user } is {roles.groob}! They must die for you to win.
 
-    .leader = You are the {roles.leader}. Tonight, you will learn the identities of the {roles.team_alien}s. If {roles.groob} and {roles.zerb} are not both in play, you only win if the aliens lose. Otherwise, you only win if both {roles.groob} and {roles.zerb} survive. If all members of the {roles.team_alien} team vote for you, the {roles.team_village} team loses.
+    .leader = You are the {roles.leader}. Tonight, you will learn the identities of the {team.alien}s. If {roles.groob} and {roles.zerb} are not both in play, you only win if the aliens lose. Otherwise, you only win if both {roles.groob} and {roles.zerb} survive. If all members of the {team.alien} team vote for you, the {team.village} team loses.
     .leader_reveal = The aliens are { $aliens }.
     .leader_reveal2 = { $groob } is {roles.groob} and { $zerb } is {roles.zerb}! Ensure that both survive to win.
 
@@ -815,7 +791,7 @@ role_message =
     .aura_seer = You are the {roles.aura_seer}. Tonight, you will learn all the players who viewed or shifted a role at night.
     .aura_seer_reveal = { $users } viewed or shifted a role last night.
 
-    .cursed = You are the {roles.cursed}. You are on the {roles.team_village} team, unless a werewolf or vampire votes for you, in which case you join them.
+    .cursed = You are the {roles.cursed}. You are on the {team.village} team, unless a werewolf or vampire votes for you, in which case you join them.
 
     .prince = You are the {roles.prince}. You cannot be voted for execution. If you receive the most votes, the player with the next most votes is killed instead.
 
