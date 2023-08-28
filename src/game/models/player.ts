@@ -50,16 +50,41 @@ export class Role {
     return this.info.priority || -1
   }
 
-  status: Status = Status.NORMAL
+  status: Status = {}
 
   constructor(status?: Status) {
-    this.status = status || Status.NORMAL
+    this.status = status || this.status
   }
 
   /* eslint-disable class-methods-use-this */
+  doDusk(player: Player, game: GameInfo) {
+    // TODO: expand this and maybe remove eslint-disable
+    // if (player.ctx === undefined) return
+  }
+
   doNight(player: Player, game: GameInfo) {
     // TODO: expand this and maybe remove eslint-disable
     // if (player.ctx === undefined) return
+  }
+
+  /**
+   * Attempt to lynch a player
+   * @param player
+   * @param game
+   * @returns true if player can be lynched, false otherwise
+   */
+  lynch(player: Player, game: GameInfo): boolean {
+    this.unalive(player, game)
+    return true
+  }
+
+  /**
+   * Forcibly unalive a player forcibly
+   * @param player
+   * @param game
+   */
+  unalive(player: Player, game: GameInfo) {
+    player.isDead = true
   }
   /* eslint-enable class-methods-use-this */
 }
@@ -80,6 +105,10 @@ export class Player {
   mark: Mark
 
   ctx?: Context
+
+  votedFor?: Player
+
+  isDead?: true
 
   constructor(id: number, name: string, role?: Role, ctx?: Context) {
     this.id = id

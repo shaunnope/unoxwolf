@@ -58,7 +58,7 @@ feature.command('join', logHandle('command-join'), async ctx => {
     return
   }
   // TODO: consider handling spam by checking last message time
-  game.serviceMsgs.push(ctx.reply(ctx.t('game.join_prompt'), { reply_markup: game.callToAction }))
+  game.serviceMsgs.push(await ctx.reply(ctx.t('game.join_prompt'), { reply_markup: game.callToAction }))
 })
 
 feature.command('leave', logHandle('command-leave'), async ctx => {

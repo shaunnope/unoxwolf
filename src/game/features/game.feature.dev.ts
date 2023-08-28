@@ -29,6 +29,8 @@ feature.command('startgame', logHandle('command-startgame-dev'), ctx => {
 
   if (Number(ctx.match) && Number(ctx.match) > 0) {
     game.addPlayers(createPlayers(_.clamp(Number(ctx.match), 0, 10)))
+  } else {
+    game.addPlayers(createPlayers(10))
   }
 })
 

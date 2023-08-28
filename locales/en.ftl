@@ -68,7 +68,7 @@ welcome =
         Hi {$user}! Before you can join a game, you need to start the bot.
 
 game_init = {$user} has started a new game!
-    .unknown_user = Someone
+
     .join = Join
     .join_prompt = Click here to join the game!
     .join_success = You joined the game in { $chat }!
@@ -110,6 +110,11 @@ game =
     .voting_unassigned =
         <strong>Unassigned roles:</strong>
         {$roles}
+    .vote_draw = No one received more than one vote!
+    .vote_results = At the end of the vote, {$users} { $num ->
+                    [one] was
+                    *[other] were
+                } executed!
 
 
 game_error =
@@ -126,6 +131,7 @@ misc =
     .self_swap_roles = You swapped roles with { $user }
     .self_role_changed = You are now a {$role}
     .self_team_changed = You are now on the {$team} team
+    .unknown_user = Someone
 
 
 roles =
@@ -274,9 +280,9 @@ roles =
 
 role_desc =
     .villager =
-    A Villager has no special abilities, but is definitely not a werewolf.
+    You lead a simple life. Vote out the non-villagers in the morning.
 
-    <em>The Villager is on the {roles.team_village} team.</em>
+    <em>Villagers are on the {roles.team_village} team.</em>
     .werewolf =
     At night, all Werewolves reveal themselves to each other.
 
@@ -556,6 +562,7 @@ role_message =
     .insomniac_false = You are now a { $role }
 
     .hunter = You are the {roles.hunter}. If you are killed tonight, the player you vote for will also die.
+    .hunter_off = With their dying breath, { $user1 } drew their gun and shot { $user2 }.
 
     .mason = You are a {roles.mason}. At night, you may meet your fellow masons.
     .mason_lone = You are the only mason.
@@ -563,7 +570,7 @@ role_message =
 
     .minion = You are the {roles.minion}. At night, you may meet your revered werewolves.
     .minion_reveal = The werewolves are { $wolves }.
-    .minion_none = There are no werewolves tonight. Survive the morning and you will win.
+    .minion_none = There are no werewolves tonight. If none show up in the morning, survive the vote and you will win.
 
     .doppelganger = You are the {roles.doppelganger}.
     .doppelganger_action = Whose role would you like to copy?

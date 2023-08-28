@@ -25,7 +25,9 @@ export class Werewolf extends Role {
 
   doNight(player: Player, game: GameInfo) {
     if (player.ctx === undefined) return
-    const teamMembers = game.teams.get(this.info.team)
+    const teamMembers = game.teams
+      .get(this.info.team)
+      ?.filter(other => other.id !== player.id && !other.role.info.isAide)
     if (teamMembers === undefined) return // NOTE: for coverage, this should never happen
     let msg = ''
     if (teamMembers.length === 1) {
@@ -36,10 +38,7 @@ export class Werewolf extends Role {
       }
     } else {
       msg = game.ctx.t('role_message.werewolf_reveal', {
-        wolves: teamMembers
-          .filter(other => other.id !== player.id)
-          .map(p => p.name)
-          .join(', '),
+        wolves: teamMembers.map(p => p.name).join(', '),
       })
     }
     player.ctx.reply(msg)
@@ -77,6 +76,7 @@ export class Robber extends Villager {
 
   doNight(player: Player, game: GameInfo) {
     if (player.ctx === undefined) {
+      // TODO: fallback
       return
     }
     const options = getOptions(game.players, other => other.id !== player.id)
@@ -176,34 +176,59 @@ export class Insomniac extends Villager {
   }
 }
 
-// export class Insomniac extends Villager {
-//   static roleName = 'insomniac'
-//   static descCommand = 'roleInsomniac'
-// }
+export class Minion extends Werewolf {
+  static readonly info: RoleInfo = {
+    name: 'minion',
+    team: Team.Werewolf,
+    descCommand: 'roleMinion',
+    isAide: true,
+  }
 
-// export class Mason extends Villager {
-//   static roleName = 'mason'
-//   static descCommand = 'roleMason'
-// }
+  doNight(player: Player, game: GameInfo) {
+    if (player.ctx === undefined) return
+    const teamMembers = game.teams
+      .get(this.info.team)
+      ?.filter(other => other.id !== player.id && !other.role.info.isAide)
+    if (teamMembers === undefined) return // NOTE: for coverage, this should never happen
+    let msg = ''
+    if (teamMembers.length === 0) {
+      msg = game.ctx.t('role_message.minion_none')
+    } else {
+      msg = game.ctx.t('role_message.minion_reveal', {
+        wolves: teamMembers.map(p => p.name).join(', '),
+      })
+    }
+    player.ctx.reply(msg)
+  }
+}
 
-// export class Minion extends Werewolf {
-//   static roleName = 'minion'
-//   static descCommand = 'roleMinion'
-//   static isAide = true
-// }
+export class Hunter extends Villager {
+  static readonly info: RoleInfo = {
+    name: 'hunter',
+    team: Team.Village,
+    descCommand: 'roleHunter',
+  }
 
-// export class Tanner extends Role {
-//   static roleName = 'tanner'
-//   static team = Team.Tanner
-//   static descCommand = 'roleTanner'
-// }
+  lynch(player: Player, game: GameInfo): boolean {
+    if (player.votedFor !== undefined) {
+      game.events.push(Events.Off(player, player.votedFor, game))
+    }
+    return super.lynch(player, game)
+  }
+}
 
-// export class Hunter extends Villager {
-//   static roleName = 'hunter'
-//   static descCommand = 'roleHunter'
-// }
+export class Tanner extends Villager {
+  static readonly info: RoleInfo = {
+    name: 'tanner',
+    team: Team.Tanner,
+    descCommand: 'roleTanner',
+  }
+}
 
-// export class Doppelganger extends Role {
-//   static roleName = 'doppelganger'
-//   static descCommand = 'roleDG'
-// }
+export class Doppelganger extends Role {
+  static readonly info: RoleInfo = {
+    name: 'doppelganger',
+    team: Team.Village,
+    descCommand: 'roleDG',
+  }
+}

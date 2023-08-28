@@ -7,9 +7,9 @@ import type { Role, Mark, Player } from './player'
 
 export type GameSettings = {
   joinTimeout: number
-  duskTimeout?: number
+  duskTimeout: number
   nightTimeout: number
-  dayTimeout?: number
+  dayTimeout: number
   voteTimeout: number
 
   minPlayers: number
@@ -46,7 +46,7 @@ export type GameInfo = {
   settings: GameSettings
 
   flags: GameFlags
-  serviceMsgs: Promise<Message.TextMessage & Message>[]
+  serviceMsgs: (Message.TextMessage & Message)[]
   callToAction: InlineKeyboard | undefined
   privateMsgs: Map<number, Promise<Message.TextMessage & Message>>
   events: GameEvent[]
@@ -56,10 +56,11 @@ export type GameInfo = {
 export type GameFlags = {
   killTimer?: true
   timerRunning?: true
+  copyDone?: true
 }
 
 export type GameEvent = {
-  type: 'none' | 'vote' | 'swap' | 'peek' | 'copy' | 'reveal'
+  type: 'none' | 'vote' | 'swap' | 'peek' | 'copy' | 'reveal' | 'off'
   author: Player
   targets: Player[]
   priority: number

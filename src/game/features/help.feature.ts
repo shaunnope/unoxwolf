@@ -13,17 +13,17 @@ feature.command('help', logHandle('command-help'), ctx => {
   ctx.reply(ctx.t('welcome.help'))
 })
 
-feature.command('rolelist', logHandle('command-rolelist'), ctx => {
-  ctx.reply(ctx.t('roles.page_base'))
-  ctx.reply(ctx.t('roles.page_daybreak'))
-  ctx.reply(ctx.t('roles.page_vampire'))
-  ctx.reply(ctx.t('roles.page_aliens'))
-  ctx.reply(ctx.t('roles.page_bonus'))
+feature.command('rolelist', logHandle('command-rolelist'), async ctx => {
+  await ctx.reply(ctx.t('roles.page_base'))
+  // await ctx.reply(ctx.t('roles.page_daybreak'))
+  // await ctx.reply(ctx.t('roles.page_vampire'))
+  // await ctx.reply(ctx.t('roles.page_aliens'))
+  // await ctx.reply(ctx.t('roles.page_bonus'))
 })
 
 Object.values(Roles).forEach(role => {
   feature.command(role.info.descCommand, logHandle(`command-${role.info.descCommand}`), ctx => {
-    ctx.reply(ctx.t(role.description))
+    ctx.reply(`<strong>${ctx.t(role.roleName)}</strong>\n${ctx.t(role.description)}`)
   })
 })
 

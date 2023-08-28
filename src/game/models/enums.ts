@@ -10,10 +10,7 @@ export enum Team {
   Mortician,
 }
 
-export enum Status {
-  NORMAL,
-  DG,
-  COPY,
-  ALIEN,
-  SYMBIOTE,
+export type Status = {
+  isCopy?: true
+  isAlien?: true
 }

@@ -1,18 +1,18 @@
 import { GameEvent, GameInfo as Game } from '~/game/models/game'
-import { Player } from '~/game/models/player'
+import { Player, Role } from '~/game/models/player'
 
-export const Vote = (player: Player, targets: Player[], game: Game) => {
-  if (targets.length !== 1) throw new Error('Invalid targets')
+export const Vote = (player: Player, target: Player, game: Game) => {
+  player.votedFor = target
 
   return {
     type: 'vote',
     author: player,
-    targets,
+    targets: [target],
     priority: 0,
     fn: () => {
-      const votes = game.aggregator.get(targets[0].id) || []
+      const votes = game.aggregator.get(target.id) || []
       votes.push(player)
-      game.aggregator.set(targets[0].id, votes)
+      game.aggregator.set(target.id, votes)
     },
   } as GameEvent
 }
@@ -64,5 +64,39 @@ export const Reveal = (player: Player, targets: Player[], callbackFn?: () => voi
             const ctx = player.ctx!
             ctx.reply(targets.map(t => ctx.t('misc.peek_role', { user: t.name, role: ctx.t(t.role.name) })).join('\n'))
           },
+  } as GameEvent
+}
+
+export const Off = (player: Player, target: Player, game: Game) => {
+  player.votedFor = target
+
+  return {
+    type: 'off',
+    author: player,
+    targets: [target],
+    priority: 0,
+    fn: () => {
+      target.currentRole.unalive(target, game)
+      game.ctx.reply(
+        game.ctx.t(`role_message.${player.currentRole.info.name}_off`, {
+          user1: player.name,
+          user2: target.name,
+        })
+      )
+    },
+  } as GameEvent
+}
+
+export const Copy = (player: Player, target: Player, game: Game) => {
+  player.votedFor = target
+
+  return {
+    type: 'copy',
+    author: player,
+    targets: [target],
+    priority: 0,
+    fn: () => {
+      player.currentRole = new (<typeof Role>target.role.constructor)({ isCopy: true })
+    },
   } as GameEvent
 }

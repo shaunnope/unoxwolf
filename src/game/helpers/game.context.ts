@@ -6,6 +6,7 @@ import { getForumTopicId } from '~/bot/helpers/forum'
 import { Game } from '~/game'
 import { Player } from '~/game/models/player'
 
+// FIXME: middleware unable to get existing game
 export const getGameFromCtx = (ctx: Context) => games.get(ctx.session.games[getForumTopicId(ctx) || -1])
 export const setGame = (ctx: Context, game: Game) => {
   const key = `${ctx.chat?.id || 0}+${getForumTopicId(ctx) || -1}`

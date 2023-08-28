@@ -46,7 +46,7 @@ export const Vote: Action = {
   fallback: (game: Game, player: Player) => {
     const options = getOptions(game.players, other => other.id !== player.id)
 
-    game.events.push(Events.Vote(player, [options[Math.floor(Math.random() * options.length)]], game))
+    game.events.push(Events.Vote(player, options[Math.floor(Math.random() * options.length)], game))
   },
   setup: (game: Game, player: Player) => {
     if (player.ctx === undefined || !game.playerMap.has(player.id)) return
@@ -70,7 +70,7 @@ export const Vote: Action = {
       )
       return
     }
-    game.events.push(Events.Vote(player, targets, game))
+    game.events.push(Events.Vote(player, targets[0], game))
     game.privateMsgs.get(player.id)?.then(msg => {
       game.ctx.api.editMessageText(player.id, msg.message_id, game.ctx.t('game.vote_cast', { user: targets[0].name }))
     })
@@ -120,11 +120,7 @@ export const Swap: Action = {
  * Peek at a player's role
  */
 export const Peek: Action = {
-  fallback: (game: Game, player: Player) => {
-    const options = getOptions(game.players, (other: Player) => other.id !== player.id)
-
-    game.events.push(Events.Vote(player, [options[Math.floor(Math.random() * options.length)]], game))
-  },
+  fallback: (game: Game, player: Player) => {},
   setup: (game: Game, player: Player) => {
     const options = getOptions(game.players, other => other.id !== player.id)
     game.privateMsgs.set(
@@ -148,7 +144,7 @@ export const Peek: Action = {
       )
       return
     }
-    game.events.push(Events.Vote(player, targets, game))
+    game.events.push(Events.Vote(player, targets[0], game))
     game.privateMsgs.get(player.id)?.then(msg => {
       game.ctx.api.editMessageText(player.id, msg.message_id, game.ctx.t('game.vote_cast', { user: targets[0].name }))
     })
@@ -181,9 +177,43 @@ export const Reveal: Action = {
   },
 }
 
-// export const Copy: Action = {
-//   fn: async (self: Player, other: Player) => {
-//     // TODO: might require concat
-//     self.actions = other.role.doppleActions
-//   },
-// }
+/**
+ * Copy another player's role
+ */
+export const Copy: Action = {
+  fallback: (game: Game, player: Player) => {
+    const options = getOptions(game.players, p => p.id !== player.id)
+
+    game.events.push(Events.Copy(player, options[Math.floor(Math.random() * options.length)], game))
+  },
+  setup: (game: Game, player: Player) => {
+    if (player.ctx === undefined || !game.playerMap.has(player.id)) return
+    const options = getOptions(game.players, other => other.id !== player.id)
+    game.privateMsgs.set(
+      player.id,
+      sendActionPrompt(player, `role_message.${player.role.info.name}_action`, createVoteKB(options, `copy${game.id}`))!
+    )
+  },
+  fn: (game: Game, playerCtx: Context, targets?: Player[]) => {
+    if (playerCtx.from?.id === undefined) return
+    const player = game.playerMap.get(playerCtx.from?.id)
+    if (player === undefined) return
+    if (game.privateMsgs.get(player.id) === undefined) {
+      playerCtx.reply(playerCtx.t('game_error.wrong_qn'))
+      return
+    }
+    if (targets === undefined || targets.length !== 1) {
+      playerCtx.answerCallbackQuery(
+        playerCtx.t('game_error.vote_invalid', { user: targets?.toString() || 'undefined' })
+      )
+      return
+    }
+    game.events.push(Events.Copy(player, targets[0], game))
+    game.privateMsgs.get(player.id)?.then(msg => {
+      game.ctx.api.editMessageText(player.id, msg.message_id, game.ctx.t('game.vote_cast', { user: targets[0].name }))
+    })
+    game.privateMsgs.delete(player.id)
+
+    playerCtx.answerCallbackQuery()
+  },
+}

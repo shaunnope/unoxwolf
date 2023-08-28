@@ -19,8 +19,10 @@ import { generateRoles } from './roles/builder'
 
 const defaultSettings: GameSettings = {
   joinTimeout: 180,
-  nightTimeout: 300,
-  voteTimeout: 300,
+  duskTimeout: 120,
+  nightTimeout: 120,
+  dayTimeout: 300,
+  voteTimeout: 180,
 
   minPlayers: 3,
   maxPlayers: 10,
@@ -43,9 +45,9 @@ const defaultSettings: GameSettings = {
 }
 
 export class Game implements GameInfo {
-  id: string
+  readonly id: string
 
-  createdTime: Date
+  readonly createdTime: Date
 
   endTime: Date | undefined = undefined
 
@@ -63,13 +65,13 @@ export class Game implements GameInfo {
 
   winners: Team[] = []
 
-  settings: GameSettings
+  readonly settings: GameSettings
 
-  tickRate: number = 1000
+  private readonly tickRate: number = 1000
 
   flags: GameFlags = {}
 
-  serviceMsgs: Promise<Message.TextMessage & Message>[] = []
+  serviceMsgs: (Message.TextMessage & Message)[] = []
 
   callToAction: InlineKeyboard | undefined = undefined
 
@@ -77,7 +79,9 @@ export class Game implements GameInfo {
 
   events: GameEvent[] = []
 
-  aggregator: Map<number, Player[]> = new Map() // TODO: specify type
+  timeline: GameEvent[] = []
+
+  aggregator: Map<number, Player[]> = new Map()
 
   constructor(ctx: Context, settings: GameSettings = defaultSettings) {
     this.ctx = ctx
@@ -86,7 +90,7 @@ export class Game implements GameInfo {
 
     this.state = 'lobby'
     this.settings = settings
-    this.tickRate = config.isDev ? 200 : this.tickRate
+    this.tickRate = config.isDev ? 300 : this.tickRate
 
     this.run()
   }
@@ -151,7 +155,7 @@ export class Game implements GameInfo {
     await this.assignRolesAndNotify()
     await sleep(2 * this.tickRate)
 
-    await this.night()
+    await this.nightPhase()
 
     await this.collectVotes()
 
@@ -171,9 +175,9 @@ export class Game implements GameInfo {
     )
 
     this.serviceMsgs = [
-      this.ctx.reply(
+      await this.ctx.reply(
         this.ctx.t('game_init', {
-          user: this.ctx.from?.first_name || this.ctx.t('game_init.unknown_user'),
+          user: this.ctx.from?.first_name || this.ctx.t('misc.unknown_user'),
         }),
         {
           reply_markup: this.callToAction,
@@ -191,6 +195,7 @@ export class Game implements GameInfo {
       }
 
       if (count !== this.playerMap.size) {
+        // extend timer if number of players changed
         i = Math.min(i, Math.max(120, i - 30))
         count = this.playerMap.size
       }
@@ -208,7 +213,7 @@ export class Game implements GameInfo {
         const left = this.settings.joinTimeout - i
         if (left > 60) {
           this.serviceMsgs.push(
-            this.ctx.reply(
+            await this.ctx.reply(
               this.ctx.t('game_init.minutes_left', {
                 time: Math.floor(left / 60),
               }),
@@ -219,7 +224,7 @@ export class Game implements GameInfo {
           )
         } else {
           this.serviceMsgs.push(
-            this.ctx.reply(this.ctx.t('game_init.seconds_left', { time: left }), {
+            await this.ctx.reply(this.ctx.t('game_init.seconds_left', { time: left }), {
               reply_markup: this.callToAction,
             })
           )
@@ -251,15 +256,43 @@ export class Game implements GameInfo {
   }
 
   /**
+   * Run copy phase.
+   *
+   */
+  async duskPhase() {
+    this.privateMsgs = new Map()
+
+    this.events = []
+
+    this.players.forEach(p => p.role.doDusk(p, this))
+
+    this.setupTimer()
+    for (let i = 0; i < this.settings.duskTimeout; i++) {
+      if (this.flags.killTimer) {
+        delete this.flags.timerRunning
+        break
+      }
+
+      // TODO: announce time left
+
+      await sleep(this.tickRate)
+    }
+    await this.cleanupPMs()
+    this.ctx.reply(this.ctx.t('game.night_end'))
+    this.events.sort((a, b) => a.priority - b.priority).forEach(e => e.fn())
+
+    await sleep(10 * this.tickRate)
+  }
+
+  /**
    * Run night phase.
    *
    */
-  async night() {
+  async nightPhase() {
     this.privateMsgs = new Map()
-    this.serviceMsgs = [this.ctx.reply(this.ctx.t('game.night_start'))]
+    this.serviceMsgs = [await this.ctx.reply(this.ctx.t('game.night_start'))]
 
     this.events = []
-    this.aggregator = new Map()
 
     this.players.forEach(p => p.role.doNight(p, this))
 
@@ -286,7 +319,7 @@ export class Game implements GameInfo {
    */
   async collectVotes() {
     this.privateMsgs = new Map()
-    this.serviceMsgs = [this.ctx.reply(this.ctx.t('game.voting_started'))]
+    this.serviceMsgs = [await this.ctx.reply(this.ctx.t('game.voting_started'))]
 
     this.events = []
     this.aggregator = new Map()
@@ -314,20 +347,39 @@ export class Game implements GameInfo {
 
     await this.cleanupPMs()
 
-    const voteResultsMsg = this.ctx.reply(`${this.ctx.t('game.voting_end')} ${this.ctx.t('game.voting_tally')}`)
+    const voteResultsMsg = await this.ctx.reply(`${this.ctx.t('game.voting_end')} ${this.ctx.t('game.voting_tally')}`)
 
     this.events.sort((a, b) => a.priority - b.priority).forEach(e => e.fn())
 
-    const numVotes: [Player, number][] = Array(this.aggregator.size).fill(undefined)
+    const numVotes: [Player, number, Player[]][] = Array(this.aggregator.size).fill(undefined)
     let voteResults = `${this.ctx.t('game.voting_end')}\n\n`
 
-    let i = 0
+    this.teams = new Map() // now track the number of non-aide team members
+
+    let i = -1
     Array.from(this.aggregator.entries()).forEach(([playerId, voters]) => {
       const player = this.playerMap.get(playerId)
       if (player === undefined) return
-      numVotes[i++] = [player, voters.length]
 
-      voteResults += `<strong>${player.name}:</strong>  (${voters.length})  -  ${this.ctx.t(
+      numVotes[++i] = [player, voters.length, voters]
+      // if (config.isDev) {
+      //   if (player.id === config.BOT_ADMIN_USER_ID) {
+      //     numVotes[0][1] = 20
+      //     numVotes[i] = [player, 20, voters]
+      //     player.currentRole = new Roles.Hunter()
+      //   }
+      // }
+
+      if (
+        !player.currentRole.info.isAide &&
+        [Team.Village, Team.Werewolf, Team.Vampire, Team.Alien].includes(player.currentRole.info.team)
+      ) {
+        const teamMembers = this.teams.get(player.currentRole.info.team)
+        if (teamMembers === undefined) this.teams.set(player.currentRole.info.team, [player])
+        else teamMembers.push(player)
+      }
+
+      voteResults += `<strong>${player.name}:</strong>  (${numVotes[i][1]})  -  ${this.ctx.t(
         player.currentRole.name
       )}\n${voters.map(p => p.name).join(', ')}\n\n`
     })
@@ -336,7 +388,43 @@ export class Game implements GameInfo {
       roles: this.unassignedRoles.map(r => this.ctx.t(r.currentRole.name)).join(', '),
     })}\n\n`
 
-    voteResultsMsg.then(msg => this.ctx.api.editMessageText(this.chatId, msg.message_id, voteResults))
+    await this.ctx.api.editMessageText(this.chatId, voteResultsMsg.message_id, voteResults)
+
+    if (!numVotes.some(([, n]) => n > 1)) {
+      this.ctx.reply(this.ctx.t('game.vote_draw'))
+      return
+    }
+
+    this.events = []
+    numVotes.sort((a, b) => b[1] - a[1])
+    let goal =
+      Array.from(this.teams.entries()).filter(([team, members]) => {
+        return team === Team.Village || members.some(p => !p.currentRole.info.isAide)
+      }).length < 3
+        ? 1
+        : 2
+
+    const out: Player[] = []
+    for (const [idx, [player, n]] of numVotes.entries()) {
+      if (player.currentRole.lynch(player, this)) {
+        out.push(player)
+        if (--goal <= 0 && n > numVotes[idx + 1][1]) break
+      }
+    }
+
+    await this.ctx.reply(
+      this.ctx.t('game.vote_results', {
+        users: out.map(p => p.name).join(', '),
+        num: out.length,
+      })
+    )
+
+    await sleep(2 * this.tickRate)
+
+    while (this.events.length > 0) {
+      const event = this.events.shift()
+      event?.fn()
+    }
   }
 
   /**
@@ -367,7 +455,7 @@ export class Game implements GameInfo {
   }
 
   cleanupMsgs() {
-    this.serviceMsgs.forEach(p => p.then(msg => this.ctx.api.deleteMessage(this.chatId, msg.message_id)))
+    this.serviceMsgs.forEach(msg => this.ctx.api.deleteMessage(this.chatId, msg.message_id))
     this.serviceMsgs = []
   }
 
