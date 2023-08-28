@@ -51,10 +51,7 @@ export const Vote: Action = {
   setup: (game: Game, player: Player) => {
     if (player.ctx === undefined || !game.playerMap.has(player.id)) return
     const options = getOptions(game.players, other => other.id !== player.id)
-    game.privateMsgs.set(
-      player.id,
-      sendActionPrompt(player, 'game.voting_qn', createVoteKB(options, `vote${game.id}`))!
-    )
+    game.privateMsgs.set(player.id, sendActionPrompt(player, createVoteKB(options, `vote${game.id}`), 'vote')!)
   },
   fn: (game: Game, playerCtx: Context, targets?: Player[]) => {
     if (playerCtx.from?.id === undefined) return
@@ -94,10 +91,7 @@ export const Swap: Action = {
   setup: (game: Game, player: Player) => {
     if (player.ctx === undefined || !game.playerMap.has(player.id)) return
     const options = getOptions(game.players, p => p.id !== player.id)
-    game.privateMsgs.set(
-      player.id,
-      sendActionPrompt(player, `${player.role.info.name}.action`, createVoteKB(options, `swap${game.id}`))!
-    )
+    game.privateMsgs.set(player.id, sendActionPrompt(player, createVoteKB(options, `swap${game.id}`))!)
   },
   fn: (game: Game, playerCtx: Context, targets?: Player[], other: ActionOptions = DEFAULT_ACTION_OPTIONS) => {
     if (playerCtx.from?.id === undefined) return
@@ -125,7 +119,7 @@ export const Peek: Action = {
     const options = getOptions(game.players, other => other.id !== player.id)
     game.privateMsgs.set(
       player.id,
-      game.ctx.api.sendMessage(player.id, game.ctx.t('game.voting_qn'), {
+      game.ctx.api.sendMessage(player.id, game.ctx.t('vote'), {
         reply_markup: createVoteKB(options, `vote${game.id}`),
       })
     )
@@ -164,7 +158,7 @@ export const Reveal: Action = {
     const options = getOptions(game.players, other => other.id !== player.id)
     game.privateMsgs.set(
       player.id,
-      game.ctx.api.sendMessage(player.id, game.ctx.t('game.voting_qn'), {
+      game.ctx.api.sendMessage(player.id, game.ctx.t('vote'), {
         reply_markup: createVoteKB(options, `vote${game.id}`),
       })
     )
@@ -189,10 +183,7 @@ export const Copy: Action = {
   setup: (game: Game, player: Player) => {
     if (player.ctx === undefined || !game.playerMap.has(player.id)) return
     const options = getOptions(game.players, other => other.id !== player.id)
-    game.privateMsgs.set(
-      player.id,
-      sendActionPrompt(player, `${player.role.info.name}.action`, createVoteKB(options, `copy${game.id}`))!
-    )
+    game.privateMsgs.set(player.id, sendActionPrompt(player, createVoteKB(options, `copy${game.id}`))!)
   },
   fn: (game: Game, playerCtx: Context, targets?: Player[]) => {
     if (playerCtx.from?.id === undefined) return

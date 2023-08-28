@@ -4,7 +4,7 @@ import { InlineKeyboard } from 'grammy'
 import type { Message } from '@grammyjs/types'
 
 import { Team } from '~/game/models/enums'
-import { Role, Player } from '~/game/models/player'
+import { Player } from '~/game/models/player'
 import type { GameSettings, GameInfo, GameEvent, GameFlags } from '~/game/models/game'
 
 import * as Roles from '~/game/roles'
@@ -27,7 +27,7 @@ const defaultSettings: GameSettings = {
   voteTimeout: 180,
 
   minPlayers: 3,
-  maxPlayers: 10,
+  maxPlayers: 11,
   extraRoles: 3,
 
   roles: [
@@ -64,13 +64,15 @@ export class Game implements GameInfo {
 
   unassignedRoles: Player[] = []
 
-  state: 'lobby' | 'starting' | 'dusk' | 'night' | 'day' | 'end'
+  deaths: Map<Team, Player[]> = new Map()
 
-  winners: Team[] = []
+  winners: Map<Team, Player[]> = new Map()
+
+  state: 'lobby' | 'starting' | 'dusk' | 'night' | 'day' | 'end'
 
   readonly settings: GameSettings
 
-  private readonly tickRate: number = 1000
+  private readonly tickRate: number = config.isDev ? 500 : 1000
 
   flags: GameFlags = {}
 
@@ -93,7 +95,6 @@ export class Game implements GameInfo {
 
     this.state = 'lobby'
     this.settings = settings
-    this.tickRate = config.isDev ? 300 : this.tickRate
 
     this.run()
   }
@@ -123,7 +124,7 @@ export class Game implements GameInfo {
     this.playerMap.set(sender.id, player)
 
     ctx.session.game = this.id
-    ctx.reply(ctx.t('game_init.join_success', { chat: getChatTitle(this.ctx) }))
+    ctx.reply(ctx.t('join.success', { chat: getChatTitle(this.ctx) }))
   }
 
   addPlayers(players: Player[]) {
@@ -150,13 +151,13 @@ export class Game implements GameInfo {
     await this.ctx.reply(this.ctx.t('game_init.starting'))
 
     await this.ctx.reply(
-      `${this.ctx.t('game_init.player_count', {
+      `${this.ctx.t('join.count', {
         count: this.players.length,
       })}\n${this.players.map(p => p.name).join('\n')}`
     )
 
-    await this.assignRolesAndNotify()
-    if (this.teams.has(Team.Copy)) {
+    const hasCopy = await this.assignRolesAndNotify()
+    if (hasCopy) {
       await this.copyPhase()
     }
     await sleep(2 * this.tickRate)
@@ -164,6 +165,8 @@ export class Game implements GameInfo {
     await this.nightPhase()
 
     await this.collectVotes()
+
+    await this.getWinners()
 
     await sleep(10 * this.tickRate)
 
@@ -176,7 +179,7 @@ export class Game implements GameInfo {
    */
   async collectPlayers() {
     this.callToAction = new InlineKeyboard().url(
-      this.ctx.t('game_init.join'),
+      this.ctx.t('join'),
       `https://t.me/${this.ctx.me.username}?start=join${this.id}`
     )
 
@@ -195,7 +198,7 @@ export class Game implements GameInfo {
     let ts = 0
     this.setupTimer()
     for (let i = 0; i < this.settings.joinTimeout; i++) {
-      if (this.flags.killTimer) {
+      if (this.flags.killTimer || this.players.length >= this.settings.maxPlayers) {
         delete this.flags.timerRunning
         break
       }
@@ -211,7 +214,7 @@ export class Game implements GameInfo {
           .map(p => p.name)
           .join(', ')
         // TODO: add user links
-        this.ctx.reply(this.ctx.t('game_init.joined_game', { users: joinedPlayers }))
+        this.ctx.reply(this.ctx.t('join.recent_list', { users: joinedPlayers }))
         this.newPlayers.clear()
       }
 
@@ -288,7 +291,7 @@ export class Game implements GameInfo {
       await sleep(this.tickRate)
     }
     await this.cleanupPMs(Actions.Copy.fallback)
-    this.ctx.reply(this.ctx.t('game.copy_end'))
+    this.ctx.reply(this.ctx.t('copy.end'))
 
     await sleep(10 * this.tickRate)
   }
@@ -299,7 +302,7 @@ export class Game implements GameInfo {
    */
   async nightPhase() {
     this.privateMsgs = new Map()
-    this.serviceMsgs = [await this.ctx.reply(this.ctx.t('game.night_start'))]
+    this.serviceMsgs = [await this.ctx.reply(this.ctx.t('night.start'))]
 
     this.events = []
 
@@ -317,7 +320,7 @@ export class Game implements GameInfo {
       await sleep(this.tickRate)
     }
     await this.cleanupPMs(() => {})
-    this.ctx.reply(this.ctx.t('game.night_end'))
+    this.ctx.reply(this.ctx.t('night.end'))
     this.events.sort((a, b) => a.priority - b.priority).forEach(e => e.fn())
 
     await sleep(10 * this.tickRate)
@@ -328,7 +331,7 @@ export class Game implements GameInfo {
    */
   async collectVotes() {
     this.privateMsgs = new Map()
-    this.serviceMsgs = [await this.ctx.reply(this.ctx.t('game.voting_started'))]
+    this.serviceMsgs = [await this.ctx.reply(this.ctx.t('vote.start'))]
 
     this.events = []
     this.aggregator = new Map()
@@ -356,12 +359,12 @@ export class Game implements GameInfo {
 
     await this.cleanupPMs()
 
-    const voteResultsMsg = await this.ctx.reply(`${this.ctx.t('game.voting_end')} ${this.ctx.t('game.voting_tally')}`)
+    const voteResultsMsg = await this.ctx.reply(`${this.ctx.t('vote.end')} ${this.ctx.t('vote.tally')}`)
 
     this.events.sort((a, b) => a.priority - b.priority).forEach(e => e.fn())
 
     const numVotes: [Player, number, Player[]][] = Array(this.aggregator.size).fill(undefined)
-    let voteResults = `${this.ctx.t('game.voting_end')}\n\n`
+    let voteResults = `${this.ctx.t('vote.end')}\n\n`
 
     this.teams = new Map() // now track the number of non-aide team members
 
@@ -388,19 +391,23 @@ export class Game implements GameInfo {
         else teamMembers.push(player)
       }
 
-      voteResults += `<strong>${player.name}:</strong>  (${numVotes[i][1]})  -  ${this.ctx.t(
-        player.currentRole.name
-      )}\n${voters.map(p => p.name).join(', ')}\n\n`
+      const roleName = isCopier(player.currentRole)
+        ? player.currentRole.fullRole(this.ctx)
+        : this.ctx.t(player.currentRole.name)
+
+      voteResults += `<strong>${player.name}:</strong>  (${numVotes[i][1]})  -  ${roleName}\n${voters
+        .map(p => p.name)
+        .join(', ')}\n\n`
     })
 
-    voteResults += `${this.ctx.t('game.voting_unassigned', {
+    voteResults += `${this.ctx.t('vote.unassigned', {
       roles: this.unassignedRoles.map(r => this.ctx.t(r.currentRole.name)).join(', '),
     })}\n\n`
 
     await this.ctx.api.editMessageText(this.chatId, voteResultsMsg.message_id, voteResults)
 
     if (!numVotes.some(([, n]) => n > 1)) {
-      this.ctx.reply(this.ctx.t('game.vote_draw'))
+      this.ctx.reply(this.ctx.t('vote.draw'))
       return
     }
 
@@ -422,7 +429,7 @@ export class Game implements GameInfo {
     }
 
     await this.ctx.reply(
-      this.ctx.t('game.vote_results', {
+      this.ctx.t('vote.results', {
         users: out.map(p => p.name).join(', '),
         num: out.length,
       })
@@ -437,7 +444,27 @@ export class Game implements GameInfo {
   }
 
   /**
+   * Determine the winners of the game
+   */
+  async getWinners() {
+    this.players.forEach(p => p.currentRole.checkWin(p, this))
+
+    const msg = `<strong>${this.ctx.t('game.end')}</strong>\n\n${this.players
+      .sort((a, b) => a.currentRole.info.team - b.currentRole.info.team)
+      .map(p => {
+        const roleName = isCopier(p.currentRole) ? p.currentRole.fullRole(this.ctx) : this.ctx.t(p.currentRole.name)
+        return `${p.name}: ${p.won ? this.ctx.t('game.won') : this.ctx.t('game.lost')} ${
+          p.isDead ? this.ctx.t('game.dead') : this.ctx.t('game.alive')
+        } - ${roleName}`
+      })
+      .join('\n')}`
+
+    await this.ctx.reply(msg)
+  }
+
+  /**
    * Assign roles to players and send them their role description
+   * @returns true if copy phase should be run, false if not
    */
   async assignRolesAndNotify() {
     const deck = generateRoles(this.players.length, this.settings.roles, this.settings.extraRoles)
@@ -459,6 +486,8 @@ export class Game implements GameInfo {
     this.unassignedRoles = deck
       .slice(this.players.length)
       .map((r, idx) => new Player(idx, this.ctx.t('misc.unassigned_role', { idx: idx + 1 }), r, undefined))
+
+    return deck.some(r => isCopier(r))
   }
 
   async end() {

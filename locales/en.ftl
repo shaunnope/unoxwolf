@@ -83,15 +83,6 @@ leave =
 
 
 game_init = {$user} has started a new game!
-
-    .join = {join}
-    .join_prompt = {join.prompt}
-    .join_success = {join.success}
-    .already_in_game = {join.already_in_game}
-    .in_another_game = {join.in_another_game}
-
-    .player_count = {join.count}
-    .joined_game = {join.recent_list}
     .minutes_left = { $time ->
         [one] {$time} minute left to join
         *[other] {$time} minutes left to join
@@ -102,6 +93,17 @@ game_init = {$user} has started a new game!
     }
     .not_enough_players = Not enough players to start the game!
     .starting = Starting game...
+
+game =
+    .not_started = No game has been started yet!
+    .already_started = A game has already been started!
+    .end = Game over!
+    .timer_skipped = <em>Skipping forward...</em>
+    .times_up = Time's up!
+    .won = 🏆
+    .lost = 🫂
+    .dead = ⚰️
+    .alive = 😃
 
 copy =
     .start = {""}
@@ -125,31 +127,6 @@ vote = Who do you want to vote for?
                     [one] was
                     *[other] were
                 } executed!
-
-game =
-    .not_started = No game has been started yet!
-    .already_started = A game has already been started!
-    .no_join = {join.failure}
-    .no_leave = {leave.failure}
-    .player_flee = {leave.success}
-    .end = Game ended!
-    .timer_skipped = <em>Skipping forward...</em>
-    .times_up = Time's up!
-
-    .copy_end = {copy.end}
-
-    .night_start = {night.start}
-    .night_end = {night.end}
-
-    .voting_started = {vote.start}
-    .voting_qn = {vote}
-    .already_voted = {vote.repeat}
-    .vote_cast = {vote.cast}
-    .voting_end = {vote.end}
-    .voting_tally = {vote.tally}
-    .voting_unassigned = {vote.unassigned}
-    .vote_draw = {vote.draw}
-    .vote_results = {vote.results}
 
 
 game_error =
@@ -306,6 +283,7 @@ hunter = Hunter
         You are the {hunter.name}
         If you are killed tonight, the player you vote for will also die.
     .off = With their dying breath, { $user1 } drew their gun and shot { $user2 }.
+    .off_fail = Alas, { $user } was already dead.
 
 mason = Mason
     .name = {mason} {mason.emoji}

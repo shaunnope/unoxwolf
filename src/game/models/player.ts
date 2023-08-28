@@ -38,8 +38,16 @@ export class Role {
     return this.locale('emoji')
   }
 
+  get emoji() {
+    return (<typeof Role>this.constructor).emoji
+  }
+
   get description() {
     return (<typeof Role>this.constructor).description
+  }
+
+  get locale() {
+    return (<typeof Role>this.constructor).locale
   }
 
   get lore() {
@@ -90,10 +98,28 @@ export class Role {
    * Forcibly unalive a player forcibly
    * @param player
    * @param game
+   * @returns false if player is already dead, true otherwise
    */
   unalive(player: Player, game: GameInfo) {
+    if (player.isDead) return false
     player.isDead = true
+    if (player.currentRole.info.isAide) return true
+    const teamDeaths = game.deaths.get(player.currentRole.info.team)
+    if (teamDeaths === undefined) game.deaths.set(player.currentRole.info.team, [player])
+    else teamDeaths.push(player)
+
+    return true
   }
+
+  /**
+   * Check win condition of a player
+   * @param player
+   * @param game
+   */
+  checkWin(player: Player, game: GameInfo): void {
+    player.won = (game.deaths.get(Team.Werewolf)?.length || 0) > 0
+  }
+
   /* eslint-enable class-methods-use-this */
 }
 
@@ -117,6 +143,8 @@ export class Player {
   votedFor?: Player
 
   isDead?: true
+
+  won?: boolean
 
   constructor(id: number, name: string, role?: Role, ctx?: Context) {
     this.id = id

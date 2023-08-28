@@ -54,11 +54,11 @@ feature.command('join', logHandle('command-join'), async ctx => {
   }
 
   if (game.state !== 'lobby') {
-    ctx.reply(ctx.t('game.no_join'))
+    ctx.reply(ctx.t('join.failure'))
     return
   }
   // TODO: consider handling spam by checking last message time
-  game.serviceMsgs.push(await ctx.reply(ctx.t('game.join_prompt'), { reply_markup: game.callToAction }))
+  game.serviceMsgs.push(await ctx.reply(ctx.t('join.prompt'), { reply_markup: game.callToAction }))
 })
 
 feature.command('leave', logHandle('command-leave'), async ctx => {
@@ -68,12 +68,12 @@ feature.command('leave', logHandle('command-leave'), async ctx => {
     return
   }
   if (game.state !== 'lobby') {
-    ctx.reply(ctx.t('game.no_leave'))
+    ctx.reply(ctx.t('leave.failure'))
     return
   }
   if (game.playerMap.has(ctx.from?.id)) {
     game.removePlayer(ctx)
-    ctx.reply(ctx.t('game.player_flee', { user: ctx.from?.first_name }))
+    ctx.reply(ctx.t('leave.success', { user: ctx.from?.first_name }))
   }
 })
 

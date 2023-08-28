@@ -19,6 +19,6 @@ export const createVoteKB = <T extends Player>(options: T[], prefix: string = 'v
   return kb
 }
 
-export const sendActionPrompt = (player: Player, textKey: string, keyboard?: InlineKeyboard) => {
-  return player.ctx?.reply(player.ctx.t(textKey), { reply_markup: keyboard })
+export const sendActionPrompt = (player: Player, keyboard?: InlineKeyboard, key?: string) => {
+  return player.ctx?.reply(player.ctx.t(key || player.role.locale('action')), { reply_markup: keyboard })
 }

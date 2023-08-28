@@ -23,7 +23,8 @@ export const Swap = (
   targets: Player[],
   game: Game,
   priority: number = 0,
-  sendReply: boolean = true
+  sendReply: boolean = true,
+  author: Player | undefined = undefined
 ) => {
   if (targets.length !== 2) throw new Error('Invalid targets')
   // TODO: change these checks
@@ -33,14 +34,14 @@ export const Swap = (
 
   return {
     type: 'swap',
-    author: player,
+    author: author ?? player,
     targets,
     priority,
     fn: () => {
       targets[0].swapRoles(targets[1])
       if (sendReply) {
         player.ctx?.reply(
-          player.ctx.t(`${player.role.info.name}.swap`, {
+          player.ctx.t(player.role.locale('swap'), {
             user1: targets[0].name,
             user2: targets[1].name,
             role: player.ctx.t(targets[0].currentRole.name),
@@ -77,13 +78,14 @@ export const Off = (player: Player, target: Player, game: Game) => {
     targets: [target],
     priority: 0,
     fn: () => {
-      target.currentRole.unalive(target, game)
-      game.ctx.reply(
-        game.ctx.t(`${player.currentRole.info.name}.off`, {
-          user1: player.name,
-          user2: target.name,
-        })
-      )
+      let msg = game.ctx.t(player.currentRole.locale('off'), {
+        user1: player.name,
+        user2: target.name,
+      })
+      if (!target.currentRole.unalive(target, game)) {
+        msg += `\n${game.ctx.t(player.currentRole.locale('off_fail'), { user: target.name })}`
+      }
+      game.ctx.reply(msg)
     },
   } as GameEvent
 }

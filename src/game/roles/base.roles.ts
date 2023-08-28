@@ -8,7 +8,7 @@ import * as Actions from '~/game/gameplay/actions'
 import * as Events from '~/game/models/events'
 import { createVoteKB, getOptions, sendActionPrompt } from '../helpers/keyboards'
 
-import { Copier } from './auxilary.roles'
+import { Copier, isCopier } from './auxilary.roles'
 
 export class Villager extends Role {
   static readonly info: RoleInfo = {
@@ -45,6 +45,10 @@ export class Werewolf extends Role {
     }
     player.ctx.reply(msg)
   }
+
+  checkWin(player: Player, game: GameInfo): void {
+    player.won = (game.deaths.get(Team.Werewolf)?.length || 0) === 0
+  }
 }
 
 export class Seer extends Villager {
@@ -64,7 +68,7 @@ export class Seer extends Villager {
     const extraOptions = [[game.ctx.t('misc.unassigned', { count: 2 }), `peek${game.id}+un`]]
     kb.text(extraOptions[0][0], extraOptions[0][1])
 
-    game.privateMsgs.set(player.id, sendActionPrompt(player, 'seer.action', kb)!)
+    game.privateMsgs.set(player.id, sendActionPrompt(player, kb)!)
   }
 }
 
@@ -85,7 +89,7 @@ export class Robber extends Villager {
     const kb = createVoteKB(options, `swap${game.id}`)
     // TODO: add pass option
 
-    game.privateMsgs.set(player.id, sendActionPrompt(player, 'robber.action', kb)!)
+    game.privateMsgs.set(player.id, sendActionPrompt(player, kb)!)
   }
 }
 
@@ -106,7 +110,7 @@ export class Troublemaker extends Villager {
     const kb = createVoteKB(options, `swap${game.id}`)
     // TODO: add pass option
 
-    game.privateMsgs.set(player.id, sendActionPrompt(player, 'troublemaker.action', kb)!)
+    game.privateMsgs.set(player.id, sendActionPrompt(player, kb)!)
   }
 }
 
@@ -131,6 +135,10 @@ export class Drunk extends Villager {
     })
     player.ctx.reply(player.ctx.t('drunk.action', { role: target.name }))
   }
+
+  checkWin(player: Player, game: GameInfo): void {
+    player.won = (game.teams.get(Team.Werewolf)?.length || 0) > 0
+  }
 }
 
 export class Mason extends Villager {
@@ -144,10 +152,14 @@ export class Mason extends Villager {
     if (player.ctx === undefined) return
     const teamMembers = game.teams
       .get(this.info.team)
-      ?.filter(other => other.id !== player.id && other.role instanceof Mason)
+      ?.filter(
+        other =>
+          other.id !== player.id &&
+          (other.role instanceof Mason || (isCopier(other.role) && other.role.tail instanceof Mason))
+      )
     if (teamMembers === undefined) return // NOTE: for coverage, this should never happen
     let msg = ''
-    if (teamMembers.length === 1) {
+    if (teamMembers.length === 0) {
       msg = game.ctx.t('mason.lone')
     } else {
       msg = game.ctx.t('mason.reveal', {
@@ -202,6 +214,13 @@ export class Minion extends Werewolf {
     }
     player.ctx.reply(msg)
   }
+
+  checkWin(player: Player, game: GameInfo): void {
+    player.won =
+      game.teams.get(this.info.team)?.length === 0
+        ? !player.isDead
+        : (game.deaths.get(Team.Werewolf)?.length || 0) === 0
+  }
 }
 
 export class Hunter extends Villager {
@@ -225,12 +244,16 @@ export class Tanner extends Villager {
     team: Team.Tanner,
     command: 'roleTanner',
   }
+
+  checkWin(player: Player) {
+    player.won = player.isDead === true
+  }
 }
 
 export class Doppelganger extends Copier {
   static readonly info: RoleInfo = {
     name: 'doppelganger',
-    team: Team.Copy,
+    team: Team.Village,
     command: 'roleDG',
   }
 }

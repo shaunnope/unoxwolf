@@ -1,7 +1,11 @@
+/* eslint-disable class-methods-use-this */
+/* eslint-disable @typescript-eslint/no-use-before-define */
+import { Context } from '~/bot/context'
 import { Role, Player, RoleInfo } from '../models/player'
 import { GameInfo } from '../models/game'
-import { createVoteKB, getOptions, sendActionPrompt } from '../helpers/keyboards'
 import { Team } from '../models/enums'
+
+import * as Actions from '../gameplay/actions'
 
 export interface CanCopy {
   copiedRole?: Role
@@ -11,22 +15,28 @@ export interface CanCopy {
 export class Copier extends Role implements CanCopy {
   static readonly info: RoleInfo = {
     name: 'role',
-    team: Team.Copy,
+    team: Team.Village,
     command: 'rolelist',
   }
 
   copiedRole?: Role
 
+  get tail(): Role {
+    if (this.copiedRole === undefined) return this
+    if (!isCopier(this.copiedRole)) return this.copiedRole
+    return this.copiedRole.tail
+  }
+
+  fullRole(ctx: Context) {
+    return `${ctx.t(this.tail.name)}${ctx.t(this.emoji)}`
+  }
+
   copy(player: Player, game: GameInfo): void {
     if (player.ctx === undefined) {
-      // TODO: fallback
+      Actions.Copy.fallback(game, player)
       return
     }
-    const options = getOptions(game.players, other => other.id !== player.id)
-    const kb = createVoteKB(options, `copy${game.id}`)
-    // TODO: add pass option
-
-    game.privateMsgs.set(player.id, sendActionPrompt(player, `${this.info.name}.action`, kb)!)
+    Actions.Copy.setup(game, player)
   }
 
   doNight(player: Player, game: GameInfo): void {
@@ -35,6 +45,10 @@ export class Copier extends Role implements CanCopy {
       return
     }
     this.copiedRole.doNight(player, game)
+  }
+
+  checkWin(player: Player, game: GameInfo): void {
+    this.tail.checkWin(player, game)
   }
 }
 
