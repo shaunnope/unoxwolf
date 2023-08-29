@@ -395,14 +395,8 @@ export class Game implements GameInfo {
         ? player.currentRole.fullRole(this.ctx)
         : this.ctx.t(player.currentRole.name)
 
-      voteResults += `<strong>${player.name}:</strong>  (${numVotes[i][1]})  -  ${roleName}\n${voters
-        .map(p => p.name)
-        .join(', ')}\n\n`
+      voteResults += `<strong>${player.name}:</strong>  (${numVotes[i][1]})\n${voters.map(p => p.name).join(', ')}\n\n`
     })
-
-    voteResults += `${this.ctx.t('vote.unassigned', {
-      roles: this.unassignedRoles.map(r => this.ctx.t(r.currentRole.name)).join(', '),
-    })}\n\n`
 
     await this.ctx.api.editMessageText(this.chatId, voteResultsMsg.message_id, voteResults)
 
@@ -449,15 +443,19 @@ export class Game implements GameInfo {
   async getWinners() {
     this.players.forEach(p => p.currentRole.checkWin(p, this))
 
-    const msg = `<strong>${this.ctx.t('game.end')}</strong>\n\n${this.players
-      .sort((a, b) => a.currentRole.info.team - b.currentRole.info.team)
-      .map(p => {
-        const roleName = isCopier(p.currentRole) ? p.currentRole.fullRole(this.ctx) : this.ctx.t(p.currentRole.name)
-        return `${p.name}: ${p.won ? this.ctx.t('game.won') : this.ctx.t('game.lost')} ${
-          p.isDead ? this.ctx.t('game.dead') : this.ctx.t('game.alive')
-        } - ${roleName}`
-      })
-      .join('\n')}`
+    const msg =
+      `<strong>${this.ctx.t('game.end')}</strong>\n\n${this.players
+        .sort((a, b) => a.currentRole.info.team - b.currentRole.info.team)
+        .map(p => {
+          const roleName = isCopier(p.currentRole) ? p.currentRole.fullRole(this.ctx) : this.ctx.t(p.currentRole.name)
+          return `${p.name}: ${p.won ? this.ctx.t('game.won') : this.ctx.t('game.lost')} ${
+            p.isDead ? this.ctx.t('game.dead') : this.ctx.t('game.alive')
+          }  -  ${roleName}`
+        })
+        .join('\n')}\n\n` +
+      `${this.ctx.t('vote.unassigned', {
+        roles: this.unassignedRoles.map(r => this.ctx.t(r.currentRole.name)).join(', '),
+      })}`
 
     await this.ctx.reply(msg)
   }
@@ -493,7 +491,6 @@ export class Game implements GameInfo {
   async end() {
     this.state = 'end'
     deleteGame(this)
-    this.ctx.reply(this.ctx.t('game.end'))
   }
 
   cleanupMsgs() {
