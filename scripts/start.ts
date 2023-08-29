@@ -30,17 +30,33 @@ try {
 
   await prisma.$connect();
 
-  // update bot owner role
+  // update bot admins role
+  await Promise.all(
+    config.BOT_ADMIN_USER_ID.map(async (id) => {
+      await prisma.user.upsert({
+        where: prisma.user.byTelegramId(id),
+        create: {
+          telegramId: id,
+          role: Role.ADMIN,
+        },
+        update: {
+          role: Role.ADMIN,
+        },
+      });
+    })
+  )
+
   await prisma.user.upsert({
-    where: prisma.user.byTelegramId(config.BOT_ADMIN_USER_ID),
+    where: prisma.user.byTelegramId(config.BOT_OWNER_USER_ID),
     create: {
-      telegramId: config.BOT_ADMIN_USER_ID,
-      role: Role.OWNER,
+      telegramId: config.BOT_OWNER_USER_ID,
+      role: Role.ADMIN,
     },
     update: {
-      role: Role.OWNER,
+      role: Role.ADMIN,
     },
   });
+
 
   if (config.isProd) {
     await server.listen({

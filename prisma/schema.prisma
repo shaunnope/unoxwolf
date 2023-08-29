@@ -15,7 +15,6 @@ datasource db {
 enum Role {
   USER
   ADMIN
-  OWNER
 }
 
 model User {
@@ -37,8 +36,8 @@ model Stats {
   chatId       BigInt   @map("chat_id")
   updatedAt    DateTime @updatedAt @map("updated_at")
   createdAt    DateTime @default(now()) @map("created_at")
-  villagerWin  Int      @default(0) @map("villager_win")
-  villagerLose Int      @default(0) @map("villager_lose")
+  villageWin   Int      @default(0) @map("villager_win")
+  villageLose  Int      @default(0) @map("villager_lose")
   werewolfWin  Int      @default(0) @map("werewolf_win")
   werewolfLose Int      @default(0) @map("werewolf_lose")
   tannerWin    Int      @default(0) @map("tanner_win")

@@ -74,7 +74,7 @@ prisma.$on('warn', (e: Prisma.LogEvent) => {
   })
 })
 
-const prismax = prisma.$extends(userExtension)
+const xprisma = prisma.$extends(userExtension)
 
-export { prismax as prisma }
-export type PrismaClientX = typeof prismax
+export { xprisma as prisma }
+export type PrismaClientX = typeof prisma & typeof xprisma

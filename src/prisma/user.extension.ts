@@ -11,13 +11,6 @@ export default Prisma.defineExtension({
           return user.role === Role.ADMIN
         },
       },
-
-      isOwner: {
-        needs: { role: true },
-        compute(user) {
-          return user.role === Role.OWNER
-        },
-      },
     },
   },
   model: {
@@ -28,15 +21,17 @@ export default Prisma.defineExtension({
         } satisfies Prisma.UserWhereInput
       },
 
-      hasAdminRole() {
+      byTelegramIds(telegramIds: number[]) {
         return {
-          role: Role.ADMIN,
+          telegramId: {
+            in: telegramIds,
+          },
         } satisfies Prisma.UserWhereInput
       },
 
-      hasOwnerRole() {
+      hasAdminRole() {
         return {
-          role: Role.OWNER,
+          role: Role.ADMIN,
         } satisfies Prisma.UserWhereInput
       },
 
@@ -44,7 +39,6 @@ export default Prisma.defineExtension({
         return {
           role: true,
           isAdmin: true,
-          isOwner: true,
         } satisfies Prisma.UserSelect<PrismaClientX['$extends']['extArgs']>
       },
     },

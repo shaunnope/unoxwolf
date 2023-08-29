@@ -29,7 +29,7 @@ export const createServer = async (bot: Bot, container: Container) => {
   server.get(`/${bot.token}/metrics`, async (req, res) => {
     try {
       const appMetrics = await register.metrics()
-      const prismaMetrics = await prisma.raw.$metrics.prometheus()
+      const prismaMetrics = prisma.$metrics !== undefined ? await prisma.$metrics.prometheus() : ''
       const metrics = appMetrics + prismaMetrics
 
       await res.header('Content-Type', register.contentType).send(metrics)

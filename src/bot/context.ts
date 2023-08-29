@@ -1,5 +1,5 @@
 import { Update, UserFromGetMe } from '@grammyjs/types'
-import { UserPayload } from '@prisma/client'
+import { Prisma } from '@prisma/client'
 import { Context as DefaultContext, SessionFlavor, type Api, type MiddlewareFn } from 'grammy'
 import {
   type Conversation as DefaultConversation,
@@ -24,7 +24,7 @@ import type { Game } from '~/game'
 import { customChecker } from './helpers/hack.bot-command'
 import { logConvoHandle } from './helpers/logging'
 
-type ScopeUser = Omit<UserPayload<PrismaClientX['$extends']['extArgs']>['scalars'], 'updatedAt' | 'createdAt'>
+type ScopeUser = Omit<Prisma.$UserPayload<PrismaClientX['$extends']['extArgs']>['scalars'], 'updatedAt' | 'createdAt'>
 
 export interface ContextScope {
   user?: ScopeUser

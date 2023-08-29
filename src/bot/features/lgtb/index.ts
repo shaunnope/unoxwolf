@@ -1,4 +1,4 @@
-import { Composer, type CommandContext } from 'grammy'
+import { Composer } from 'grammy'
 import type { Context } from '~/bot/context'
 import { logHandle } from '~/bot/helpers/logging'
 
@@ -24,15 +24,11 @@ feature.on(':sticker', async ctx => {
   ctx.reply(JSON.stringify(sticker) || ctx.t('gmgm.no-set-name'))
 })
 
-async function bread(ctx: CommandContext<Context>) {
+feature.command(['gmgm_lgtb', 'lgtb', 'gmgm'], logHandle('command-gmgm'), ctx => {
   const sticker = stickers[Math.floor(Math.random() * stickers.length)]
   ctx.api.sendSticker(ctx.msg.chat.id, sticker.file_id, {
     reply_to_message_id: ctx.msg.message_id,
   })
-}
-
-feature.command('gmgm_lgtb', logHandle('command-gmgm'), bread)
-feature.command('lgtb', logHandle('command-gmgm'), bread)
-feature.command('gmgm', logHandle('command-gmgm'), bread)
+})
 
 export { composer as lgtbFeature }

@@ -269,7 +269,7 @@ insomniac = Insomniac
     .lore =
         You are the {insomniac.name}
         With news of werewolves hiding in your midst, it would be a miracle if you were able to sleep soundly tonight.
-    .true = You are still the {roles.insomniac}
+    .true = You are still the {insomniac.name}
     .false = {misc.self_role_changed}
 
 hunter = Hunter
