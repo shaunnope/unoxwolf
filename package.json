@@ -28,6 +28,7 @@
     "pino-pretty": "^10.2.0",
     "prom-client": "^14.2.0",
     "tslog": "^4.9.1",
+    "tsx": "^3.12.7",
     "zod": "^3.22.2"
   },
   "devDependencies": {
@@ -54,8 +55,8 @@
     "format": "eslint \"src/**/*.ts\" --fix",
     "typecheck": "tsc",
     "dev": "tsc-watch --onSuccess \"tsx ./scripts/start.ts\"",
+    "build": "tsc --noEmit false",
     "start": "tsc && tsx ./scripts/start.ts",
-    "start:force": "tsx ./scripts/start.ts",
-    "prepare": "npx husky install"
+    "start:force": "tsx ./scripts/start.ts"
   }
 }

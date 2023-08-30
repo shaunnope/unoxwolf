@@ -1,0 +1,24 @@
+version: '3'
+services:
+
+  bot:
+    ports:
+      - "3000:80"
+    volumes:
+      - ".:/usr/src"
+    env_file:
+      - docker-compose.bot.dev.env
+    command: npm run dev
+
+  redis:
+    image: redis:alpine
+
+  db:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: example
+
+  adminer:
+    image: adminer
+    restart: always
