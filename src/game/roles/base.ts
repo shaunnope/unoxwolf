@@ -8,7 +8,7 @@ import * as Actions from '~/game/gameplay/actions'
 import * as Events from '~/game/models/events'
 import { createVoteKB, getOptions, sendActionPrompt } from '../helpers/keyboards'
 
-import { Copier, isCopier } from './auxilary.roles'
+import { Copier, isCopier } from './auxilary'
 
 export class Villager extends Role {
   static readonly info: RoleInfo = {
@@ -217,7 +217,7 @@ export class Minion extends Werewolf {
 
   checkWin(player: Player, game: GameInfo): void {
     player.won =
-      game.teams.get(this.info.team)?.length === 0
+      (game.teams.get(this.info.team)?.length || 0) === 0
         ? !player.isDead
         : (game.deaths.get(Team.Werewolf)?.length || 0) === 0
   }

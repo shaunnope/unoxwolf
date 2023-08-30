@@ -25,3 +25,5 @@ cp example.env .env
 The initial template for this project was adapted from [Telegram Bot Template](https://github.com/bot-base/telegram-bot-template)
 
 The mechanics of the game are inspired by the [One Night Ultimate Series](https://beziergames.com/products/one-night-ultimate-werewolf) by Ted Alspach and Akihisa Okui.
+
+The implementation of the game loop is adapted from [Werewolf for Telegram](https://github.com/GreyWolfDev/Werewolf)

@@ -1,1 +1,1 @@
-export * from './base.roles'
+export * from './base'

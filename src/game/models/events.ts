@@ -1,6 +1,6 @@
 import { GameEvent, GameInfo as Game } from '~/game/models/game'
 import { Player } from '~/game/models/player'
-import { isCopier } from '../roles/auxilary.roles'
+import { isCopier } from '../roles/auxilary'
 
 export const Vote = (player: Player, target: Player, game: Game) => {
   player.votedFor = target
@@ -77,7 +77,7 @@ export const Off = (player: Player, target: Player, game: Game) => {
     author: player,
     targets: [target],
     priority: 0,
-    fn: () => {
+    fn: async () => {
       let msg = game.ctx.t(player.currentRole.locale('off'), {
         user1: player.name,
         user2: target.name,
@@ -85,7 +85,7 @@ export const Off = (player: Player, target: Player, game: Game) => {
       if (!target.currentRole.unalive(target, game)) {
         msg += `\n${game.ctx.t(player.currentRole.locale('off_fail'), { user: target.name })}`
       }
-      game.ctx.reply(msg)
+      await game.ctx.reply(msg)
     },
   } as GameEvent
 }

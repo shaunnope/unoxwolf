@@ -4,7 +4,7 @@ import { logHandle } from '~/bot/helpers/logging'
 
 import * as Roles from '~/game/roles'
 import * as RoleGroups from '~/game/roles/role.groups'
-import { getRoleListEntry } from '../helpers/game.info'
+import { getRoleListEntry } from '../helpers/rolelist'
 
 const composer = new Composer<Context>()
 

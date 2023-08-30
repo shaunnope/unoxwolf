@@ -16,15 +16,14 @@ import * as Actions from '~/game/gameplay/actions'
 import { config } from '~/config'
 import { deleteGame, getChatTitle } from './helpers/game.context'
 import { generateRoles } from './roles/builder'
-import { isCopier } from './roles/auxilary.roles'
+import { isCopier } from './roles/auxilary'
 
 const defaultSettings: GameSettings = {
   joinTimeout: 180,
   copyTimeout: 120,
   duskTimeout: 120,
   nightTimeout: 120,
-  dayTimeout: 300,
-  voteTimeout: 180,
+  voteTimeout: 600,
 
   minPlayers: 3,
   maxPlayers: 11,
@@ -395,7 +394,9 @@ export class Game implements GameInfo {
         ? player.currentRole.fullRole(this.ctx)
         : this.ctx.t(player.currentRole.name)
 
-      voteResults += `<strong>${player.name}:</strong>  (${numVotes[i][1]})\n${voters.map(p => p.name).join(', ')}\n\n`
+      voteResults += `<strong>${player.name}:</strong>  (${numVotes[i][1]})\n`
+
+      voteResults += voters.length > 0 ? `${voters.map(p => p.name).join(', ')}\n\n` : '\n'
     })
 
     await this.ctx.api.editMessageText(this.chatId, voteResultsMsg.message_id, voteResults)
@@ -433,7 +434,7 @@ export class Game implements GameInfo {
 
     while (this.events.length > 0) {
       const event = this.events.shift()
-      event?.fn()
+      await event?.fn()
     }
   }
 
@@ -445,7 +446,6 @@ export class Game implements GameInfo {
 
     const msg =
       `<strong>${this.ctx.t('game.end')}</strong>\n\n${this.players
-        .sort((a, b) => a.currentRole.info.team - b.currentRole.info.team)
         .map(p => {
           const roleName = isCopier(p.currentRole) ? p.currentRole.fullRole(this.ctx) : this.ctx.t(p.currentRole.name)
           return `${p.name}: ${p.won ? this.ctx.t('game.won') : this.ctx.t('game.lost')} ${

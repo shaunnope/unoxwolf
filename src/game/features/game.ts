@@ -5,8 +5,8 @@ import { logHandle } from '~/bot/helpers/logging'
 
 import { Game } from '~/game'
 import { getChatTitle, getGameFromCtx, playerInGame, setGame } from '~/game/helpers/game.context'
-import { gameActions } from './game.actions'
-import { gameConvos } from './game.convos'
+import { gameActions } from './actions'
+import { gameConvos } from './convos'
 
 const composer = new Composer<Context>()
 /**
@@ -37,7 +37,7 @@ pmFeature.command('start', logHandle('command-start'), ctx => {
   }
 })
 
-feature.command('startgame', logHandle('command-startgame'), ctx => {
+feature.command('startgame', logHandle('command-startgame'), async ctx => {
   // check if game is already started
   if (getGameFromCtx(ctx) !== undefined) {
     ctx.reply(ctx.t('game.already_started'))

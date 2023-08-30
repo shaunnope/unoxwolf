@@ -10,7 +10,6 @@ export type GameSettings = {
   copyTimeout: number
   duskTimeout: number
   nightTimeout: number
-  dayTimeout: number
   voteTimeout: number
 
   minPlayers: number
@@ -67,5 +66,5 @@ export type GameEvent = {
   author: Player
   targets: Player[]
   priority: number
-  fn: () => void
+  fn: () => Promise<void>
 }

@@ -7,7 +7,7 @@ import { logHandle } from '~/bot/helpers/logging'
 import { Game } from '~/game'
 import { getGameFromCtx, setGame } from '~/game/helpers/game.context'
 import { Conversation } from '~/bot/context'
-import { createPlayers } from '../helpers/mock'
+import { createPlayers } from '../helpers/create-players'
 
 const composer = new Composer<Context>()
 
@@ -18,7 +18,7 @@ composer.command('debug', logHandle('command-debug'), ctx => {
 const feature = composer.chatType(['group', 'supergroup'])
 const pmFeature = composer.chatType('private')
 
-feature.command('startgame', logHandle('command-startgame-dev'), ctx => {
+feature.command('startgame', logHandle('command-startgame-dev'), async ctx => {
   // check if game is already started
   if (getGameFromCtx(ctx) !== undefined) {
     ctx.reply(ctx.t('game.already_started'))
