@@ -1,4 +1,5 @@
 #!/usr/bin/env tsx
+import Redis from 'ioredis'
 import { RedisAdapter } from "@grammyjs/storage-redis";
 import { Role } from "@prisma/client";
 import { onShutdown } from "node-graceful-shutdown";
@@ -6,10 +7,9 @@ import { createBot } from "~/bot";
 import { container } from "~/container";
 import { createServer } from "~/server";
 
-
-
 try {
-  const { config, logger, prisma, redis } = container;
+  const { config, logger, prisma } = container;
+  const redis = new Redis(config.REDIS_URL);
   const bot = createBot(config.BOT_TOKEN, {
     container,
     sessionStorage: new RedisAdapter({

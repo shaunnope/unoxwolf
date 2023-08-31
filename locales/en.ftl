@@ -60,7 +60,7 @@ welcome =
     {welcome.help}
 
     .help =
-        <strong>{"COMMANDS"}</strong>
+        <strong>COMMANDS</strong>
         /rolelist - List all available roles
         /help - Show help
 

@@ -20,7 +20,7 @@ function parseJsonSafe(path: string) {
 }
 
 const configSchema = z.object({
-  NODE_ENV: z.enum(['development', 'production']),
+  NODE_ENV: z.enum(['development', 'production', 'test']),
   LOG_LEVEL: z.enum(['trace', 'debug', 'info', 'warn', 'error', 'fatal', 'silent']).default('info'),
   DATABASE_URL: z.string(),
   REDIS_URL: z.string(),
@@ -39,7 +39,7 @@ const configSchema = z.object({
     .catch([]),
 })
 
-const parseConfig = (environment: NodeJS.ProcessEnv) => {
+export const parseConfig = (environment: NodeJS.ProcessEnv) => {
   const config = configSchema.parse(environment)
 
   return {
