@@ -6,11 +6,13 @@ WORKDIR /usr/src
 FROM base AS builder
 
 # Files required by npm install
-COPY package*.json ./
+COPY package.json ./
+COPY yarn.lock ./
 
 # Install app dependencies
 RUN yarn install \
-  --production=false
+    --non-interactive \
+    --production=false
 
 # Bundle app source
 COPY . .
@@ -25,7 +27,8 @@ COPY . .
 
 # Install only production app dependencies
 RUN yarn install \
-  --production=true && yarn cache clean
+    --non-interactive \
+    --production=true && yarn cache clean
 
 USER node
 
