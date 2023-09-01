@@ -41,7 +41,7 @@ export type GameInfo = {
 
   players: Player[]
   playerMap: Map<number, Player>
-  state: 'lobby' | 'starting' | 'dusk' | 'night' | 'day' | 'end'
+  state: 'lobby' | 'started' | 'ended'
   teams: Map<Team, Player[]>
   unassignedRoles: Player[]
 

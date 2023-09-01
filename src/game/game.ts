@@ -71,11 +71,11 @@ export class Game implements GameInfo {
 
   winners: Map<Team, Player[]> = new Map()
 
-  state: 'lobby' | 'starting' | 'dusk' | 'night' | 'day' | 'end'
+  state: 'lobby' | 'started' | 'ended'
 
   readonly settings: GameSettings
 
-  private readonly tickRate: number = config.isDev ? 500 : 1000
+  private readonly tickRate: number = config.isDev ? 1000 : 1000
 
   flags: GameFlags = {}
 
@@ -128,6 +128,7 @@ export class Game implements GameInfo {
     this.playerMap.set(sender.id, player)
 
     ctx.session.game = this.id
+    ctx.session.actions = []
     ctx.reply(ctx.t('join.success', { chat: getChatTitle(this.ctx) }))
   }
 
@@ -227,7 +228,7 @@ export class Game implements GameInfo {
       ts++
       await sleep(this.tickRate)
     }
-    this.state = 'starting'
+    this.state = 'started'
 
     // delete all countdown messages
     this.cleanupMsgs()
@@ -487,7 +488,7 @@ export class Game implements GameInfo {
   }
 
   async end() {
-    this.state = 'end'
+    this.state = 'ended'
     deleteGame(this)
   }
 

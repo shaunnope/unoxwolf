@@ -75,6 +75,8 @@ export const troublemaker = async (conversation: Conversation, ctx: Context) => 
     })
     return true
   })
+
+  actionCtx.session.actions = []
 }
 
 export const TroublemakerConvo = createConversation(troublemaker)
