@@ -229,11 +229,12 @@ export class Hunter extends Villager {
     command: 'roleHunter',
   }
 
-  lynch(player: Player, game: GameInfo): boolean {
-    if (player.votedFor !== undefined) {
+  unalive(player: Player, game: GameInfo) {
+    if (!player.isDead && player.votedFor !== undefined) {
       game.events.push(Events.Off(player, player.votedFor, game))
     }
-    return super.lynch(player, game)
+
+    return super.unalive(player, game)
   }
 }
 

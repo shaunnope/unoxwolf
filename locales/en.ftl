@@ -102,6 +102,15 @@ game =
     .dead = 💀
     .alive = 😃
 
+events = <strong>Order of Events:</strong>
+    .vote = Vote
+    .copy = Copy
+    .peek = Peek
+    .swap = Swap
+    .off = Off
+    .rotate = Rotate
+    .reveal = Reveal
+
 copy =
     .start = {""}
     .end = As the sun sets, rumors of identity theft spread through the village.
@@ -124,7 +133,6 @@ vote = Who do you want to vote for?
                     [one] was
                     *[other] were
                 } executed!
-
 
 game_error =
     .err_assign_roles = Error while assigning roles. Please start a new game.

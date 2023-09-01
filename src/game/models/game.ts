@@ -66,6 +66,7 @@ export type GameFlags = {
 
 export type GameEvent = {
   type: 'none' | 'vote' | 'swap' | 'peek' | 'copy' | 'reveal' | 'off' | 'rotate'
+  icon: string
   author: Player
   targets: Player[]
   priority: number

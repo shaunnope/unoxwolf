@@ -9,6 +9,7 @@ export const Vote = (player: Player, target: Player, game: Game) => {
 
   return {
     type: 'vote',
+    icon: '🗳️',
     author: player,
     targets: [target],
     priority: 0,
@@ -36,17 +37,24 @@ export const Swap = (
 
   return {
     type: 'swap',
+    icon: '🔀',
     author: author ?? player,
     targets,
     priority,
     fn: () => {
       targets[0].swapRoles(targets[1])
-      if (sendReply) {
-        player.ctx?.reply(
-          player.ctx.t(player.role.locale('swap'), {
+      if (sendReply && player.ctx !== undefined) {
+        const { ctx } = player
+        const newRole =
+          isCopier(targets[0].currentRole) && targets[0].currentRole.copiedRole !== undefined
+            ? targets[0].currentRole.fullRole(ctx)
+            : ctx.t(targets[0].currentRole.name)
+
+        ctx.reply(
+          ctx.t(player.role.locale('swap'), {
             user1: targets[0].name,
             user2: targets[1].name,
-            role: player.ctx.t(targets[0].currentRole.name),
+            role: newRole,
           })
         )
       }
@@ -57,6 +65,7 @@ export const Swap = (
 export const Peek = (player: Player, targets: Player[], callbackFn?: () => void, priority: number = 2) => {
   return {
     type: 'peek',
+    icon: '👀',
     author: player,
     targets,
     priority,
@@ -65,7 +74,7 @@ export const Peek = (player: Player, targets: Player[], callbackFn?: () => void,
         ? callbackFn
         : () => {
             if (player.ctx === undefined) return
-            const ctx = player.ctx!
+            const { ctx } = player
             ctx.reply(targets.map(t => ctx.t('misc.peek_role', { user: t.name, role: ctx.t(t.role.name) })).join('\n'))
           },
   } as GameEvent
@@ -74,6 +83,7 @@ export const Peek = (player: Player, targets: Player[], callbackFn?: () => void,
 export const Reveal = (player: Player, targets: Player[], callbackFn?: () => void, priority: number = 0) => {
   return {
     type: 'reveal',
+    icon: '🪞',
     author: player,
     targets,
     priority,
@@ -93,6 +103,7 @@ export const Off = (player: Player, target: Player, game: Game) => {
 
   return {
     type: 'off',
+    icon: '🩸',
     author: player,
     targets: [target],
     priority: 0,
@@ -112,6 +123,7 @@ export const Off = (player: Player, target: Player, game: Game) => {
 export const Copy = (player: Player, target: Player, game: Game) => {
   return {
     type: 'copy',
+    icon: '📝',
     author: player,
     targets: [target],
     priority: player.innateRole.priority,
@@ -132,6 +144,7 @@ export const Copy = (player: Player, target: Player, game: Game) => {
 export const Rotate = (player: Player, rotation: number, game: Game, priority: number = 0) => {
   return {
     type: 'rotate',
+    icon: '🔄',
     author: player,
     targets: [] as Player[],
     priority,

@@ -94,7 +94,7 @@ export class Role {
   }
 
   /**
-   * Forcibly unalive a player forcibly
+   * Forcibly unalive a player
    * @param player
    * @param game
    * @returns false if player is already dead, true otherwise

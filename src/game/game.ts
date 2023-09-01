@@ -173,6 +173,8 @@ export class Game implements GameInfo {
 
     await this.getWinners()
 
+    await this.announceTimeline()
+
     await sleep(10 * this.tickRate)
 
     this.end()
@@ -277,6 +279,8 @@ export class Game implements GameInfo {
     }
     this.cleanupMsgs()
     await this.cleanupPMs(Actions.Copy.fallback)
+    this.events.sort((a, b) => a.priority - b.priority)
+    this.updateTimeline()
     this.ctx.reply(this.ctx.t('copy.end'))
 
     await sleep(10 * this.tickRate)
@@ -310,6 +314,7 @@ export class Game implements GameInfo {
     await this.cleanupPMs(() => {})
     await this.ctx.reply(this.ctx.t('night.end'))
     this.events.sort((a, b) => a.priority - b.priority).forEach(e => e.fn())
+    this.updateTimeline()
 
     await sleep(10 * this.tickRate)
   }
@@ -364,9 +369,9 @@ export class Game implements GameInfo {
       numVotes[++i] = [player, voters.length, voters]
       // if (config.isDev) {
       //   if (player.id === config.BOT_OWNER_USER_ID) {
-      //     numVotes[0][1] = 20
       //     numVotes[i] = [player, 20, voters]
       //     player.currentRole = new Roles.Hunter()
+      //     numVotes[0][0].currentRole = new Roles.Hunter()
       //   }
       // }
 
@@ -419,8 +424,9 @@ export class Game implements GameInfo {
     await sleep(2 * this.tickRate)
 
     while (this.events.length > 0) {
-      const event = this.events.shift()
-      await event?.fn()
+      const event = this.events.shift()!
+      await event.fn()
+      this.timeline.push(event)
     }
   }
 
@@ -430,21 +436,30 @@ export class Game implements GameInfo {
   async getWinners() {
     this.players.forEach(p => p.currentRole.checkWin(p, this))
 
+    const results = this.players
+      .map(p => {
+        const roleName =
+          isCopier(p.currentRole) && p.currentRole.copiedRole !== undefined
+            ? p.currentRole.fullRole(this.ctx)
+            : this.ctx.t(p.currentRole.name)
+        return `${p.name}: ${p.won ? this.ctx.t('game.won') : this.ctx.t('game.lost')} ${
+          p.isDead ? this.ctx.t('game.dead') : this.ctx.t('game.alive')
+        }  -  ${roleName}`
+      })
+      .join('\n')
+
+    const unassigned = this.unassignedRoles
+      .map(r => {
+        return isCopier(r.currentRole) && r.currentRole.copiedRole !== undefined
+          ? r.currentRole.fullRole(this.ctx)
+          : this.ctx.t(r.currentRole.name)
+      })
+      .join(', ')
+
     const msg =
-      `<strong>${this.ctx.t('game.end')}</strong>\n\n${this.players
-        .map(p => {
-          const roleName = isCopier(p.currentRole) ? p.currentRole.fullRole(this.ctx) : this.ctx.t(p.currentRole.name)
-          return `${p.name}: ${p.won ? this.ctx.t('game.won') : this.ctx.t('game.lost')} ${
-            p.isDead ? this.ctx.t('game.dead') : this.ctx.t('game.alive')
-          }  -  ${roleName}`
-        })
-        .join('\n')}\n\n` +
+      `<strong>${this.ctx.t('game.end')}</strong>\n\n${results}\n\n` +
       `${this.ctx.t('vote.unassigned', {
-        roles: this.unassignedRoles
-          .map(r => {
-            return isCopier(r.currentRole) ? r.currentRole.fullRole(this.ctx) : this.ctx.t(r.currentRole.name)
-          })
-          .join(', '),
+        roles: unassigned,
       })}`
 
     await this.ctx.reply(msg)
@@ -485,6 +500,21 @@ export class Game implements GameInfo {
     )
 
     return deck.some(r => isCopier(r))
+  }
+
+  /**
+   * Announce the timeline of events that happened during the night
+   */
+  async announceTimeline() {
+    const eventBlock = this.timeline
+      .map(e => {
+        return `${e.icon} ${this.ctx.t(`events.${e.type}`)} -  ${e.author.name}:  [ ${e.targets
+          .map(t => t.name)
+          .join(', ')} ]`
+      })
+      .join('\n')
+
+    await this.ctx.reply(`${this.ctx.t('events')}\n\n${eventBlock}`)
   }
 
   async end() {
@@ -531,6 +561,10 @@ export class Game implements GameInfo {
   setupTimer() {
     this.flags.timerRunning = true
     delete this.flags.killTimer
+  }
+
+  updateTimeline() {
+    this.timeline.push(...this.events)
   }
 
   canExit(ts: number) {

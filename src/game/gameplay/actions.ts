@@ -173,7 +173,9 @@ export const Copy: Action = {
   fallback: (game: Game, player: Player) => {
     const options = getOptions(game.players, p => p.id !== player.id)
 
-    Events.Copy(player, options[Math.floor(Math.random() * options.length)], game).fn()
+    const copyEvent = Events.Copy(player, options[Math.floor(Math.random() * options.length)], game)
+    game.events.push(copyEvent)
+    copyEvent.fn()
   },
   setup: (game: Game, player: Player) => {
     if (player.ctx === undefined || !game.playerMap.has(player.id)) return
@@ -198,7 +200,9 @@ export const Copy: Action = {
       game.ctx.api.editMessageText(player.id, msg.message_id, game.ctx.t('vote.cast', { user: targets[0].name }))
     })
 
-    Events.Copy(player, targets[0], game).fn()
+    const copyEvent = Events.Copy(player, targets[0], game)
+    game.events.push(copyEvent)
+    copyEvent.fn()
 
     playerCtx.answerCallbackQuery()
     game.privateMsgs.delete(player.id)
