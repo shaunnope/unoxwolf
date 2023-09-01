@@ -476,6 +476,13 @@ export class Game implements GameInfo {
       .slice(this.players.length)
       .map((r, idx) => new Player(idx, this.ctx.t('misc.unassigned_role', { idx: idx + 1 }), r, undefined))
 
+    await this.ctx.reply(
+      `${this.ctx.t('game.roles')}\n${deck
+        .map(r => this.ctx.t(r.name))
+        .sort()
+        .join('\n')}`
+    )
+
     return deck.some(r => isCopier(r))
   }
 
@@ -494,8 +501,7 @@ export class Game implements GameInfo {
 
   async cleanupPMs(fallback = Actions.Vote.fallback) {
     for (const [playerId, promise] of this.privateMsgs.entries()) {
-      const player = this.playerMap.get(playerId)
-      if (player === undefined) return // NOTE: for coverage, this should never happen
+      const player = this.playerMap.get(playerId)!
 
       await player.ctx?.conversation.exit()
 

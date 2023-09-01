@@ -29,9 +29,8 @@ export class Werewolf extends Role {
   doNight(player: Player, game: GameInfo) {
     if (player.ctx === undefined) return
     const teamMembers = game.teams
-      .get(this.info.team)
-      ?.filter(other => other.id !== player.id && !other.role.info.isAide)
-    if (teamMembers === undefined) return // NOTE: for coverage, this should never happen
+      .get(this.info.team)!
+      .filter(other => other.id !== player.id && !other.role.info.isAide)
     let msg = ''
     if (teamMembers.length === 1) {
       msg = game.ctx.t('werewolf.lone')
@@ -152,9 +151,8 @@ export class Mason extends Villager {
   doNight(player: Player, game: GameInfo) {
     if (player.ctx === undefined) return
     const teamMembers = game.teams
-      .get(this.info.team)
-      ?.filter(other => other.id !== player.id && other.role instanceof Mason)
-    if (teamMembers === undefined) return // NOTE: for coverage, this should never happen
+      .get(this.info.team)!
+      .filter(other => other.id !== player.id && other.role instanceof Mason)
     let msg = ''
     if (teamMembers.length === 0) {
       msg = game.ctx.t('mason.lone')
@@ -203,9 +201,8 @@ export class Minion extends Werewolf {
   doNight(player: Player, game: GameInfo) {
     if (player.ctx === undefined) return
     const teamMembers = game.teams
-      .get(this.info.team)
-      ?.filter(other => other.id !== player.id && !other.role.info.isAide)
-    if (teamMembers === undefined) return // NOTE: for coverage, this should never happen
+      .get(this.info.team)!
+      .filter(other => other.id !== player.id && !other.role.info.isAide)
     let msg = ''
     if (teamMembers.length === 0) {
       msg = game.ctx.t('minion.lone')

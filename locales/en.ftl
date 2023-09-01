@@ -90,6 +90,7 @@ game =
     .not_started = No game has been started yet!
     .already_started = A game has already been started!
     .end = Game over!
+    .roles = <strong>Available Roles:</strong>
     .timer_skipped = <em>Skipping forward...</em>
     .seconds_left = { $time ->
         [one] {$time} second left

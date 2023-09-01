@@ -58,7 +58,7 @@ export const createBot = (
     bot.use(languageFeature)
   }
 
-  bot.use(logHandle('unhandled'), unhandledHandler)
+  bot.use(unhandledHandler)
 
   if (config.isDev) {
     bot.catch(errorHandler)

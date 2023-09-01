@@ -1,3 +1,10 @@
+import { Composer } from 'grammy'
 import type { Context } from '../context'
 
-export const unhandledHandler = <C extends Context>(ctx: C) => ctx.chat && ctx.reply(ctx.t('unhandled'))
+import { logHandle } from '../helpers/logging'
+
+const composer = new Composer<Context>()
+
+composer.on(':text', logHandle('unhandled'), ctx => ctx.reply(ctx.t('unhandled')))
+
+export { composer as unhandledHandler }
