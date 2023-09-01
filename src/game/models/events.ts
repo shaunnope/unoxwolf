@@ -1,6 +1,8 @@
 import { GameEvent, GameInfo as Game } from '~/game/models/game'
 import { Player } from '~/game/models/player'
-import { isCopier } from '../roles/auxilary'
+import { isCopier } from '../roles/copier'
+
+// TODO: remove priority from parameters. should be accessible from Player
 
 export const Vote = (player: Player, target: Player, game: Game) => {
   player.votedFor = target
@@ -52,6 +54,23 @@ export const Swap = (
   } as GameEvent
 }
 
+export const Peek = (player: Player, targets: Player[], callbackFn?: () => void, priority: number = 2) => {
+  return {
+    type: 'peek',
+    author: player,
+    targets,
+    priority,
+    fn:
+      callbackFn !== undefined
+        ? callbackFn
+        : () => {
+            if (player.ctx === undefined) return
+            const ctx = player.ctx!
+            ctx.reply(targets.map(t => ctx.t('misc.peek_role', { user: t.name, role: ctx.t(t.role.name) })).join('\n'))
+          },
+  } as GameEvent
+}
+
 export const Reveal = (player: Player, targets: Player[], callbackFn?: () => void, priority: number = 0) => {
   return {
     type: 'reveal',
@@ -95,10 +114,10 @@ export const Copy = (player: Player, target: Player, game: Game) => {
     type: 'copy',
     author: player,
     targets: [target],
-    priority: 0,
+    priority: player.innateRole.priority,
     fn: () => {
-      if (!isCopier(player.role)) return
-      player.role.copiedRole = target.role
+      if (!isCopier(player.innateRole)) return
+      player.innateRole.copiedRole = target.role
 
       const teamMembers = game.teams.get(target.role.info.team)
       if (teamMembers === undefined) game.teams.set(target.role.info.team, [player])
@@ -106,6 +125,24 @@ export const Copy = (player: Player, target: Player, game: Game) => {
 
       if (player.ctx === undefined) return
       player.ctx.reply(player.ctx.t(target.role.lore))
+    },
+  } as GameEvent
+}
+
+export const Rotate = (player: Player, rotation: number, game: Game, priority: number = 0) => {
+  return {
+    type: 'rotate',
+    author: player,
+    targets: [] as Player[],
+    priority,
+    fn: () => {
+      const targets = game.players.filter(p => p.id !== player.id && !p.isProtected)
+      const r = ((-rotation % targets.length) + targets.length) % targets.length
+      const shiftedRoles = targets.map(p => p.currentRole)
+      shiftedRoles.push(...shiftedRoles.splice(0, r))
+      targets.forEach((p, i) => {
+        p.currentRole = shiftedRoles[i]
+      })
     },
   } as GameEvent
 }

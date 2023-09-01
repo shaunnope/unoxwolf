@@ -33,7 +33,7 @@ pmFeature.command('start', logHandle('command-start'), ctx => {
       game.addPlayer(ctx)
       return
     }
-    ctx.reply(ctx.t(`game_init.${status}`, { chat: getChatTitle(ctx.games.get(ctx.session.game)!.ctx) }))
+    ctx.reply(ctx.t(`join.${status}`, { chat: getChatTitle(ctx.games.get(ctx.session.game)!.ctx) }))
   }
 })
 
@@ -77,15 +77,24 @@ feature.command('leave', logHandle('command-leave'), async ctx => {
   }
 })
 
-// FIXME: this does not seem to work
-feature.command('nextphase', logHandle('command-nextphase'), async ctx => {
+feature.command('forcenext', logHandle('command-forcenext'), async ctx => {
   const game = getGameFromCtx(ctx)
   if (game === undefined) return
-  // TODO - more conditions: only allow admin/ game owner to skip timer etc.
+  if (game.createdBy !== ctx.from?.id || 0) return
   if (game.flags.timerRunning) {
     game.flags.killTimer = true
     ctx.reply(ctx.t('game.timer_skipped'))
   }
+})
+
+feature.command('players', logHandle('command-players'), async ctx => {
+  const game = getGameFromCtx(ctx)
+  if (game === undefined) return
+  await ctx.reply(
+    `${ctx.t('join.count', {
+      count: game.players.length,
+    })}\n${game.players.map(p => p.name).join('\n')}`
+  )
 })
 
 composer.use(gameActions)

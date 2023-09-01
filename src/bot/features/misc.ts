@@ -2,6 +2,8 @@ import { Composer } from 'grammy'
 import type { Context } from '~/bot/context'
 import { logHandle } from '~/bot/helpers/logging'
 
+import { lgtbFeature } from '.'
+
 const composer = new Composer<Context>()
 
 const feature = composer
@@ -20,5 +22,7 @@ feature.command('ping', logHandle('command-ping'), async ctx => {
   message += `\n${ctx.t('ping_command.pong', { ts })}`
   await msg.editText(message)
 })
+
+feature.use(lgtbFeature)
 
 export { composer as miscFeature }

@@ -9,7 +9,7 @@ import { Player } from '~/game/models/player'
 // FIXME: middleware unable to get existing game
 export const getGameFromCtx = (ctx: Context) => games.get(ctx.session.games[getForumTopicId(ctx) || -1])
 export const setGame = (ctx: Context, game: Game) => {
-  const key = `${ctx.chat?.id || 0}+${getForumTopicId(ctx) || -1}`
+  const key = getForumTopicId(ctx) || -1
   ctx.session.games[key] = game.id
   games.set(game.id, game)
 }
@@ -27,7 +27,9 @@ export const getChatTitle = (ctx: Context) => {
   let groupTitle = ''
   switch (ctx.chat?.type) {
     case 'supergroup':
-    // TODO: Add topic name
+      // TODO: Add topic name
+      groupTitle = ctx.chat?.title
+      break
     case 'group':
       groupTitle = ctx.chat?.title
       break
@@ -50,8 +52,7 @@ export const playerInGame = (game: Game, ctx: Context): false | 'already_in_game
   const oldGame = ctx.games.get(ctx.session.game)
   // game ended
   if (oldGame === undefined) return false
-  const playerId = ctx.from?.id
-  if (playerId === undefined) return false // TODO: filter Context type to only include messages with from.id
+  const playerId = ctx.from!.id // TODO: filter Context type to only include messages with from.id
 
   if (oldGame.id !== game.id) {
     if (oldGame.playerMap.has(playerId)) return 'in_another_game'

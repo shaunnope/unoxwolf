@@ -5,7 +5,7 @@ import { or } from 'grammy-guard'
 import _ from 'lodash'
 import type { Context } from '~/bot/context'
 import { isAdminUser, isOwnerUser } from '~/bot/filters'
-import { DEFAULT_LANGUAGE_CODE, getPrivateChatAdminCommands, getPrivateChatCommands } from '~/bot/helpers/bot-commands'
+import { DEFAULT_LANGUAGE_CODE, getPrivateChatAdminCommands, getLanguageCommand } from '~/bot/helpers/bot-commands'
 import { logHandle } from '~/bot/helpers/logging'
 import { userRequests } from '~/bot/helpers/user-requests'
 import { isMultipleLocales } from '~/bot/i18n'
@@ -85,14 +85,8 @@ featureForOwner.filter(
     const updateCommandsForUser = user.isAdmin
       ? ctx.api.setMyCommands(
           [
-            ...getPrivateChatCommands({
-              localeCode: user.languageCode ?? DEFAULT_LANGUAGE_CODE,
-              includeLanguageCommand: isMultipleLocales,
-            }),
-            ...getPrivateChatAdminCommands({
-              localeCode: user.languageCode ?? DEFAULT_LANGUAGE_CODE,
-              includeLanguageCommand: isMultipleLocales,
-            }),
+            ...getPrivateChatAdminCommands(user.languageCode ?? DEFAULT_LANGUAGE_CODE),
+            ...(isMultipleLocales ? [getLanguageCommand(user.languageCode ?? DEFAULT_LANGUAGE_CODE)] : []),
           ],
           {
             scope: {

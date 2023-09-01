@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import * as Roles from '~/game/roles'
 
-import type { Role } from '~/game/models/player'
+import type { Role } from '~/game/models/role'
 
 export const generateRoles = (n: number, roles: (typeof Role)[] | Set<typeof Role>, extra: number = 3) => {
   // TODO: dynamic role generation

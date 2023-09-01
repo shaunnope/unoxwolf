@@ -1,3 +1,21 @@
+unhandled = Unrecognized update. Try /start
+
+commands =
+    .unknown = Unknown command
+    .start = Start the bot
+    .language = Change language
+    .admin = Make user an administrator
+    .stats = Stats
+    .setcommands = Set bot commands
+    .help = Help
+    .startgame = Start a game
+    .join = Join a game
+    .leave = Leave a game
+    .rolelist = List all available roles
+    .players = List all players
+    .ping = Check bot reply time
+    .forcenext = Force start next phase
+
 language =
     .select = Select your language
     .changed = Language successfully changed!
@@ -19,35 +37,6 @@ admin =
 
 gmgm =
     .no-set-name = No sticker set name
-
-unhandled = Unrecognized update. Try /start
-
-start_command =
-    .description = Start the bot
-language_command =
-    .description = Change language
-admin_command =
-    .description = Make user an administrator
-stats_command =
-    .description = Stats
-setcommands_command =
-    .description = Set bot commands
-
-commands =
-    .unknown = Unknown command
-    .start = Start the bot
-    .language = Change language
-    .admin = Make user an administrator
-    .stats = Stats
-    .setcommands = Set bot commands
-    .help = Help
-    .startgame = Start a game
-    .join = Join a game
-    .flee = Leave a game
-    .rolelist = List all available roles
-    .players = List all players
-    .ping = Check bot reply time
-    .setlang = Set language
 
 ping_command =
     .ping = <strong>Time to receive ping:</strong> {$ts} ms
@@ -102,10 +91,14 @@ game =
     .already_started = A game has already been started!
     .end = Game over!
     .timer_skipped = <em>Skipping forward...</em>
+    .seconds_left = { $time ->
+        [one] {$time} second left
+        *[other] {$time} seconds left
+    }
     .times_up = Time's up!
     .won = 🏆
     .lost = 🫂
-    .dead = ⚰️
+    .dead = 💀
     .alive = 😃
 
 copy =
@@ -148,7 +141,10 @@ misc =
     .self_role_changed = You are now a {$role}
     .self_team_changed = You are now on the {$team} team
     .unknown_user = Someone
-    .no_user = Noone
+    .no_user = No one
+    .undefined = Undefined
+    .pass = Pass
+    .passed = You chose to do nothing.
 
 team =
     .village = Village
@@ -158,7 +154,7 @@ team =
     .assassin = Assassin
     .alien = Alien
     .synth = Synthetic Alien
-    .blob = Blob
+    .blob = Symbiote
     .mortician = Mortician
 
 role = Role
@@ -209,7 +205,8 @@ seer = Seer
         At night, you may look at one other player's role or two of the unassigned roles.
     .action = Whose role would you like to look at?
     .reveal = { misc.peek_role }
-    .reveal2 = A { $role1 } and a { $role2 } are unassigned tonight.
+    .reveal2 = The forces of the universe reveal the following unassigned roles:
+
 
 robber = Robber
     .name = {robber} {robber.emoji}
@@ -428,7 +425,6 @@ fool = Fool
     .lore = {seer.lore}
     .action = {seer.action}
     .reveal = {seer.reveal}
-    .reveal2 = {seer.reveal2}
 
 bodyguard = Bodyguard
     .name = {bodyguard} {bodyguard.emoji}

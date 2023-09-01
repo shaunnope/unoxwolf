@@ -34,23 +34,27 @@ feature.callbackQuery(/peek(.+)\+(.+)/, logHandle('callback-peek'), async ctx =>
   const res = validateCallbackQuery(ctx)
   if (res === undefined) return
   const [game, player, userId] = res
-  let msg = ''
   if (player.role instanceof Roles.Seer) {
+    const targets = []
+    let payload: string
     if (userId === 'un') {
-      const [role1, role2] = _.sampleSize(game.unassignedRoles, 2)
-      msg = ctx.t('seer.reveal2', { role1: ctx.t(role1.name), role2: ctx.t(role2.name) })
+      targets.push(..._.sampleSize(game.unassignedRoles, 2))
+      payload = ctx.t('misc.unassigned', { count: 2 })
     } else {
       const target = game.playerMap.get(Number(userId))
       if (target === undefined) {
         ctx.answerCallbackQuery(ctx.t('game_error.invalid_vote', { user: userId }))
         return
       }
-      msg = ctx.t('seer.reveal', { user: target.name, role: ctx.t(target.role.name) })
+      targets.push(target)
+      payload = target.name
     }
-    game.privateMsgs.get(player.id)?.then(oldMsg => {
-      ctx.api.editMessageText(player.id, oldMsg.message_id, msg)
+    Actions.Peek.fn(game, ctx, targets, {
+      priority: player.role.priority,
+      responsePayload: {
+        user: payload,
+      },
     })
-    game.privateMsgs.delete(player.id)
   }
 })
 

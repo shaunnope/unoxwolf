@@ -1,7 +1,8 @@
 /* eslint-disable class-methods-use-this */
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import { Context } from '~/bot/context'
-import { Role, Player, RoleInfo } from '../models/player'
+import { Player } from '../models/player'
+import { Role, RoleInfo } from '../models/role'
 import { GameInfo } from '../models/game'
 import { Team } from '../models/enums'
 
@@ -21,6 +22,8 @@ export class Copier extends Role implements CanCopy {
 
   copiedRole?: Role
 
+  // NOTE: can fail with cycles (more than 1 active doppelganger)
+  // Ultimately a non-issue since at most 1 doppelganger can be active at a time
   get tail(): Role {
     if (this.copiedRole === undefined) return this
     if (!isCopier(this.copiedRole)) return this.copiedRole

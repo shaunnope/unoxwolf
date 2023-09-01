@@ -6,7 +6,7 @@ import stickers from './lgtb.json'
 
 const composer = new Composer<Context>()
 
-const feature = composer
+const feature = composer.chatType('private')
 
 feature.on(':sticker', async ctx => {
   const sticker = {
@@ -24,11 +24,27 @@ feature.on(':sticker', async ctx => {
   ctx.reply(JSON.stringify(sticker) || ctx.t('gmgm.no-set-name'))
 })
 
-feature.command(['gmgm_lgtb', 'lgtb', 'gmgm'], logHandle('command-gmgm'), ctx => {
+composer.command(['gmgm_lgtb', 'lgtb', 'gmgm'], logHandle('command-gmgm'), ctx => {
   const sticker = stickers[Math.floor(Math.random() * stickers.length)]
   ctx.api.sendSticker(ctx.msg.chat.id, sticker.file_id, {
     reply_to_message_id: ctx.msg.message_id,
   })
+})
+
+composer.inlineQuery(['gmgm_lgtb', 'lgtb', 'gmgm'], logHandle('inline-gmgm'), async ctx => {
+  const sticker = stickers[Math.floor(Math.random() * stickers.length)]
+  await ctx.answerInlineQuery(
+    [
+      {
+        type: 'sticker',
+        id: sticker.file_unique_id,
+        sticker_file_id: sticker.file_id,
+      },
+    ],
+    {
+      cache_time: 0,
+    }
+  )
 })
 
 export { composer as lgtbFeature }

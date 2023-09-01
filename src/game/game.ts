@@ -16,7 +16,7 @@ import * as Actions from '~/game/gameplay/actions'
 import { config } from '~/config'
 import { deleteGame, getChatTitle } from './helpers/game.context'
 import { generateRoles } from './roles/builder'
-import { isCopier } from './roles/auxilary'
+import { isCopier } from './roles/copier'
 
 const defaultSettings: GameSettings = {
   joinTimeout: 180,
@@ -46,10 +46,14 @@ const defaultSettings: GameSettings = {
   marks: [],
 }
 
+const timeLeftReminders = [10, 30, 60]
+
 export class Game implements GameInfo {
   readonly id: string
 
   readonly createdTime: Date
+
+  readonly createdBy: number
 
   endTime: Date | undefined = undefined
 
@@ -90,6 +94,7 @@ export class Game implements GameInfo {
   constructor(ctx: Context, settings: GameSettings = defaultSettings) {
     this.ctx = ctx
     this.id = createHash('sha256').update(`${this.chatId.toString()}-${Date.now()}`).digest('hex').slice(0, 20)
+    this.createdBy = ctx.from?.id || 0
     this.createdTime = new Date()
 
     this.state = 'lobby'
@@ -217,27 +222,7 @@ export class Game implements GameInfo {
         this.newPlayers.clear()
       }
 
-      if ([10, 30, 60].map(x => this.settings.joinTimeout - x).includes(i)) {
-        const left = this.settings.joinTimeout - i
-        if (left > 60) {
-          this.serviceMsgs.push(
-            await this.ctx.reply(
-              this.ctx.t('game_init.minutes_left', {
-                time: Math.floor(left / 60),
-              }),
-              {
-                reply_markup: this.callToAction,
-              }
-            )
-          )
-        } else {
-          this.serviceMsgs.push(
-            await this.ctx.reply(this.ctx.t('game_init.seconds_left', { time: left }), {
-              reply_markup: this.callToAction,
-            })
-          )
-        }
-      }
+      await this.countdownPrompt(ts, this.settings.joinTimeout, this.callToAction)
 
       ts++
       await sleep(this.tickRate)
@@ -273,8 +258,8 @@ export class Game implements GameInfo {
     this.events = []
 
     this.players.forEach(p => {
-      if (isCopier(p.role)) {
-        p.role.copy(p, this)
+      if (isCopier(p.innateRole)) {
+        p.innateRole.copy(p, this)
       }
     })
 
@@ -285,10 +270,11 @@ export class Game implements GameInfo {
         break
       }
 
-      // TODO: announce time left
+      await this.countdownPrompt(i, this.settings.copyTimeout)
 
       await sleep(this.tickRate)
     }
+    this.cleanupMsgs()
     await this.cleanupPMs(Actions.Copy.fallback)
     this.ctx.reply(this.ctx.t('copy.end'))
 
@@ -301,7 +287,8 @@ export class Game implements GameInfo {
    */
   async nightPhase() {
     this.privateMsgs = new Map()
-    this.serviceMsgs = [await this.ctx.reply(this.ctx.t('night.start'))]
+    this.serviceMsgs = []
+    await this.ctx.reply(this.ctx.t('night.start'))
 
     this.events = []
 
@@ -314,12 +301,13 @@ export class Game implements GameInfo {
         break
       }
 
-      // TODO: announce time left
+      await this.countdownPrompt(i, this.settings.nightTimeout)
 
       await sleep(this.tickRate)
     }
+    this.cleanupMsgs()
     await this.cleanupPMs(() => {})
-    this.ctx.reply(this.ctx.t('night.end'))
+    await this.ctx.reply(this.ctx.t('night.end'))
     this.events.sort((a, b) => a.priority - b.priority).forEach(e => e.fn())
 
     await sleep(10 * this.tickRate)
@@ -351,11 +339,11 @@ export class Game implements GameInfo {
         break
       }
 
-      // TODO: announce time left
+      await this.countdownPrompt(i, this.settings.voteTimeout)
 
       await sleep(this.tickRate)
     }
-
+    this.cleanupMsgs()
     await this.cleanupPMs()
 
     const voteResultsMsg = await this.ctx.reply(`${this.ctx.t('vote.end')} ${this.ctx.t('vote.tally')}`)
@@ -374,13 +362,14 @@ export class Game implements GameInfo {
 
       numVotes[++i] = [player, voters.length, voters]
       // if (config.isDev) {
-      //   if (player.id === config.BOT_ADMIN_USER_ID) {
+      //   if (player.id === config.BOT_OWNER_USER_ID) {
       //     numVotes[0][1] = 20
       //     numVotes[i] = [player, 20, voters]
       //     player.currentRole = new Roles.Hunter()
       //   }
       // }
 
+      // collate non-aide players in main teams
       if (
         !player.currentRole.info.isAide &&
         [Team.Village, Team.Werewolf, Team.Vampire, Team.Alien].includes(player.currentRole.info.team)
@@ -389,10 +378,6 @@ export class Game implements GameInfo {
         if (teamMembers === undefined) this.teams.set(player.currentRole.info.team, [player])
         else teamMembers.push(player)
       }
-
-      const roleName = isCopier(player.currentRole)
-        ? player.currentRole.fullRole(this.ctx)
-        : this.ctx.t(player.currentRole.name)
 
       voteResults += `<strong>${player.name}:</strong>  (${numVotes[i][1]})\n`
 
@@ -454,7 +439,11 @@ export class Game implements GameInfo {
         })
         .join('\n')}\n\n` +
       `${this.ctx.t('vote.unassigned', {
-        roles: this.unassignedRoles.map(r => this.ctx.t(r.currentRole.name)).join(', '),
+        roles: this.unassignedRoles
+          .map(r => {
+            return isCopier(r.currentRole) ? r.currentRole.fullRole(this.ctx) : this.ctx.t(r.currentRole.name)
+          })
+          .join(', '),
       })}`
 
     await this.ctx.reply(msg)
@@ -469,8 +458,10 @@ export class Game implements GameInfo {
     this.players.forEach((p, i) => {
       p.setup(deck[i])
 
-      // if (config.isDev && p.id === config.BOT_ADMIN_USER_ID) {
-      //   p.setup(new Roles.Doppelganger())
+      // if (config.isDev && p.id === config.BOT_OWNER_USER_ID) {
+      //   const role = new Roles.Doppelganger()
+      //   p.setup(role)
+      //   deck[i] = role
       // }
 
       // collate players by team
@@ -493,6 +484,9 @@ export class Game implements GameInfo {
     deleteGame(this)
   }
 
+  /**
+   * Delete all service messages
+   */
   cleanupMsgs() {
     this.serviceMsgs.forEach(msg => this.ctx.api.deleteMessage(this.chatId, msg.message_id))
     this.serviceMsgs = []
@@ -509,6 +503,21 @@ export class Game implements GameInfo {
         this.ctx.api.editMessageText(playerId, msg.message_id, this.ctx.t('game.times_up'))
         fallback(this, player)
       })
+    }
+  }
+
+  async countdownPrompt(
+    ts: number,
+    duration: number = this.settings.joinTimeout,
+    kb: InlineKeyboard | undefined = undefined
+  ) {
+    if (timeLeftReminders.map(x => duration - x).includes(ts)) {
+      const left = duration - ts
+      this.serviceMsgs.push(
+        await this.ctx.reply(this.ctx.t('game.seconds_left', { time: left }), {
+          reply_markup: kb,
+        })
+      )
     }
   }
 

@@ -6,6 +6,10 @@ import { Context } from '~/bot/context'
 import type { GameInfo as Game } from '../models/game'
 import { createVoteKB, getOptions, sendActionPrompt } from '../helpers/keyboards'
 
+type TranslationContext = {
+  [key: string]: string
+}
+
 export type ActionChoice = {
   name: string // TODO: specific strings
   gameId: string
@@ -21,6 +25,8 @@ export type ActionOptions = {
   isAuto?: true
   predicate?: (player: Player) => boolean
   eventCallback?: () => void
+
+  responsePayload?: TranslationContext
 }
 
 const DEFAULT_ACTION_OPTIONS: ActionOptions = {
@@ -115,36 +121,34 @@ export const Swap: Action = {
  */
 export const Peek: Action = {
   fallback: (game: Game, player: Player) => {},
-  setup: (game: Game, player: Player) => {
-    const options = getOptions(game.players, other => other.id !== player.id)
-    game.privateMsgs.set(
-      player.id,
-      game.ctx.api.sendMessage(player.id, game.ctx.t('vote'), {
-        reply_markup: createVoteKB(options, `vote${game.id}`),
-      })
-    )
-  },
-  fn: (game: Game, playerCtx: Context, targets?: Player[]) => {
-    if (playerCtx.from?.id === undefined) return
-    const player = game.playerMap.get(playerCtx.from?.id)
+  setup: (game: Game, player: Player) => {},
+  fn: (game: Game, playerCtx: Context, targets?: Player[], other: ActionOptions = DEFAULT_ACTION_OPTIONS) => {
+    const player = game.playerMap.get(playerCtx.from!.id)
     if (player === undefined) return
-    if (game.privateMsgs.get(player.id) === undefined) {
+    if (!other.isAuto && game.privateMsgs.get(player.id) === undefined) {
       playerCtx.reply(playerCtx.t('game_error.wrong_qn'))
       return
     }
-    if (targets === undefined || targets.length !== 1) {
-      playerCtx.answerCallbackQuery(
-        playerCtx.t('game_error.invalid_vote', { user: targets?.toString() || 'undefined' })
-      )
+    if (targets === undefined) {
+      if (other.isAuto) return
+      playerCtx.answerCallbackQuery(playerCtx.t('game_error.invalid_vote', { user: playerCtx.t('misc.undefined') }))
       return
     }
-    game.events.push(Events.Vote(player, targets[0], game))
-    game.privateMsgs.get(player.id)?.then(msg => {
-      game.ctx.api.editMessageText(player.id, msg.message_id, game.ctx.t('vote.cast', { user: targets[0].name }))
-    })
-    game.privateMsgs.delete(player.id)
+    // TODO: validate that targets in game
+    game.events.push(Events.Peek(player, targets, other.eventCallback, other.priority))
 
-    playerCtx.answerCallbackQuery()
+    if (!other.isAuto) {
+      game.privateMsgs.get(player.id)?.then(msg => {
+        game.ctx.api.editMessageText(
+          player.id,
+          msg.message_id,
+          game.ctx.t('vote.cast', other.responsePayload ?? { user: targets[0].name })
+        )
+      })
+      game.privateMsgs.delete(player.id)
+
+      playerCtx.answerCallbackQuery()
+    }
   },
 }
 
@@ -154,19 +158,10 @@ export const Peek: Action = {
  */
 export const Reveal: Action = {
   fallback: (game: Game, player: Player) => {},
-  setup: (game: Game, player: Player) => {
-    const options = getOptions(game.players, other => other.id !== player.id)
-    game.privateMsgs.set(
-      player.id,
-      game.ctx.api.sendMessage(player.id, game.ctx.t('vote'), {
-        reply_markup: createVoteKB(options, `vote${game.id}`),
-      })
-    )
-  },
+  setup: (game: Game, player: Player) => {},
   fn: (game: Game, playerCtx: Context, targets?: Player[], other: ActionOptions = DEFAULT_ACTION_OPTIONS) => {
-    if (playerCtx.from?.id === undefined) return
-    const player = game.playerMap.get(playerCtx.from?.id)
-    if (player?.ctx === undefined || targets === undefined) return
+    const player = game.playerMap.get(playerCtx.from!.id)
+    if (player === undefined || targets === undefined) return
     game.events.push(Events.Reveal(player, targets, other.eventCallback, other.priority))
   },
 }
@@ -207,5 +202,35 @@ export const Copy: Action = {
 
     playerCtx.answerCallbackQuery()
     game.privateMsgs.delete(player.id)
+  },
+}
+
+/**
+ * Rotate roles around players
+ */
+export const Rotate: Action = {
+  fallback: (game: Game, player: Player, other: ActionOptions = DEFAULT_ACTION_OPTIONS) => {
+    const rotation = Math.random() > 0.5 ? 1 : -1
+    game.events.push(Events.Rotate(player, rotation, game, other.priority))
+  },
+  setup: (game: Game, player: Player) => {
+    if (player.ctx === undefined || !game.playerMap.has(player.id)) return
+    const options = getOptions(game.players, p => p.id !== player.id)
+    game.privateMsgs.set(player.id, sendActionPrompt(player, createVoteKB(options, `swap${game.id}`))!)
+  },
+  fn: (game: Game, playerCtx: Context, targets?: Player[], other: ActionOptions = DEFAULT_ACTION_OPTIONS) => {
+    if (playerCtx.from?.id === undefined) return
+    const player = game.playerMap.get(playerCtx.from?.id)
+    if (player === undefined) return
+    if (targets === undefined || targets.length !== 2) {
+      if (!other.isAuto)
+        playerCtx.answerCallbackQuery(
+          playerCtx.t('game_error.invalid_vote', { user: targets?.toString() || 'undefined' })
+        )
+      return
+    }
+
+    game.events.push(Events.Swap(player, targets, game, other.priority, !other.isAuto))
+    if (!other.isAuto) playerCtx.answerCallbackQuery()
   },
 }

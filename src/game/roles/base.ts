@@ -2,13 +2,14 @@
 import _ from 'lodash'
 import { GameInfo } from '~/game/models/game'
 import { Team } from '~/game/models/enums'
-import { Role, RoleInfo, Player } from '~/game/models/player'
+import { Player } from '~/game/models/player'
+import { Role, RoleInfo } from '~/game/models/role'
 
 import * as Actions from '~/game/gameplay/actions'
 import * as Events from '~/game/models/events'
 import { createVoteKB, getOptions, sendActionPrompt } from '../helpers/keyboards'
 
-import { Copier, isCopier } from './auxilary'
+import { Copier } from './copier'
 
 export class Villager extends Role {
   static readonly info: RoleInfo = {
@@ -35,7 +36,7 @@ export class Werewolf extends Role {
     if (teamMembers.length === 1) {
       msg = game.ctx.t('werewolf.lone')
       if (game.settings.loneWolf) {
-        const role = _.sample(game.unassignedRoles)?.role.info.name || 'null'
+        const role = _.sample(game.unassignedRoles)!.role.info.name
         msg += `\n${game.ctx.t('werewolf.lone2', { role: game.ctx.t(role) })}`
       }
     } else {
@@ -56,6 +57,7 @@ export class Seer extends Villager {
     name: 'seer',
     team: Team.Village,
     command: 'roleSeer',
+    priority: 2,
   }
 
   doNight(player: Player, game: GameInfo) {
@@ -87,7 +89,6 @@ export class Robber extends Villager {
     }
     const options = getOptions(game.players, other => other.id !== player.id)
     const kb = createVoteKB(options, `swap${game.id}`)
-    // TODO: add pass option
 
     game.privateMsgs.set(player.id, sendActionPrompt(player, kb)!)
   }
@@ -98,7 +99,7 @@ export class Troublemaker extends Villager {
     name: 'troublemaker',
     team: Team.Village,
     command: 'roleTM',
-    priority: 3,
+    priority: 6,
   }
 
   async doNight(player: Player, game: GameInfo) {
@@ -152,11 +153,7 @@ export class Mason extends Villager {
     if (player.ctx === undefined) return
     const teamMembers = game.teams
       .get(this.info.team)
-      ?.filter(
-        other =>
-          other.id !== player.id &&
-          (other.role instanceof Mason || (isCopier(other.role) && other.role.tail instanceof Mason))
-      )
+      ?.filter(other => other.id !== player.id && other.role instanceof Mason)
     if (teamMembers === undefined) return // NOTE: for coverage, this should never happen
     let msg = ''
     if (teamMembers.length === 0) {
@@ -181,10 +178,15 @@ export class Insomniac extends Villager {
   doNight(player: Player, game: GameInfo) {
     if (player.ctx === undefined) return
 
-    Actions.Reveal.fn(game, player.ctx, [player], {
+    Actions.Peek.fn(game, player.ctx, [player], {
       priority: this.priority,
+      isAuto: true,
       eventCallback: () => {
-        player.ctx!.reply(player.ctx!.t(`insomniac.${(player.currentRole === player.role).toString()}`))
+        player.ctx!.reply(
+          player.ctx!.t(`insomniac.${(player.currentRole === player.innateRole).toString()}`, {
+            role: player.ctx!.t(player.currentRole.name),
+          })
+        )
       },
     })
   }
@@ -255,5 +257,11 @@ export class Doppelganger extends Copier {
     name: 'doppelganger',
     team: Team.Village,
     command: 'roleDG',
+    priority: 1,
+  }
+
+  get priority() {
+    if (this.copiedRole === undefined) return super.priority
+    return this.tail.priority + 0.5
   }
 }

@@ -88,7 +88,7 @@ export function createContextConstructor(container: Container) {
   } as unknown as new (update: Update, api: Api, me: UserFromGetMe) => Context
 }
 
-// TODO: log wrapper doesn't appear to work
+// FIXME: log wrapper doesn't appear to work
 export const createConversation = <C extends DefaultContext>(
   builder: ConversationFn<C>,
   config: string | ConversationConfig = {}

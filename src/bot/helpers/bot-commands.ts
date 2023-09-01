@@ -1,3 +1,4 @@
+import { BotCommand } from '@grammyjs/types'
 import { i18n } from '../i18n'
 
 export const DEFAULT_LANGUAGE_CODE = 'en'
@@ -6,7 +7,12 @@ if (!i18n.locales.includes(DEFAULT_LANGUAGE_CODE)) {
   throw new Error(`Localization for default language code (${DEFAULT_LANGUAGE_CODE}) is missing`)
 }
 
-const ALL_COMMANDS = new Map<string, { command: string; description: string }>(
+type Command = {
+  command: string
+  description: string
+}
+
+const ALL_COMMANDS = new Map<string, Command>(
   Object.entries({
     start: {
       command: 'start',
@@ -40,9 +46,9 @@ const ALL_COMMANDS = new Map<string, { command: string; description: string }>(
       command: 'startgame',
       description: 'commands.startgame',
     },
-    flee: {
-      command: 'flee',
-      description: 'commands.flee',
+    leave: {
+      command: 'leave',
+      description: 'commands.leave',
     },
     players: {
       command: 'players',
@@ -52,10 +58,14 @@ const ALL_COMMANDS = new Map<string, { command: string; description: string }>(
       command: 'ping',
       description: 'commands.ping',
     },
+    forcenext: {
+      command: 'forcenext',
+      description: 'commands.forcenext',
+    },
   })
 )
 
-const getCommand = (key: string, localeCode: string = DEFAULT_LANGUAGE_CODE) => {
+const getCommand = (key: string, localeCode: string = DEFAULT_LANGUAGE_CODE): BotCommand => {
   const command = ALL_COMMANDS.get(key)
   if (command === undefined) {
     return {
@@ -69,29 +79,27 @@ const getCommand = (key: string, localeCode: string = DEFAULT_LANGUAGE_CODE) => 
   }
 }
 
-export const getPrivateChatCommands = (options: { localeCode: string; includeLanguageCommand: boolean }) => {
-  const commands = [getCommand('start', options.localeCode), getCommand('ping', options.localeCode)]
-
-  if (options.includeLanguageCommand) {
-    commands.push(getCommand('language', options.localeCode))
-  }
-
-  return commands
+const getGlobalChatCommands = (localeCode: string): BotCommand[] => {
+  return [getCommand('start', localeCode), getCommand('ping', localeCode), getCommand('help', localeCode)]
 }
 
-export const getPrivateChatAdminCommands = (options: { localeCode: string; includeLanguageCommand: boolean }) => {
-  const commands = [getCommand('stats', options.localeCode), getCommand('setcommands', options.localeCode)]
-
-  return commands
+export const getPrivateChatCommands = (localeCode: string): BotCommand[] => {
+  return [...getGlobalChatCommands(localeCode), getCommand('rolelist', localeCode)]
 }
 
-export const getGroupChatCommands = (options: { localeCode: string }) => {
-  const commands = [
-    getCommand('startgame', options.localeCode),
-    getCommand('join', options.localeCode),
-    getCommand('flee', options.localeCode),
-    getCommand('players', options.localeCode),
-    getCommand('ping', options.localeCode),
+export const getPrivateChatAdminCommands = (localeCode: string): BotCommand[] => {
+  return [...getPrivateChatCommands(localeCode), getCommand('setcommands', localeCode)]
+}
+
+export const getGroupChatCommands = (localeCode: string): BotCommand[] => {
+  return [
+    getCommand('startgame', localeCode),
+    getCommand('leave', localeCode),
+    getCommand('players', localeCode),
+    getCommand('forcenext', localeCode),
   ]
-  return commands
+}
+
+export const getLanguageCommand = (localeCode: string): BotCommand => {
+  return getCommand('language', localeCode)
 }

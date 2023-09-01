@@ -3,7 +3,9 @@ import type { Message } from '@grammyjs/types'
 
 import type { Context } from '~/bot/context'
 import { Team } from './enums'
-import type { Role, Mark, Player } from './player'
+import type { Player } from './player'
+import type { Role } from './role'
+import type { Affliction } from './affliction'
 
 export type GameSettings = {
   joinTimeout: number
@@ -25,12 +27,13 @@ export type GameSettings = {
   secretDrunk?: true
 
   roles: (typeof Role)[]
-  marks: Mark[]
+  marks: Affliction[]
 }
 
 export type GameInfo = {
   id: string
   ctx: Context
+  createdBy: number
   createdTime: Date
   endTime: Date | undefined
   chatId: number
@@ -52,7 +55,7 @@ export type GameInfo = {
   callToAction: InlineKeyboard | undefined
   privateMsgs: Map<number, Promise<Message.TextMessage & Message>>
   events: GameEvent[]
-  aggregator: Map<number, Player[]> // TODO: specify type
+  aggregator: Map<number, Player[]>
 }
 
 export type GameFlags = {
@@ -62,7 +65,7 @@ export type GameFlags = {
 }
 
 export type GameEvent = {
-  type: 'none' | 'vote' | 'swap' | 'peek' | 'copy' | 'reveal' | 'off'
+  type: 'none' | 'vote' | 'swap' | 'peek' | 'copy' | 'reveal' | 'off' | 'rotate'
   author: Player
   targets: Player[]
   priority: number
