@@ -7,7 +7,7 @@ import { Role, RoleInfo } from '~/game/models/role'
 
 import * as Actions from '~/game/gameplay/actions'
 import * as Events from '~/game/models/events'
-import { createVoteKB, getOptions, sendActionPrompt } from '../helpers/keyboards'
+import { createVoteKB, getOptions, sendActionPrompt } from '~/game/helpers/keyboards'
 
 import { Copier } from './copier'
 

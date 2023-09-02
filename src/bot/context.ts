@@ -21,8 +21,8 @@ import { ActionChoice } from '~/game/gameplay/actions'
 import type { Game } from '~/game'
 
 // HACK: Override `ctx.has.command`
-import { customChecker } from './helpers/hack.bot-command'
-import { logConvoHandle } from './helpers/logging'
+import { customChecker } from '~/bot/helpers/hack.bot-command'
+import { logConvoHandle } from '~/bot/helpers/logging'
 
 type ScopeUser = Omit<Prisma.$UserPayload<PrismaClientX['$extends']['extArgs']>['scalars'], 'updatedAt' | 'createdAt'>
 

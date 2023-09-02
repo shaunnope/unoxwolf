@@ -8,7 +8,6 @@ import { gameFeature } from '~/game'
 import { Context, createContextConstructor } from './context'
 import { botAdminFeature, languageFeature, miscFeature, welcomeFeature } from './features'
 import { errorHandler, unhandledHandler } from './handlers'
-import { logHandle } from './helpers/logging'
 import { isMultipleLocales } from './i18n'
 import { i18n, metrics, session, setScope, updateLogger } from './middlewares'
 

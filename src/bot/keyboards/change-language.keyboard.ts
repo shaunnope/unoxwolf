@@ -1,9 +1,9 @@
 import { InlineKeyboard } from 'grammy'
 import ISO6391 from 'iso-639-1'
 import _ from 'lodash'
-import { changeLanguageData } from '../callback-data'
-import type { Context } from '../context'
-import { i18n } from '../i18n'
+import { changeLanguageData } from '~/bot/callback-data'
+import type { Context } from '~/bot/context'
+import { i18n } from '~/bot/i18n'
 
 export const createChangeLanguageKeyboard = async (ctx: Context) => {
   const currentLocaleCode = await ctx.i18n.getLocale()

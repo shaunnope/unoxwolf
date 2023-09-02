@@ -3,8 +3,8 @@ import type { Player } from '~/game/models/player'
 
 import * as Events from '~/game/models/events'
 import { Context } from '~/bot/context'
-import type { GameInfo as Game } from '../models/game'
-import { createVoteKB, getOptions, sendActionPrompt } from '../helpers/keyboards'
+import type { GameInfo as Game } from '~/game/models/game'
+import { createVoteKB, getOptions, sendActionPrompt } from '~/game/helpers/keyboards'
 
 type TranslationContext = {
   [key: string]: string

@@ -4,8 +4,8 @@ import { createConversation } from '@grammyjs/conversations'
 import { Conversation, Context } from '~/bot/context'
 import * as Actions from '~/game/gameplay/actions'
 import { games } from '~/container'
-import { validateCallbackQuery, validateTarget } from '../helpers/game.context'
-import { getOptions, createVoteKB } from '../helpers/keyboards'
+import { validateCallbackQuery, validateTarget } from '~/game/helpers/game.context'
+import { getOptions, createVoteKB } from '~/game/helpers/keyboards'
 
 export const troublemaker = async (conversation: Conversation, ctx: Context) => {
   const { gameId, targetId } = ctx.session.actions[0]

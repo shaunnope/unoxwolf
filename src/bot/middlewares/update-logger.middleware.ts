@@ -1,6 +1,6 @@
 import { Middleware } from 'grammy'
-import type { Context } from '../context'
-import { getFullMetadata } from '../helpers/logging'
+import type { Context } from '~/bot/context'
+import { getFullMetadata } from '~/bot/helpers/logging'
 
 export const updateLogger = (): Middleware<Context> => (ctx, next) => {
   ctx.api.config.use((prev, method, payload, signal) => {

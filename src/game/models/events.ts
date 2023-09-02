@@ -1,6 +1,6 @@
 import { GameEvent, GameInfo as Game } from '~/game/models/game'
 import { Player } from '~/game/models/player'
-import { isCopier } from '../roles/copier'
+import { isCopier } from '~/game/roles/copier'
 
 // TODO: remove priority from parameters. should be accessible from Player
 

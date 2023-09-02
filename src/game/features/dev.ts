@@ -7,7 +7,7 @@ import { logHandle } from '~/bot/helpers/logging'
 import { Game } from '~/game'
 import { getGameFromCtx, setGame } from '~/game/helpers/game.context'
 import { Conversation } from '~/bot/context'
-import { createPlayers } from '../helpers/create-players'
+import { createPlayers } from '~/game/helpers/create-players'
 
 const composer = new Composer<Context>()
 

@@ -1,5 +1,5 @@
 import { Context } from '~/bot/context'
-import { Role } from '../models/role'
+import { Role } from '~/game/models/role'
 
 export const getRoleListEntry = (ctx: Context, role: typeof Role) => {
   const nameKey = `${role.roleName}.name`

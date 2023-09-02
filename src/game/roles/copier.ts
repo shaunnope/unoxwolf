@@ -1,12 +1,12 @@
 /* eslint-disable class-methods-use-this */
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import { Context } from '~/bot/context'
-import { Player } from '../models/player'
-import { Role, RoleInfo } from '../models/role'
-import { GameInfo } from '../models/game'
-import { Team } from '../models/enums'
+import { Player } from '~/game/models/player'
+import { Role, RoleInfo } from '~/game/models/role'
+import { GameInfo } from '~/game/models/game'
+import { Team } from '~/game/models/enums'
 
-import * as Actions from '../gameplay/actions'
+import * as Actions from '~/game/gameplay/actions'
 
 export interface CanCopy {
   copiedRole?: Role

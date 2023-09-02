@@ -1,6 +1,6 @@
 import { Middleware } from 'grammy'
 import { updateCounter, updateFailedCounter } from '~/metrics'
-import type { Context } from '../context'
+import type { Context } from '~/bot/context'
 
 export const metrics = (): Middleware<Context> => async (ctx, next) => {
   try {

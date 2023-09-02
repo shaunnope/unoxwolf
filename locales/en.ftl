@@ -108,7 +108,7 @@ events = <strong>Order of Events:</strong>
     .peek = Peek
     .swap = Swap
     .off = Off
-    .rotate = Rotate
+    .rotate = Shift
     .reveal = Reveal
 
 copy =

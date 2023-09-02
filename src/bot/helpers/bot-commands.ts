@@ -1,5 +1,5 @@
 import { BotCommand } from '@grammyjs/types'
-import { i18n } from '../i18n'
+import { i18n } from '~/bot/i18n'
 
 export const DEFAULT_LANGUAGE_CODE = 'en'
 
