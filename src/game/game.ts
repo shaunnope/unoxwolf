@@ -517,8 +517,16 @@ export class Game implements GameInfo {
     await this.ctx.reply(`${this.ctx.t('events')}\n\n${eventBlock}`)
   }
 
+  /**
+   * End the game, updating the database with the results
+   */
   async end() {
     this.state = 'ended'
+
+    for (const p of this.players) {
+      await p.ctx?.prisma.stats.logGame(p, this)
+    }
+
     deleteGame(this)
   }
 

@@ -17,6 +17,11 @@ export class Villager extends Role {
     team: Team.Village,
     command: 'roleVG',
   }
+
+  checkWin(player: Player, game: GameInfo): void {
+    player.won =
+      (game.teams.get(Team.Werewolf)?.length || 0) > 0 ? (game.deaths.get(Team.Werewolf)?.length || 0) > 0 : true
+  }
 }
 
 export class Werewolf extends Role {
@@ -134,10 +139,6 @@ export class Drunk extends Villager {
       isAuto: true,
     })
     player.ctx.reply(player.ctx.t('drunk.action', { role: target.name }))
-  }
-
-  checkWin(player: Player, game: GameInfo): void {
-    player.won = (game.teams.get(Team.Werewolf)?.length || 0) > 0
   }
 }
 

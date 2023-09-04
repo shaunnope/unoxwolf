@@ -106,7 +106,7 @@ featureForOwner.filter(
   }
 )
 
-feature.command('stats', logHandle('command-stats'), chatAction('typing'), async ctx => {
+feature.command('botstats', logHandle('command-stats'), chatAction('typing'), async ctx => {
   const usersCount = await ctx.prisma.user.count()
 
   return ctx.reply(`Users count: ${usersCount}`)

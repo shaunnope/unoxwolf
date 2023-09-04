@@ -116,7 +116,7 @@ export class Role {
    * @param game
    */
   checkWin(player: Player, game: GameInfo): void {
-    player.won = (game.deaths.get(Team.Werewolf)?.length || 0) > 0
+    player.won = false
   }
 
   /* eslint-enable class-methods-use-this */

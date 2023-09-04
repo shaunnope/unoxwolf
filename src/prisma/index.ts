@@ -3,6 +3,8 @@ import { logger } from '~/logger'
 
 import userExtension from './user.extension'
 
+import statsExtension from './stats.extension'
+
 const parseParameters = (parameters: string): unknown[] => {
   try {
     return JSON.parse(parameters) as unknown[]
@@ -74,7 +76,7 @@ prisma.$on('warn', (e: Prisma.LogEvent) => {
   })
 })
 
-const xprisma = prisma.$extends(userExtension)
+const xprisma = prisma.$extends(userExtension).$extends(statsExtension)
 
 export type PrismaClientX = typeof prisma & typeof xprisma // inject client methods
 

@@ -7,12 +7,7 @@ if (!i18n.locales.includes(DEFAULT_LANGUAGE_CODE)) {
   throw new Error(`Localization for default language code (${DEFAULT_LANGUAGE_CODE}) is missing`)
 }
 
-type Command = {
-  command: string
-  description: string
-}
-
-const ALL_COMMANDS = new Map<string, Command>(
+const ALL_COMMANDS = new Map<string, BotCommand>(
   Object.entries({
     start: {
       command: 'start',

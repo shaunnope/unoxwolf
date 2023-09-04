@@ -6,7 +6,11 @@ import * as Roles from '~/game/roles'
 import * as RoleGroups from '~/game/roles/role.groups'
 import { getRoleListEntry } from '~/game/helpers/rolelist'
 
+import { statsFeature } from './stats'
+
 const composer = new Composer<Context>()
+
+composer.use(statsFeature)
 
 const feature = composer.chatType('private')
 // const groupFeature = composer.chatType(['group', 'supergroup'])
@@ -27,10 +31,6 @@ feature.command('rolelist', logHandle('command-rolelist'), async ctx => {
   if (page) {
     await ctx.reply(page)
   }
-  // await ctx.reply(ctx.t('roles.page_daybreak'))
-  // await ctx.reply(ctx.t('roles.page_vampire'))
-  // await ctx.reply(ctx.t('roles.page_aliens'))
-  // await ctx.reply(ctx.t('roles.page_bonus'))
 })
 
 Object.values(Roles).forEach(role => {
@@ -39,4 +39,4 @@ Object.values(Roles).forEach(role => {
   })
 })
 
-export { composer as helpFeature }
+export { composer as infoFeature }

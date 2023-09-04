@@ -5,7 +5,7 @@ commands =
     .start = Start the bot
     .language = Change language
     .admin = Make user an administrator
-    .stats = Stats
+    .stats = Get game stats
     .setcommands = Set bot commands
     .help = Help
     .startgame = Start a game
@@ -165,6 +165,18 @@ team =
     .synth = Synthetic Alien
     .blob = Symbiote
     .mortician = Mortician
+
+stats =
+    <strong>No. of Groups</strong>:  { $count }
+
+    <strong>Won : Lost</strong>
+    <em>Total</em>  -  { $won } : { $lost }
+
+    <em> {team.village}</em>  -  { $villageWin } : { $villageLose }
+
+    <em> {team.werewolf}</em>  -  { $werewolfWin } : { $werewolfLose }
+
+    <em> {team.tanner}</em>  -  { $tannerWin } : { $tannerLose }
 
 role = Role
     .name = {role} {role.emoji}
