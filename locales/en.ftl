@@ -285,7 +285,7 @@ insomniac = Insomniac
     .name = {insomniac} {insomniac.emoji}
     .emoji = 😴
     .desc =
-        Before the end of the night, the Insomniac wakes up and looks at their own role.
+        Before the end of the night, the Insomniac wakes up and checks if their role has changed.
 
         <em>The Insomniac is on the {team.village} team.</em>
     .lore =

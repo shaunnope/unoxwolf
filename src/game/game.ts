@@ -3,6 +3,7 @@ import { InlineKeyboard } from 'grammy'
 
 import type { Message } from '@grammyjs/types'
 
+import { Other } from '@grammyjs/hydrate'
 import { Team } from '~/game/models/enums'
 import { Player } from '~/game/models/player'
 import type { GameSettings, GameInfo, GameEvent, GameFlags } from '~/game/models/game'
@@ -153,9 +154,9 @@ export class Game implements GameInfo {
   async run() {
     if (!(await this.collectPlayers())) return
 
-    await this.ctx.reply(this.ctx.t('game_init.starting'))
+    await this.reply(this.ctx.t('game_init.starting'))
 
-    await this.ctx.reply(
+    await this.reply(
       `${this.ctx.t('join.count', {
         count: this.players.length,
       })}\n${this.players.map(p => p.name).join('\n')}`
@@ -191,7 +192,7 @@ export class Game implements GameInfo {
     )
 
     this.serviceMsgs = [
-      await this.ctx.reply(
+      await this.reply(
         this.ctx.t('game_init', {
           user: this.ctx.from?.first_name || this.ctx.t('misc.unknown_user'),
         }),
@@ -221,7 +222,7 @@ export class Game implements GameInfo {
           .map(p => p.name)
           .join(', ')
         // TODO: add user links
-        this.ctx.reply(this.ctx.t('join.recent_list', { users: joinedPlayers }))
+        this.reply(this.ctx.t('join.recent_list', { users: joinedPlayers }))
         this.newPlayers.clear()
       }
 
@@ -239,7 +240,7 @@ export class Game implements GameInfo {
 
     // check if enough players
     if (this.playerMap.size < this.settings.minPlayers) {
-      await this.ctx.reply(
+      await this.reply(
         this.ctx.t('game_init.not_enough_players', {
           count: this.settings.minPlayers,
         })
@@ -281,7 +282,7 @@ export class Game implements GameInfo {
     await this.cleanupPMs(Actions.Copy.fallback)
     this.events.sort((a, b) => a.priority - b.priority)
     this.updateTimeline()
-    this.ctx.reply(this.ctx.t('copy.end'))
+    this.reply(this.ctx.t('copy.end'))
 
     await sleep(10 * this.tickRate)
   }
@@ -293,7 +294,7 @@ export class Game implements GameInfo {
   async nightPhase() {
     this.privateMsgs = new Map()
     this.serviceMsgs = []
-    await this.ctx.reply(this.ctx.t('night.start'))
+    await this.reply(this.ctx.t('night.start'))
 
     this.events = []
 
@@ -312,7 +313,7 @@ export class Game implements GameInfo {
     }
     this.cleanupMsgs()
     await this.cleanupPMs(() => {})
-    await this.ctx.reply(this.ctx.t('night.end'))
+    await this.reply(this.ctx.t('night.end'))
     this.events.sort((a, b) => a.priority - b.priority).forEach(e => e.fn())
     this.updateTimeline()
 
@@ -324,7 +325,7 @@ export class Game implements GameInfo {
    */
   async collectVotes() {
     this.privateMsgs = new Map()
-    this.serviceMsgs = [await this.ctx.reply(this.ctx.t('vote.start'))]
+    this.serviceMsgs = [await this.reply(this.ctx.t('vote.start'))]
 
     this.events = []
     this.aggregator = new Map()
@@ -352,7 +353,7 @@ export class Game implements GameInfo {
     this.cleanupMsgs()
     await this.cleanupPMs()
 
-    const voteResultsMsg = await this.ctx.reply(`${this.ctx.t('vote.end')} ${this.ctx.t('vote.tally')}`)
+    const voteResultsMsg = await this.reply(`${this.ctx.t('vote.end')} ${this.ctx.t('vote.tally')}`)
 
     this.events.sort((a, b) => a.priority - b.priority).forEach(e => e.fn())
 
@@ -393,7 +394,7 @@ export class Game implements GameInfo {
     await this.ctx.api.editMessageText(this.chatId, voteResultsMsg.message_id, voteResults)
 
     if (!numVotes.some(([, n]) => n > 1)) {
-      this.ctx.reply(this.ctx.t('vote.draw'))
+      this.reply(this.ctx.t('vote.draw'))
       return
     }
 
@@ -414,7 +415,7 @@ export class Game implements GameInfo {
       }
     }
 
-    await this.ctx.reply(
+    await this.reply(
       this.ctx.t('vote.results', {
         users: out.map(p => p.name).join(', '),
         num: out.length,
@@ -462,7 +463,7 @@ export class Game implements GameInfo {
         roles: unassigned,
       })}`
 
-    await this.ctx.reply(msg)
+    await this.reply(msg)
   }
 
   /**
@@ -470,7 +471,9 @@ export class Game implements GameInfo {
    * @returns true if copy phase should be run, false if not
    */
   async assignRolesAndNotify() {
+    this.teams = new Map()
     const deck = generateRoles(this.players.length, this.settings.roles, this.settings.extraRoles)
+
     this.players.forEach((p, i) => {
       p.setup(deck[i])
 
@@ -492,7 +495,7 @@ export class Game implements GameInfo {
       .slice(this.players.length)
       .map((r, idx) => new Player(idx, this.ctx.t('misc.unassigned_role', { idx: idx + 1 }), r, undefined))
 
-    await this.ctx.reply(
+    await this.reply(
       `${this.ctx.t('game.roles')}\n${deck
         .map(r => this.ctx.t(r.name))
         .sort()
@@ -514,7 +517,7 @@ export class Game implements GameInfo {
       })
       .join('\n')
 
-    await this.ctx.reply(`${this.ctx.t('events')}\n\n${eventBlock}`)
+    await this.reply(`${this.ctx.t('events')}\n\n${eventBlock}`)
   }
 
   /**
@@ -559,11 +562,15 @@ export class Game implements GameInfo {
     if (timeLeftReminders.map(x => duration - x).includes(ts)) {
       const left = duration - ts
       this.serviceMsgs.push(
-        await this.ctx.reply(this.ctx.t('game.seconds_left', { time: left }), {
+        await this.reply(this.ctx.t('game.seconds_left', { time: left }), {
           reply_markup: kb,
         })
       )
     }
+  }
+
+  async reply(msg: string, other?: Other<'sendMessage', 'chat_id' | 'text'>) {
+    return this.ctx.reply(msg, { ...other, reply_to_message_id: this.topicId })
   }
 
   setupTimer() {

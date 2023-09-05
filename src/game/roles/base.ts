@@ -19,6 +19,7 @@ export class Villager extends Role {
   }
 
   checkWin(player: Player, game: GameInfo): void {
+    // TODO: change when other non-village teams are added
     player.won =
       (game.teams.get(Team.Werewolf)?.length || 0) > 0 ? (game.deaths.get(Team.Werewolf)?.length || 0) > 0 : true
   }
@@ -34,10 +35,10 @@ export class Werewolf extends Role {
   doNight(player: Player, game: GameInfo) {
     if (player.ctx === undefined) return
     const teamMembers = game.teams
-      .get(this.info.team)!
+      .get(this.info.team)! // NOTE: never undefined since self is in the team
       .filter(other => other.id !== player.id && !other.role.info.isAide)
     let msg = ''
-    if (teamMembers.length === 1) {
+    if (teamMembers.length === 0) {
       msg = game.ctx.t('werewolf.lone')
       if (game.settings.loneWolf) {
         const role = _.sample(game.unassignedRoles)!.role.info.name

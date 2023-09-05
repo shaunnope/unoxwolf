@@ -132,8 +132,12 @@ export const Copy = (player: Player, target: Player, game: Game) => {
       player.innateRole.copiedRole = target.role
 
       const teamMembers = game.teams.get(target.role.info.team)
-      if (teamMembers === undefined) game.teams.set(target.role.info.team, [player])
-      else teamMembers.push(player)
+      if (teamMembers === undefined)
+        game.teams.set(target.role.info.team, [player]) // can happen when target is an unassigned role
+      else if (player.role.info.team !== target.role.info.team) {
+        // TODO: team membership for copier not changed. might need to change this
+        teamMembers.push(player)
+      }
 
       if (player.ctx === undefined) return
       player.ctx.reply(player.ctx.t(target.role.lore))
