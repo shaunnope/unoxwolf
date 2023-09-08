@@ -26,4 +26,4 @@ The initial template for this project was adapted from [Telegram Bot Template](h
 
 The mechanics of the game are inspired by the [One Night Ultimate Series](https://beziergames.com/products/one-night-ultimate-werewolf) by Ted Alspach and Akihisa Okui.
 
-The implementation of the game loop is adapted from [Werewolf for Telegram](https://github.com/GreyWolfDev/Werewolf)
+The infrastructure behind the game is adapted from that used in [Werewolf for Telegram](https://github.com/GreyWolfDev/Werewolf)

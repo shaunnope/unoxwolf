@@ -5,6 +5,7 @@ import { logHandle } from '~/bot/helpers/logging'
 
 import { Game } from '~/game'
 import { getChatTitle, getGameFromCtx, playerInGame, setGame } from '~/game/helpers/game.context'
+import { getForumTopicId } from '~/bot/helpers/forum'
 import { gameActions } from './actions'
 import { gameConvos } from './convos'
 
@@ -40,7 +41,7 @@ pmFeature.command('start', logHandle('command-start'), ctx => {
 feature.command('startgame', logHandle('command-startgame'), async ctx => {
   // check if game is already started
   if (getGameFromCtx(ctx) !== undefined) {
-    ctx.reply(ctx.t('game.already_started'))
+    ctx.reply(ctx.t('game.already_started'), { reply_to_message_id: getForumTopicId(ctx) })
     return
   }
   setGame(ctx, new Game(ctx))
@@ -49,31 +50,36 @@ feature.command('startgame', logHandle('command-startgame'), async ctx => {
 feature.command('join', logHandle('command-join'), async ctx => {
   const game = getGameFromCtx(ctx)
   if (game === undefined) {
-    ctx.reply(ctx.t('game.not_started'))
+    ctx.reply(ctx.t('game.not_started'), { reply_to_message_id: getForumTopicId(ctx) })
     return
   }
 
   if (game.state !== 'lobby') {
-    ctx.reply(ctx.t('join.failure'))
+    ctx.reply(ctx.t('join.failure'), { reply_to_message_id: getForumTopicId(ctx) })
     return
   }
   // TODO: consider handling spam by checking last message time
-  game.serviceMsgs.push(await ctx.reply(ctx.t('join.prompt'), { reply_markup: game.callToAction }))
+  game.serviceMsgs.push(
+    await ctx.reply(ctx.t('join.prompt'), {
+      reply_markup: game.callToAction,
+      reply_to_message_id: getForumTopicId(ctx),
+    })
+  )
 })
 
 feature.command('leave', logHandle('command-leave'), async ctx => {
   const game = getGameFromCtx(ctx)
   if (game === undefined) {
-    ctx.reply(ctx.t('game.not_started'))
+    ctx.reply(ctx.t('game.not_started'), { reply_to_message_id: getForumTopicId(ctx) })
     return
   }
   if (game.state !== 'lobby') {
-    ctx.reply(ctx.t('leave.failure'))
+    ctx.reply(ctx.t('leave.failure'), { reply_to_message_id: getForumTopicId(ctx) })
     return
   }
   if (game.playerMap.has(ctx.from?.id)) {
     game.removePlayer(ctx)
-    ctx.reply(ctx.t('leave.success', { user: ctx.from?.first_name }))
+    ctx.reply(ctx.t('leave.success', { user: ctx.from?.first_name }), { reply_to_message_id: getForumTopicId(ctx) })
   }
 })
 
@@ -83,7 +89,7 @@ feature.command('forcenext', logHandle('command-forcenext'), async ctx => {
   if (game.createdBy !== ctx.from?.id || 0) return
   if (game.flags.timerRunning) {
     game.flags.killTimer = true
-    ctx.reply(ctx.t('game.timer_skipped'))
+    ctx.reply(ctx.t('game.timer_skipped'), { reply_to_message_id: getForumTopicId(ctx) })
   }
 })
 
@@ -93,7 +99,8 @@ feature.command('players', logHandle('command-players'), async ctx => {
   await ctx.reply(
     `${ctx.t('join.count', {
       count: game.players.length,
-    })}\n${game.players.map(p => p.name).join('\n')}`
+    })}\n${game.players.map(p => p.name).join('\n')}`,
+    { reply_to_message_id: getForumTopicId(ctx) }
   )
 })
 
