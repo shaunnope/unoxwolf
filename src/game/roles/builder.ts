@@ -3,7 +3,12 @@ import * as Roles from '~/game/roles'
 
 import type { Role } from '~/game/models/role'
 
-export const generateRoles = (n: number, roles: (typeof Role)[] | Set<typeof Role>, extra: number = 3) => {
+export const generateRoles = (
+  n: number,
+  roles: (typeof Role)[] | Set<typeof Role>,
+  extra: number = 3,
+  shuffle: boolean = true
+) => {
   // TODO: dynamic role generation
   const deck: (typeof Role)[] = [
     Roles.Werewolf,
@@ -12,6 +17,9 @@ export const generateRoles = (n: number, roles: (typeof Role)[] | Set<typeof Rol
     Roles.Mason,
     Roles.Mason,
     Roles.Robber,
+  ]
+
+  let addon: (typeof Role)[] = [
     Roles.Villager,
     Roles.Seer,
     Roles.Minion,
@@ -22,7 +30,11 @@ export const generateRoles = (n: number, roles: (typeof Role)[] | Set<typeof Rol
     Roles.Doppelganger,
   ]
 
-  return _.shuffle(deck.slice(0, n + extra)).map(R => new R())
+  if (shuffle) {
+    addon = _.shuffle(addon)
+  }
+
+  return _.shuffle(deck.concat(addon).slice(0, n + extra)).map(R => new R())
 }
 
 export const balanceRoles = (n: number, roles: (typeof Role)[]) => {
