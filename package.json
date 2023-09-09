@@ -1,7 +1,7 @@
 {
-  "name": "onuwolf",
-  "version": "0.1.0",
-  "description": "A Telegram bot for playing One Night Ultimate Werewolf.",
+  "name": "unoxwolf",
+  "version": "1.0.0",
+  "description": "A Telegram bot for playing Unoxian Werewolf.",
   "author": "shaunnope <seanyap123@gmail.com>",
   "packageManager": "yarn@3.4.1",
   "private": true,

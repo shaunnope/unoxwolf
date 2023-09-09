@@ -1,5 +1,5 @@
-# ONUWolf Telegram Bot
-ONUWolf is a Telegram bot to moderate Unoxian Werewolf games. It is currently in development.
+# UnoxWolf Telegram Bot
+UnoxWolf is a Telegram bot to moderate Unoxian Werewolf games. It is currently in development.
 
 ## Getting Started
 Make a copy of the `example.env` file and rename it to `.env`. Fill in the values for the environment variables.
