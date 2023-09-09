@@ -3,6 +3,8 @@ FROM node:lts-slim AS base
 # Create app directory
 WORKDIR /usr/src
 
+RUN apt-get update -y && apt-get install -y openssl
+
 FROM base AS builder
 
 # Files required by npm install
@@ -34,4 +36,4 @@ USER node
 
 # Start the app
 EXPOSE 80
-CMD ["npm", "run", "start:force"]
+CMD ["yarn", "start:force"]
