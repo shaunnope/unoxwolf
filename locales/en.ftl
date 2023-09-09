@@ -122,7 +122,7 @@ night =
 vote = Who do you want to vote for?
     .start = Voting has started!
     .end = Voting has ended!
-    .cast = You voted for {$user}
+    .cast = You selected {$user}
     .repeat = You have already voted!
     .tally = Tallying votes...
     .unassigned =
@@ -210,9 +210,9 @@ werewolf = Werewolf
     .lore =
         You are a {werewolf.name}!
         Arise at night to meet your fellow lycantrophic brethren.
-    .reveal = Your fellow werewolves are { $wolves }.
+    .reveal = You are werewolves together with { $wolves }
     .lone = You are the only werewolf.
-    .lone2 = One of the unassigned roles is a { $role }.
+    .lone2 = One of the unassigned roles is a { $role }
 
 seer = Seer
     .name = {seer} {seer.emoji}
