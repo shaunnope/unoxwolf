@@ -1,25 +1,58 @@
 import type { Context } from '~/bot/context'
-import type { Action, Role, Mark, Player as PlayerType } from './types'
+import * as Roles from '~/game/roles'
 
-export class Player implements PlayerType {
+import { isCopier } from '~/game/roles/copier'
+import { Role } from './role'
+import type { Affliction } from './affliction'
+
+export class Player {
   id: number
 
   name: string
 
-  role: Role
+  innateRole: Role
 
-  mark: Mark
+  currentRole: Role
 
-  actions: Action[]
+  mark: Affliction
 
   ctx?: Context
 
-  constructor(id: number, name: string, role: Role, mark: Mark, ctx?: Context) {
+  isProtected?: true
+
+  votedFor?: Player
+
+  isDead?: true
+
+  won?: boolean
+
+  get role() {
+    return isCopier(this.innateRole) ? this.innateRole.tail : this.innateRole
+  }
+
+  constructor(id: number, name: string, role?: Role, ctx?: Context) {
     this.id = id
     this.name = name
-    this.role = role
-    this.mark = mark
-    this.actions = role.actions
+
+    this.innateRole = role ?? new Roles.Villager()
+    this.currentRole = this.innateRole
+
+    this.mark = { name: 'mark' }
     this.ctx = ctx
+  }
+
+  setup(role: Role) {
+    this.innateRole = role
+    this.currentRole = role
+  }
+
+  get team() {
+    return this.currentRole.info.team
+  }
+
+  swapRoles(other: Player) {
+    const temp = this.currentRole
+    this.currentRole = other.currentRole
+    other.currentRole = temp
   }
 }

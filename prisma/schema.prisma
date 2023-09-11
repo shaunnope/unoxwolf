@@ -4,7 +4,7 @@
 generator client {
   provider = "prisma-client-js"
   previewFeatures = ["metrics"]
-  binaryTargets   = ["native", "debian-openssl-1.1.x"]
+  binaryTargets   = ["native", "debian-openssl-3.0.x"]
 }
 
 datasource db {
@@ -15,7 +15,6 @@ datasource db {
 enum Role {
   USER
   ADMIN
-  OWNER
 }
 
 model User {
@@ -25,20 +24,21 @@ model User {
   role         Role     @default(USER)
   updatedAt    DateTime @updatedAt @map("updated_at")
   createdAt    DateTime @default(now()) @map("created_at")
-  stats        Stats?
+  stats        Stats[]
 
   @@map(name: "users")
 }
 
 model Stats {
   id           Int      @id @default(autoincrement())
-  userId       BigInt   @unique @map("user_id")
+  userId       BigInt   @map("user_id")
   user         User     @relation(fields: [userId], references: [telegramId])
   chatId       BigInt   @map("chat_id")
+  topicId      BigInt   @map("topic_id")
   updatedAt    DateTime @updatedAt @map("updated_at")
   createdAt    DateTime @default(now()) @map("created_at")
-  villagerWin  Int      @default(0) @map("villager_win")
-  villagerLose Int      @default(0) @map("villager_lose")
+  villageWin   Int      @default(0) @map("villager_win")
+  villageLose  Int      @default(0) @map("villager_lose")
   werewolfWin  Int      @default(0) @map("werewolf_win")
   werewolfLose Int      @default(0) @map("werewolf_lose")
   tannerWin    Int      @default(0) @map("tanner_win")
@@ -46,5 +46,31 @@ model Stats {
   vampireWin   Int      @default(0) @map("vampire_win")
   vampireLose  Int      @default(0) @map("vampire_lose")
 
+  @@unique([userId, chatId, topicId], name: "group_id")
   @@map(name: "stats")
 }
+
+// TODO: add chat and topic models to store chat and topic info
+// model Chat {
+//   id        Int      @id @default(autoincrement())
+//   chatId    BigInt   @unique @map("chat_id")
+//   title     String   @map("title")
+//   updatedAt DateTime @updatedAt @map("updated_at")
+//   createdAt DateTime @default(now()) @map("created_at")
+//   topics    Topic[]
+
+//   @@map(name: "chats")
+// }
+
+// model Topic {
+//   id        Int      @id @default(autoincrement())
+//   chatId    BigInt   @map("chat_id")
+//   chat      Chat     @relation(fields: [chatId], references: [chatId])
+//   topicId   BigInt   @map("topic_id")
+//   title     String   @map("title")
+//   updatedAt DateTime @updatedAt @map("updated_at")
+//   createdAt DateTime @default(now()) @map("created_at")
+
+//   @@unique([chatId, topicId], name: "chat_id")
+//   @@map(name: "topics")
+// }

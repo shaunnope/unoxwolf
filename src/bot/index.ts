@@ -6,9 +6,8 @@ import { Bot as TelegramBot, BotConfig, StorageAdapter } from 'grammy'
 import type { Container } from '~/container'
 import { gameFeature } from '~/game'
 import { Context, createContextConstructor } from './context'
-import { botAdminFeature, languageFeature, lgtbFeature, miscFeature, welcomeFeature } from './features'
+import { botAdminFeature, languageFeature, miscFeature, welcomeFeature } from './features'
 import { errorHandler, unhandledHandler } from './handlers'
-import { logHandle } from './helpers/logging'
 import { isMultipleLocales } from './i18n'
 import { i18n, metrics, session, setScope, updateLogger } from './middlewares'
 
@@ -52,14 +51,13 @@ export const createBot = (
   bot.use(botAdminFeature)
   bot.use(welcomeFeature)
 
-  bot.use(lgtbFeature)
   bot.use(miscFeature)
 
   if (isMultipleLocales) {
     bot.use(languageFeature)
   }
 
-  bot.use(logHandle('unhandled'), unhandledHandler)
+  bot.use(unhandledHandler)
 
   if (config.isDev) {
     bot.catch(errorHandler)

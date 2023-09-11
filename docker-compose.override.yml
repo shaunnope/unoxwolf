@@ -1,0 +1,28 @@
+version: '3'
+services:
+
+  bot:
+    ports:
+      - "3000:80"
+    volumes:
+      - ".:/usr/src"
+    env_file:
+      - docker-compose.bot.dev.env
+    command: sh -c "npx prisma migrate deploy && yarn start:force"
+
+  redis:
+    image: redis:alpine
+    restart: always
+
+  db:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: container
+      POSTGRES_DB: onuw
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
