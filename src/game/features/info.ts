@@ -1,10 +1,11 @@
 import { Composer } from 'grammy'
 import type { Context } from '~/bot/context'
 import { logHandle } from '~/bot/helpers/logging'
+import { getPrivateChatCommandEntries } from '~/bot/helpers/bot-commands'
 
 import * as Roles from '~/game/roles'
 import * as RoleGroups from '~/game/roles/role.groups'
-import { getRoleListEntry } from '~/game/helpers/rolelist'
+import { getRoleListEntry } from '~/game/helpers/commandlist'
 
 import { statsFeature } from './stats'
 
@@ -16,7 +17,7 @@ const feature = composer.chatType('private')
 // const groupFeature = composer.chatType(['group', 'supergroup'])
 
 feature.command('help', logHandle('command-help'), ctx => {
-  ctx.reply(ctx.t('welcome.help'))
+  ctx.reply(`${ctx.t('welcome.commands')}\n${getPrivateChatCommandEntries(ctx.from?.language_code || 'en')}`)
 })
 
 feature.command('rolelist', logHandle('command-rolelist'), async ctx => {

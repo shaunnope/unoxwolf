@@ -75,7 +75,12 @@ const getCommand = (key: string, localeCode: string = DEFAULT_LANGUAGE_CODE): Bo
 }
 
 const getGlobalChatCommands = (localeCode: string): BotCommand[] => {
-  return [getCommand('start', localeCode), getCommand('ping', localeCode), getCommand('help', localeCode)]
+  return [
+    getCommand('start', localeCode),
+    getCommand('help', localeCode),
+    getCommand('rolelist', localeCode),
+    getCommand('ping', localeCode),
+  ]
 }
 
 export const getPrivateChatCommands = (localeCode: string): BotCommand[] => {
@@ -97,4 +102,12 @@ export const getGroupChatCommands = (localeCode: string): BotCommand[] => {
 
 export const getLanguageCommand = (localeCode: string): BotCommand => {
   return getCommand('language', localeCode)
+}
+
+export const getCommandEntries = (...commands: BotCommand[]) => {
+  return commands.map(c => `/${c.command} - ${c.description}`).join('\n')
+}
+
+export const getPrivateChatCommandEntries = (localeCode: string = DEFAULT_LANGUAGE_CODE) => {
+  return getCommandEntries(...getPrivateChatCommands(localeCode))
 }

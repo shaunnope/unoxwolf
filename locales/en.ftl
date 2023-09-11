@@ -7,7 +7,7 @@ commands =
     .admin = Make user an administrator
     .stats = Get game stats
     .setcommands = Set bot commands
-    .help = Help
+    .help = Show help
     .startgame = Start a game
     .join = Join a game
     .leave = Leave a game
@@ -46,12 +46,10 @@ welcome =
     👋🏻 Hi there, I am Unox! Add me to a group to moderate games of Unoxian Werewolf.
     Try me now! 🐺
 
-    {welcome.help}
+    {welcome.commands}
 
-    .help =
-        <strong>COMMANDS</strong>
-        /rolelist - List all available roles
-        /help - Show help
+    .commands = <strong>COMMANDS</strong>
+
 
     .prompt_start_bot =
         Hi {$user}! Before you can join a game, you need to start the bot.

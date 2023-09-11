@@ -2,6 +2,7 @@ import _ from 'lodash'
 import { Composer } from 'grammy'
 import type { Context } from '~/bot/context'
 import { logHandle } from '~/bot/helpers/logging'
+import { getWelcomeMessage } from '~/bot/middlewares'
 
 import { Game } from '~/game'
 import { getChatTitle, getGameFromCtx, playerInGame, setGame } from '~/game/helpers/game.context'
@@ -20,23 +21,28 @@ composer.use(gameConvos)
 const feature = composer.chatType(['group', 'supergroup'])
 const pmFeature = composer.chatType('private')
 
-pmFeature.command('start', logHandle('command-start'), ctx => {
-  if (!ctx.match) {
-    ctx.reply(ctx.t('welcome'))
-    return
-  }
-  if (ctx.match.slice(0, 4) === 'join') {
-    const game = ctx.games.get(ctx.match.slice(4))
-    if (game === undefined) return // no active game
-
-    const status = playerInGame(game, ctx)
-    if (status === false) {
-      game.addPlayer(ctx)
+pmFeature.command(
+  'start',
+  logHandle('command-start'),
+  (ctx, next) => {
+    if (!ctx.match) {
+      next()
       return
     }
-    ctx.reply(ctx.t(`join.${status}`, { chat: getChatTitle(ctx.games.get(ctx.session.game)!.ctx) }))
-  }
-})
+    if (ctx.match.slice(0, 4) === 'join') {
+      const game = ctx.games.get(ctx.match.slice(4))
+      if (game === undefined) return // no active game
+
+      const status = playerInGame(game, ctx)
+      if (status === false) {
+        game.addPlayer(ctx)
+        return
+      }
+      ctx.reply(ctx.t(`join.${status}`, { chat: getChatTitle(ctx.games.get(ctx.session.game)!.ctx) }))
+    }
+  },
+  getWelcomeMessage()
+)
 
 feature.command('startgame', logHandle('command-startgame'), async ctx => {
   // check if game is already started
