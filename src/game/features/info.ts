@@ -1,7 +1,6 @@
 import { Composer } from 'grammy'
 import type { Context } from '~/bot/context'
 import { logHandle } from '~/bot/helpers/logging'
-import { getPrivateChatCommandEntries } from '~/bot/helpers/bot-commands'
 
 import * as Roles from '~/game/roles'
 import * as RoleGroups from '~/game/roles/role.groups'
@@ -16,9 +15,27 @@ composer.use(statsFeature)
 const feature = composer.chatType('private')
 // const groupFeature = composer.chatType(['group', 'supergroup'])
 
-feature.command('help', logHandle('command-help'), ctx => {
-  ctx.reply(`${ctx.t('welcome.commands')}\n${getPrivateChatCommandEntries(ctx.from?.language_code || 'en')}`)
-})
+const phases = async (ctx: Context) => {
+  await ctx.reply(
+    `${ctx.t('help.copy')}\n${RoleGroups.PHASES.copy.map(role => getRoleListEntry(ctx, role)).join('\n')}\n\n` +
+      `${ctx.t('help.night')}\n${RoleGroups.PHASES.night.map(role => getRoleListEntry(ctx, role)).join('\n')}\n\n`
+  )
+  await ctx.reply(
+    `${ctx.t('help.passive')}\n${RoleGroups.PHASES.passive.map(role => getRoleListEntry(ctx, role)).join('\n')}`
+  )
+}
+
+feature.command(
+  'help',
+  logHandle('command-help'),
+  async (ctx, next) => {
+    await ctx.reply(ctx.t('help'))
+    await next()
+  },
+  phases
+)
+
+feature.command('phases', logHandle('command-orderinfo'), phases)
 
 feature.command('rolelist', logHandle('command-rolelist'), async ctx => {
   let page = ''
