@@ -5,6 +5,8 @@ import { logHandle } from '~/bot/helpers/logging'
 
 const composer = new Composer<Context>()
 
-composer.on(':text', logHandle('unhandled'), ctx => ctx.reply(ctx.t('unhandled')))
+composer.on('::bot_command', logHandle('unhandled-command'), ctx => ctx.reply(ctx.t('unhandled')))
+
+composer.on(':text', logHandle('unhandled'))
 
 export { composer as unhandledHandler }

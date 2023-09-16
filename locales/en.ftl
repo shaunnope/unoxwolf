@@ -1,4 +1,4 @@
-unhandled = Unrecognized update. Try /start
+unhandled = Unrecognized command. Try /start
 
 commands =
     .unknown = Unknown command
