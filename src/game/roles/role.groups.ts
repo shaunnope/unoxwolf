@@ -16,3 +16,9 @@ export const BASE_ROLES = [
 ]
 
 export const ALL_ROLES = [...BASE_ROLES]
+
+export const PHASES = {
+  copy: [Roles.Doppelganger],
+  night: [Roles.Seer, Roles.Robber, Roles.Troublemaker, Roles.Drunk, Roles.Insomniac],
+  passive: [Roles.Villager, Roles.Werewolf, Roles.Minion, Roles.Mason, Roles.Hunter, Roles.Tanner],
+}

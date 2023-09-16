@@ -12,6 +12,7 @@ commands =
     .join = Join a game
     .leave = Leave a game
     .rolelist = List all available roles
+    .phases = List game phases and role order
     .players = List all players
     .ping = Check bot reply time
     .forcenext = Force start next phase
@@ -56,6 +57,23 @@ welcome =
     .group =
         👋🏻 Hi there, I am Unox!
         Run /startgame to start a game of Unoxian Werewolf!🐺
+
+help =
+    Trouble is brewing in the village of Unoxia. Word has spread that cryptids lurk amongst the villagers, causing much distress. The villagers must band together to root out the imposters and lynch them before it is too late.
+
+    <strong>Gameplay</strong>
+    At the start of the game, each player is secretly assigned a role and a predetermined number of roles are left unassigned (<em>default: 3</em>).
+
+    The game progresses in phases, during which players with certain roles may perform actions. Some actions result in changes to the role assignment. Hence, when day breaks, players may not be who they think they are.
+
+    Within each phase, role actions are performed in a specific order. The phases and order of actions are as follows:
+
+    .copy = <strong>Copy Phase</strong>
+    .night = <strong>Night Phase</strong>
+    .passive =
+        <strong>Passive Roles</strong>
+        The following roles do not perform actions that need to be resolved in a specific order.
+
 
 join = Join
     .prompt = Click here to join the game!
@@ -335,7 +353,7 @@ doppelganger = Doppelgänger
     .name = {doppelganger} {doppelganger.emoji}
     .emoji = 🎭
     .desc =
-        At dusk, the Doppelgänger assumes another player's role.
+        At dusk, the Doppelgänger assumes another player's role. Any actions that the Doppelgänger performs will occur after the original player's actions.
 
         <em>The Doppelgänger is on the team of the role they copy.</em>
     .lore =
