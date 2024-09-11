@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "A Telegram bot for playing Unoxian Werewolf.",
   "author": "shaunnope <seanyap123@gmail.com>",
-  "packageManager": "yarn@3.4.1",
+  "packageManager": "yarn@3.8.5+sha256.6fd0fd785cdf2b18a9a9e2589726a11530ff018d193f8eda64be485a080f75b9",
   "private": true,
   "type": "module",
   "dependencies": {
