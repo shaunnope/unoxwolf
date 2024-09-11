@@ -1,22 +1,24 @@
-import { Middleware } from 'grammy'
-import type { Context } from '~/bot/context'
-import { getFullMetadata } from '~/bot/helpers/logging'
+import type { Middleware } from "grammy"
+import type { Context } from "~/bot/context"
+import { getFullMetadata } from "~/bot/helpers/logging"
 
-export const updateLogger = (): Middleware<Context> => (ctx, next) => {
-  ctx.api.config.use((prev, method, payload, signal) => {
-    ctx.logger.debug({
-      msg: 'bot api call',
-      method,
-      payload,
+export function updateLogger(): Middleware<Context> {
+  return (ctx, next) => {
+    ctx.api.config.use((prev, method, payload, signal) => {
+      ctx.logger.debug({
+        msg: "bot api call",
+        method,
+        payload,
+      })
+
+      return prev(method, payload, signal)
     })
 
-    return prev(method, payload, signal)
-  })
+    ctx.logger.debug({
+      msg: "update received",
+      ...getFullMetadata(ctx),
+    })
 
-  ctx.logger.debug({
-    msg: 'update received',
-    ...getFullMetadata(ctx),
-  })
-
-  return next()
+    return next()
+  }
 }

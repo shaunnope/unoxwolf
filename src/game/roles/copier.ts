@@ -1,23 +1,22 @@
-/* eslint-disable class-methods-use-this */
-/* eslint-disable @typescript-eslint/no-use-before-define */
-import { Context } from '~/bot/context'
-import { Player } from '~/game/models/player'
-import { Role, RoleInfo } from '~/game/models/role'
-import { GameInfo } from '~/game/models/game'
-import { Team } from '~/game/models/enums'
+import type { Context } from "~/bot/context"
+import * as Actions from "~/game/gameplay/actions"
+import { Team } from "~/game/models/enums"
+import type { GameInfo } from "~/game/models/game"
+import type { Player } from "~/game/models/player"
 
-import * as Actions from '~/game/gameplay/actions'
+import type { RoleInfo } from "~/game/models/role"
+import { Role } from "~/game/models/role"
 
 export interface CanCopy {
   copiedRole?: Role
-  copy(player: Player, game: GameInfo): void
+  copy: (player: Player, game: GameInfo) => void
 }
 
 export class Copier extends Role implements CanCopy {
   static readonly info: RoleInfo = {
-    name: 'role',
+    name: "role",
     team: Team.Village,
-    command: 'rolelist',
+    command: "rolelist",
   }
 
   copiedRole?: Role
@@ -25,8 +24,10 @@ export class Copier extends Role implements CanCopy {
   // NOTE: can fail with cycles (more than 1 active doppelganger)
   // Ultimately a non-issue since at most 1 doppelganger can be active at a time
   get tail(): Role {
-    if (this.copiedRole === undefined) return this
-    if (!isCopier(this.copiedRole)) return this.copiedRole
+    if (this.copiedRole === undefined)
+      return this
+    if (!isCopier(this.copiedRole))
+      return this.copiedRole
     return this.copiedRole.tail
   }
 
@@ -50,7 +51,15 @@ export class Copier extends Role implements CanCopy {
     this.tail.doNight(player, game)
   }
 
+  defaultWin(player: Player, _game: GameInfo): void {
+    player.won = false
+  }
+
   checkWin(player: Player, game: GameInfo): void {
+    if (this.copiedRole === undefined) {
+      this.defaultWin(player, game)
+      return
+    }
     this.tail.checkWin(player, game)
   }
 
@@ -62,6 +71,6 @@ export class Copier extends Role implements CanCopy {
   }
 }
 
-export const isCopier = (role: Role): role is Copier => {
+export function isCopier(role: Role): role is Copier {
   return (role as Copier).copy !== undefined
 }

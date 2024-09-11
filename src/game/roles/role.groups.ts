@@ -1,4 +1,4 @@
-import * as Roles from '~/game/roles'
+import * as Roles from "~/game/roles"
 
 export const BASE_ROLES = [
   Roles.Villager,

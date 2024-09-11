@@ -20,9 +20,3 @@ repos:
         files: src/.*\.[jt]sx?$
         types: [file]
         language: system
-      - id: prettier
-        name: prettier
-        entry: npx prettier --write src/
-        files: src/.*\.[jt]sx?$
-        types: [file]
-        language: system

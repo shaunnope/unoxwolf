@@ -1,8 +1,9 @@
-import type { Player } from './player'
-import { Team, Status } from './enums'
-import { GameInfo } from './game'
+import { Team } from "./enums"
+import type { Status } from "./enums"
+import type { GameInfo } from "./game"
+import type { Player } from "./player"
 
-export type RoleInfo = {
+export interface RoleInfo {
   name: string
   team: Team
   isAide?: boolean
@@ -12,9 +13,9 @@ export type RoleInfo = {
 
 export class Role {
   static readonly info: RoleInfo = {
-    name: 'role',
+    name: "role",
     team: Team.None,
-    command: 'rolelist',
+    command: "rolelist",
   }
 
   static locale(key: string) {
@@ -22,43 +23,43 @@ export class Role {
   }
 
   static get description() {
-    return this.locale('desc')
+    return this.locale("desc")
   }
 
   static get lore() {
-    return this.locale('lore')
+    return this.locale("lore")
   }
 
   static get roleName() {
-    return this.locale('name')
+    return this.locale("name")
   }
 
   static get emoji() {
-    return this.locale('emoji')
+    return this.locale("emoji")
   }
 
   get emoji() {
-    return (<typeof Role>this.constructor).emoji
+    return (<typeof Role> this.constructor).emoji
   }
 
   get description() {
-    return (<typeof Role>this.constructor).description
+    return (<typeof Role> this.constructor).description
   }
 
   get locale() {
-    return (<typeof Role>this.constructor).locale
+    return (<typeof Role> this.constructor).locale
   }
 
   get lore() {
-    return (<typeof Role>this.constructor).lore
+    return (<typeof Role> this.constructor).lore
   }
 
   get name() {
-    return (<typeof Role>this.constructor).roleName
+    return (<typeof Role> this.constructor).roleName
   }
 
   get info() {
-    return (<typeof Role>this.constructor).info
+    return (<typeof Role> this.constructor).info
   }
 
   get priority() {
@@ -71,13 +72,12 @@ export class Role {
     this.status = status || this.status
   }
 
-  /* eslint-disable class-methods-use-this */
-  doDusk(player: Player, game: GameInfo) {
+  doDusk(_player: Player, _game: GameInfo) {
     // TODO: expand this and maybe remove eslint-disable
     // if (player.ctx === undefined) return
   }
 
-  doNight(player: Player, game: GameInfo) {
+  doNight(_player: Player, _game: GameInfo) {
     // TODO: expand this and maybe remove eslint-disable
     // if (player.ctx === undefined) return
   }
@@ -100,11 +100,14 @@ export class Role {
    * @returns false if player is already dead, true otherwise
    */
   unalive(player: Player, game: GameInfo) {
-    if (player.isDead) return false
+    if (player.isDead)
+      return false
     player.isDead = true
-    if (player.currentRole.info.isAide) return true
+    if (player.currentRole.info.isAide)
+      return true
     const teamDeaths = game.deaths.get(player.currentRole.info.team)
-    if (teamDeaths === undefined) game.deaths.set(player.currentRole.info.team, [player])
+    if (teamDeaths === undefined)
+      game.deaths.set(player.currentRole.info.team, [player])
     else teamDeaths.push(player)
 
     return true
@@ -113,11 +116,9 @@ export class Role {
   /**
    * Check win condition of a player
    * @param player
-   * @param game
+   * @param _game
    */
-  checkWin(player: Player, game: GameInfo): void {
+  checkWin(player: Player, _game: GameInfo): void {
     player.won = false
   }
-
-  /* eslint-enable class-methods-use-this */
 }

@@ -1,5 +1,5 @@
-import pino from 'pino'
-import { config } from '~/config'
+import pino from "pino"
+import { config } from "~/config"
 
 export const logger = pino({
   level: config.LOG_LEVEL,
@@ -8,10 +8,10 @@ export const logger = pino({
       ...(config.isDev
         ? [
             {
-              target: 'pino-pretty',
+              target: "pino-pretty",
               level: config.LOG_LEVEL,
               options: {
-                ignore: 'pid,hostname',
+                ignore: "pid,hostname",
                 colorize: true,
                 translateTime: true,
               },
@@ -19,7 +19,7 @@ export const logger = pino({
           ]
         : [
             {
-              target: 'pino/file',
+              target: "pino/file",
               level: config.LOG_LEVEL,
               options: {},
             },

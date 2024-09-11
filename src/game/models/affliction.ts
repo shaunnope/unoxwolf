@@ -1,3 +1,3 @@
-export type Affliction = {
+export interface Affliction {
   name: string
 }
