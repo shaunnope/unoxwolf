@@ -2,15 +2,14 @@ import { chatAction } from '@grammyjs/auto-chat-action'
 import { Role } from '@prisma/client'
 import { Composer, Keyboard } from 'grammy'
 import { or } from 'grammy-guard'
-import _ from 'lodash'
 import type { Context } from '~/bot/context'
 import { isAdminUser, isOwnerUser } from '~/bot/filters'
-import { DEFAULT_LANGUAGE_CODE, getPrivateChatAdminCommands, getLanguageCommand } from '~/bot/helpers/bot-commands'
+import { setCommandsHandler } from '~/bot/handlers'
+import { DEFAULT_LANGUAGE_CODE, getLanguageCommand, getPrivateChatAdminCommands } from '~/bot/helpers/bot-commands'
 import { logHandle } from '~/bot/helpers/logging'
 import { userRequests } from '~/bot/helpers/user-requests'
-import { isMultipleLocales } from '~/bot/i18n'
 
-import { setCommandsHandler } from '~/bot/handlers'
+import { isMultipleLocales } from '~/bot/i18n'
 
 const composer = new Composer<Context>()
 
@@ -23,7 +22,7 @@ featureForOwner.command('admin', logHandle('command-admin'), ctx =>
     reply_markup: {
       resize_keyboard: true,
       keyboard: new Keyboard()
-        .requestUser(ctx.t('admin.select-user-btn'), userRequests.getId('make-admin'), {
+        .requestUsers(ctx.t('admin.select-user-btn'), userRequests.getId('make-admin'), {
           user_is_bot: false,
         })
         .build(),
@@ -36,7 +35,11 @@ featureForOwner.filter(
   logHandle('user-shared-for-admin-role'),
   chatAction('typing'),
   async ctx => {
-    const userId = ctx.message.user_shared.user_id
+    const userId = ctx.message.users_shared?.users[0].user_id
+
+    if (userId === undefined) {
+      return ctx.reply(ctx.t('admin.user-not-found'))
+    }
 
     let user = await ctx.prisma.user.findUnique({
       where: ctx.prisma.user.byTelegramId(userId),

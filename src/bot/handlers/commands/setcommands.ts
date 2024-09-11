@@ -1,14 +1,15 @@
-import { CommandContext } from 'grammy'
-import { i18n, isMultipleLocales } from '~/bot/i18n'
-import { config } from '~/config'
+import type { LanguageCode } from '@grammyjs/types'
+import type { CommandContext } from 'grammy'
 import type { Context } from '~/bot/context'
-
 import {
-  getPrivateChatCommands,
-  getPrivateChatAdminCommands,
   getGroupChatCommands,
   getLanguageCommand,
+  getPrivateChatAdminCommands,
+  getPrivateChatCommands,
 } from '~/bot/helpers/bot-commands'
+
+import { i18n, isMultipleLocales } from '~/bot/i18n'
+import { config } from '~/config'
 
 export async function setCommandsHandler(ctx: CommandContext<Context>) {
   const DEFAULT_LANGUAGE_CODE = 'en'
@@ -29,7 +30,7 @@ export async function setCommandsHandler(ctx: CommandContext<Context>) {
   if (isMultipleLocales) {
     const requests = i18n.locales.map(code =>
       ctx.api.setMyCommands([...getPrivateChatCommands(code), ...[getLanguageCommand(code)]], {
-        language_code: code,
+        language_code: code as LanguageCode,
         scope: {
           type: 'all_private_chats',
         },
@@ -49,7 +50,7 @@ export async function setCommandsHandler(ctx: CommandContext<Context>) {
   if (isMultipleLocales) {
     const requests = i18n.locales.map(code =>
       ctx.api.setMyCommands(getGroupChatCommands(code), {
-        language_code: code,
+        language_code: code as LanguageCode,
         scope: {
           type: 'all_group_chats',
         },
