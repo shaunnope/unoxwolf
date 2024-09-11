@@ -13,8 +13,6 @@ import type { ParseModeFlavor } from "@grammyjs/parse-mode"
 import type { Update, UserFromGetMe } from "@grammyjs/types"
 import type { Prisma } from "@prisma/client"
 
-// HACK: Override `ctx.has.command`
-import { customChecker } from "~/bot/helpers/hack.bot-command"
 import { logConvoHandle } from "~/bot/helpers/logging"
 import type { Container } from "~/container"
 
@@ -71,8 +69,6 @@ export function createContextConstructor(container: Container) {
     games: Map<string, Game>
 
     scope: ContextScope
-
-    static has = customChecker // HACK: Override `ctx.has.command`
 
     constructor(update: Update, api: Api, me: UserFromGetMe) {
       super(update, api, me)
