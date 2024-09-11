@@ -1,15 +1,12 @@
-/* eslint-disable class-methods-use-this */ // TODO: consider how to refactor methods to avoid this
-import _ from 'lodash'
-import { GameInfo } from '~/game/models/game'
+// TODO: consider how to refactor methods to avoid this
 import { Team } from '~/game/models/enums'
-import { Player } from '~/game/models/player'
-import { Role, RoleInfo } from '~/game/models/role'
-
-import * as Actions from '~/game/gameplay/actions'
-import * as Events from '~/game/models/events'
-import { createVoteKB, getOptions, sendActionPrompt } from '../helpers/keyboards'
+import type { GameInfo } from '~/game/models/game'
+import type { Player } from '~/game/models/player'
+import type { RoleInfo } from '~/game/models/role'
 
 import { Seer } from '.'
+
+import { createVoteKB, getOptions, sendActionPrompt } from '../helpers/keyboards'
 
 export class Fool extends Seer {
   static readonly info: RoleInfo = {
