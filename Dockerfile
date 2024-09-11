@@ -5,6 +5,8 @@ WORKDIR /usr/src
 
 RUN apt-get update -y && apt-get install -y openssl
 
+RUN corepack enable
+
 FROM base AS builder
 
 # Files required by npm install
@@ -12,9 +14,7 @@ COPY package.json ./
 COPY yarn.lock ./
 
 # Install app dependencies
-RUN yarn install \
-    --non-interactive \
-    --production=false
+RUN yarn install
 
 # Bundle app source
 COPY . .
@@ -28,9 +28,7 @@ FROM base AS runner
 COPY . .
 
 # Install only production app dependencies
-RUN yarn install \
-    --non-interactive \
-    --production=true && yarn cache clean
+RUN yarn install && yarn cache clean
 
 USER node
 
