@@ -8,8 +8,8 @@ const config: Config = {
 
   modulePaths: ['<rootDir>/src'],
   moduleNameMapper: {
-    '^~/(.*)$': '<rootDir>/src/$1'
-  }
-};
+    '^~/(.*)$': '<rootDir>/src/$1',
+  },
+}
 
-export default config;
+export default config
