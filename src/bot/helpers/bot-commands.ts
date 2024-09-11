@@ -37,6 +37,10 @@ const ALL_COMMANDS = new Map<string, BotCommand>(
       command: 'rolelist',
       description: 'commands.rolelist',
     },
+    phases: {
+      command: 'phases',
+      description: 'commands.phases',
+    },
     startgame: {
       command: 'startgame',
       description: 'commands.startgame',
@@ -84,7 +88,7 @@ const getGlobalChatCommands = (localeCode: string): BotCommand[] => {
 }
 
 export const getPrivateChatCommands = (localeCode: string): BotCommand[] => {
-  return [...getGlobalChatCommands(localeCode), getCommand('rolelist', localeCode)]
+  return [...getGlobalChatCommands(localeCode), getCommand('rolelist', localeCode), getCommand('phases', localeCode)]
 }
 
 export const getPrivateChatAdminCommands = (localeCode: string): BotCommand[] => {
