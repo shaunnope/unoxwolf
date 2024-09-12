@@ -5,6 +5,7 @@ import { logHandle } from "~/bot/helpers/logging"
 
 import * as Actions from "~/game/gameplay/actions"
 import { validateCallbackQuery } from "~/game/helpers/game.context"
+import type { Player } from "~/game/models/player"
 import * as Roles from "~/game/roles"
 
 const composer = new Composer<Context>()
@@ -36,29 +37,44 @@ feature.callbackQuery(/peek([\w.]+)\+([\w.]+)/, logHandle("callback-peek"), asyn
   if (res === undefined)
     return
   const [game, player, userId] = res
-  if (player.role instanceof Roles.Seer) {
-    const targets = []
-    let payload: string
-    if (userId === "un") {
-      targets.push(..._.sampleSize(game.unassignedRoles, 2))
-      payload = ctx.t("misc.unassigned", { count: 2 })
-    }
-    else {
-      const target = game.playerMap.get(Number(userId))
-      if (target === undefined) {
-        ctx.answerCallbackQuery(ctx.t("game_error.invalid_vote", { user: userId }))
-        return
-      }
-      targets.push(target)
-      payload = target.name
-    }
-    Actions.Peek.fn(game, ctx, targets, {
-      priority: player.role.priority,
-      responsePayload: {
-        user: payload,
-      },
-    })
+  if (!(player.role instanceof Roles.Seer))
+    return
+
+  const targets: Player[] = []
+  let payload: string
+  if (userId === "un") {
+    targets.push(..._.sampleSize(game.unassignedRoles, 2))
+    payload = ctx.t("misc.unassigned", { count: 2 })
   }
+  else {
+    const target = game.playerMap.get(Number(userId))
+    if (target === undefined) {
+      ctx.answerCallbackQuery(ctx.t("game_error.invalid_vote", { user: userId }))
+      return
+    }
+    targets.push(target)
+    payload = target.name
+  }
+
+  let eventCallback: (() => void) | undefined
+
+  if (player.role instanceof Roles.Fool) {
+    eventCallback = () => {
+      if (player.ctx === undefined)
+        return
+      const { ctx } = player
+      const roles = _.sampleSize(game.roles, targets.length)
+      ctx.reply(targets.map((t, index) => ctx.t("misc.peek_role", { user: t.name, role: ctx.t(roles[index].name) })).join("\n"))
+    }
+  }
+
+  Actions.Peek.fn(game, ctx, targets, {
+    priority: player.role.priority,
+    responsePayload: {
+      user: payload,
+    },
+    eventCallback,
+  })
 })
 
 /**

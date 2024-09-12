@@ -18,6 +18,7 @@ import * as Roles from "~/game/roles"
 import { deleteGame, getChatTitle } from "./helpers/game.context"
 import { generateRoles } from "./roles/builder"
 import { isCopier } from "./roles/copier"
+import type { Role } from "./models/role"
 
 const defaultSettings: GameSettings = {
   joinTimeout: 180,
@@ -67,6 +68,8 @@ export class Game implements GameInfo {
   teams: Map<Team, Player[]> = new Map()
 
   unassignedRoles: Player[] = []
+
+  roles?: Role[]
 
   deaths: Map<Team, Player[]> = new Map()
 
@@ -481,12 +484,13 @@ export class Game implements GameInfo {
   async assignRolesAndNotify() {
     this.teams = new Map()
     const deck = generateRoles(this.players.length, this.settings.roles, this.settings.extraRoles)
+    this.roles = deck
 
     this.players.forEach((p, i) => {
       p.setup(deck[i])
 
       // if (config.isDev && p.id === config.BOT_OWNER_USER_ID) {
-      //   const role = new Roles.Doppelganger()
+      //   const role = new Roles.Fool()
       //   p.setup(role)
       //   deck[i] = role
       // }

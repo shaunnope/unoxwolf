@@ -67,6 +67,12 @@ export function playerInGame(game: Game, ctx: Context): false | "already_in_game
   return false
 }
 
+/**
+ * Validate the context around a callback query.
+ * Checks if associated game has started and if the sender is in the game
+ * @param ctx The context of the query
+ * @returns On success, returns the game, player, and userId
+ */
 export function validateCallbackQuery(ctx: Context) {
   if (ctx.match === undefined)
     return undefined

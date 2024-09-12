@@ -22,7 +22,10 @@ export interface ActionOptions {
   required?: true
   swapSelf?: true
   swapUnassigned?: true
+
+  /** An automatic action */
   isAuto?: true
+
   predicate?: (player: Player) => boolean
   eventCallback?: () => void
 

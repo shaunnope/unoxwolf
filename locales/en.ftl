@@ -334,7 +334,7 @@ mason = Mason
         <em>The Masons are on the {team.village} team.</em>
     .lore =
         You are a {mason.name}
-        At night, you will meet your fellow masons.
+        At night, you will meet up with your fellow masons.
     .lone = You are the only mason.
     .reveal = You are masons together with { $masons }.
 
@@ -449,18 +449,19 @@ witch = Witch
     .swap = {$user} is now a {$role}
     .swap_self = You are now a {$role}
 
-
-### NOTE: Fool actions should be hardcorded in game, not translated
+## TODO: reconsider how to add extra behaviour to the fool
 fool = Fool
     .name = {fool} {fool.emoji}
     .emoji = 🃏
     .desc =
-        The Fool is delulu. They believe that they have the mystical abilities of the {seer.name}, but their foresight is random at best. Also, if they choose to view a role, they will end up messing up everyone's roles instead.
+        The Fool is delulu. While they may believe that they share powers with the {seer.name}, their foresight is random at best.
+
+        <em>The Fool is on the {team.village} team.</em>
+    .extra =
+        Also, if they choose to view a role, they will end up messing up everyone's roles instead.
 
         If they attempt to view a player role, all movable player roles but their own will be shifted one position to the left.
         If they attempt to view an unassigned role, all movable player roles but their own will be shifted one position to the right.
-
-        <em>The Fool is on the {team.village} team.</em>
     .lore = {seer.lore}
     .action = {seer.action}
     .reveal = {seer.reveal}
