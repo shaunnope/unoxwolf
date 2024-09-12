@@ -1,4 +1,6 @@
-unhandled = Unrecognized command. Try /start
+unhandled = Try /start
+    .command = Unrecognized command. {unhandled}
+    .text = Unrecognized input. {unhandled}
 
 commands =
     .unknown = Unknown command

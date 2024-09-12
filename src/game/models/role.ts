@@ -6,6 +6,7 @@ import type { Player } from "./player"
 export interface RoleInfo {
   name: string
   team: Team
+  /** An aide wins along with their team, but their death does not result in a loss to their team. */
   isAide?: boolean
   command: string
   priority?: number
@@ -73,12 +74,10 @@ export class Role {
   }
 
   doDusk(_player: Player, _game: GameInfo) {
-    // TODO: expand this and maybe remove eslint-disable
     // if (player.ctx === undefined) return
   }
 
   doNight(_player: Player, _game: GameInfo) {
-    // TODO: expand this and maybe remove eslint-disable
     // if (player.ctx === undefined) return
   }
 

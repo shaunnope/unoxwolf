@@ -17,6 +17,6 @@ repos:
       - id: lint
         name: lint
         entry: npx eslint --fix
-        files: src/.*\.[jt]sx?$
+        files: (?:src|tests)\/.*\.[jt]sx?$
         types: [file]
         language: system

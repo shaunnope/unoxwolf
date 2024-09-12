@@ -1,16 +1,19 @@
 import pino from "pino"
 import { config } from "~/config"
 
-export function buildLogger(isDev: boolean = false) {
+type LogLevel = typeof config.LOG_LEVEL
+
+export function buildLogger(level: LogLevel | undefined = undefined) {
+  const log_level = level === undefined ? config.LOG_LEVEL : level
   return pino({
-    level: config.LOG_LEVEL,
+    level: log_level,
     transport: {
       targets: [
-        ...(config.isDev || isDev
+        ...(config.isDev
           ? [
               {
                 target: "pino-pretty",
-                level: config.LOG_LEVEL,
+                level: log_level,
                 options: {
                   ignore: "pid,hostname",
                   colorize: true,
@@ -21,7 +24,7 @@ export function buildLogger(isDev: boolean = false) {
           : [
               {
                 target: "pino/file",
-                level: config.LOG_LEVEL,
+                level: log_level,
                 options: {},
               },
             ]),

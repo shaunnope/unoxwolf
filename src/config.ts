@@ -45,7 +45,7 @@ export function parseConfig(environment: NodeJS.ProcessEnv) {
 
   return {
     ...config,
-    isDev: process.env.NODE_ENV === "development",
+    isDev: process.env.NODE_ENV === "development" || process.env.NODE_ENV === "test",
     isProd: process.env.NODE_ENV === "production",
   }
 }
