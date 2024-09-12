@@ -76,7 +76,7 @@ export class Game implements GameInfo {
 
   readonly settings: GameSettings
 
-  private readonly tickRate: number = config.isDev ? 1000 : 1000
+  private readonly tickRate: number = config.isTest ? 10 : 1000
 
   flags: GameFlags = {}
 

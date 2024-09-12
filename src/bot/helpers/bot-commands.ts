@@ -88,7 +88,7 @@ function getGlobalChatCommands(localeCode: string): BotCommand[] {
 }
 
 export function getPrivateChatCommands(localeCode: string): BotCommand[] {
-  return [...getGlobalChatCommands(localeCode), getCommand("rolelist", localeCode), getCommand("phases", localeCode)]
+  return [...getGlobalChatCommands(localeCode), getCommand("phases", localeCode)]
 }
 
 export function getPrivateChatAdminCommands(localeCode: string): BotCommand[] {
