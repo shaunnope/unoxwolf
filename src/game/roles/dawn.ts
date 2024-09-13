@@ -14,7 +14,10 @@ export class Fool extends Seer {
     team: Team.Village,
     command: "roleFool",
     priority: 7,
+    mask: "seer",
   }
+  // TODO: the fool should be masked as the seer only if there is no seer in game
+  // otherwise, mask as villager
 
   doNight(player: Player, game: GameInfo) {
     if (player.ctx === undefined) {

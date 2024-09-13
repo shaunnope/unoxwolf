@@ -10,6 +10,7 @@ export interface RoleInfo {
   isAide?: boolean
   command: string
   priority?: number
+  mask?: string
 }
 
 export class Role {
@@ -57,6 +58,12 @@ export class Role {
 
   get name() {
     return (<typeof Role> this.constructor).roleName
+  }
+
+  get mask() {
+    if (this.info.mask)
+      return `${this.info.mask}.name`
+    return this.name
   }
 
   get info() {

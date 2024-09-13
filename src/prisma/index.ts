@@ -48,7 +48,7 @@ export function buildPrisma(logger: Logger) {
       return (previousChar === "," ? " " : "") + parameter
     })
 
-    logger.debug({
+    logger.trace({
       msg: "database query",
       query,
       duration: e.duration,

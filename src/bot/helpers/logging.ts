@@ -55,7 +55,7 @@ export function logHandle(id: string): Middleware<Context> {
       handler_id: id,
     })
 
-    logger.info({
+    logger.debug({
       msg: `handle ${id}`,
       ...(id === "unhandled" ? getFullMetadata(ctx) : getMetadata(ctx)),
     })
@@ -65,7 +65,7 @@ export function logHandle(id: string): Middleware<Context> {
 }
 
 export function logGameEvent(id: string, game: GameInfo, player: Player, data?: object) {
-  logger.info({
+  logger.debug({
     msg: `trigger game ${id}`,
     game: game.id,
     player: player.id,
@@ -81,7 +81,7 @@ export function logConvoHandle<C extends Context>(id: string, ctx: C, isLeave?: 
       handler_id: id,
     })
   }
-  logger.info({
+  logger.debug({
     msg: `convo ${isLeave ? "leave" : "enter"}-${id}`,
     ...(id === "unhandled" ? getFullMetadata(ctx) : getMetadata(ctx)),
   })

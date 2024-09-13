@@ -161,7 +161,7 @@ game_error =
 
 misc =
     .unassigned_role = Role {$idx}
-    .unassigned = Unassigned roles ({$count})
+    .unassigned = Unassigned ({$count})
     .peek_role = { $user } is a { $role }
     .self_swap_roles = You swapped roles with { $user }
     .self_role_same = You are still a {$role}

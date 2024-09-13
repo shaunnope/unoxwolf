@@ -83,7 +83,11 @@ export class Game implements GameInfo {
 
   flags: GameFlags = {}
 
+  /** Messages to be deleted at the end of each state */
   serviceMsgs: (Message.TextMessage & Message)[] = []
+
+  /** Messages to be deleted at the end of the game */
+  traceMsgs: (Message.TextMessage & Message)[] = []
 
   callToAction: InlineKeyboard | undefined = undefined
 
@@ -162,12 +166,14 @@ export class Game implements GameInfo {
     if (!(await this.collectPlayers()))
       return
 
-    await this.reply(this.ctx.t("game_init.starting"))
+    await this.reply(this.ctx.t("game_init.starting"), undefined, "trace")
 
     await this.reply(
       `${this.ctx.t("join.count", {
         count: this.players.length,
       })}\n${this.players.map(p => p.name).join("\n")}`,
+      undefined,
+      "trace",
     )
 
     const hasCopy = await this.assignRolesAndNotify()
@@ -199,16 +205,15 @@ export class Game implements GameInfo {
       `https://t.me/${this.ctx.me.username}?start=join${this.id}`,
     )
 
-    this.serviceMsgs = [
-      await this.reply(
-        this.ctx.t("game_init", {
-          user: this.ctx.from?.first_name || this.ctx.t("misc.unknown_user"),
-        }),
-        {
-          reply_markup: this.callToAction,
-        },
-      ),
-    ]
+    await this.reply(
+      this.ctx.t("game_init", {
+        user: this.ctx.from?.first_name || this.ctx.t("misc.unknown_user"),
+      }),
+      {
+        reply_markup: this.callToAction,
+      },
+      "service",
+    )
 
     let count = this.playerMap.size
     let ts = 0
@@ -230,7 +235,7 @@ export class Game implements GameInfo {
           .map(p => p.name)
           .join(", ")
         // TODO: add user links
-        this.reply(this.ctx.t("join.recent_list", { users: joinedPlayers }))
+        this.reply(this.ctx.t("join.recent_list", { users: joinedPlayers }), undefined, "service")
         this.newPlayers.clear()
       }
 
@@ -242,7 +247,7 @@ export class Game implements GameInfo {
     this.state = "started"
 
     // delete all countdown messages
-    this.cleanupMsgs()
+    this.cleanupMsgs(this.serviceMsgs)
 
     await sleep(2 * this.tickRate) // wait for last players to join
 
@@ -252,6 +257,8 @@ export class Game implements GameInfo {
         this.ctx.t("game_init.not_enough_players", {
           count: this.settings.minPlayers,
         }),
+        undefined,
+        "trace",
       )
       this.end()
       return false
@@ -286,11 +293,11 @@ export class Game implements GameInfo {
 
       await sleep(this.tickRate)
     }
-    this.cleanupMsgs()
+    this.cleanupMsgs(this.serviceMsgs)
     await this.cleanupPMs(Actions.Copy.fallback)
     this.events.sort((a, b) => a.priority - b.priority)
     this.updateTimeline()
-    this.reply(this.ctx.t("copy.end"))
+    this.reply(this.ctx.t("copy.end"), undefined, "trace")
 
     await sleep(10 * this.tickRate)
   }
@@ -301,8 +308,8 @@ export class Game implements GameInfo {
    */
   async nightPhase() {
     this.privateMsgs = new Map()
-    this.serviceMsgs = []
-    await this.reply(this.ctx.t("night.start"))
+    // this.serviceMsgs = []
+    await this.reply(this.ctx.t("night.start"), undefined, "trace")
 
     this.events = []
 
@@ -319,9 +326,9 @@ export class Game implements GameInfo {
 
       await sleep(this.tickRate)
     }
-    this.cleanupMsgs()
+    this.cleanupMsgs(this.serviceMsgs)
     await this.cleanupPMs(() => {})
-    await this.reply(this.ctx.t("night.end"))
+    await this.reply(this.ctx.t("night.end"), undefined, "trace")
     this.events.sort((a, b) => a.priority - b.priority).forEach(e => e.fn())
     this.updateTimeline()
 
@@ -333,7 +340,8 @@ export class Game implements GameInfo {
    */
   async collectVotes() {
     this.privateMsgs = new Map()
-    this.serviceMsgs = [await this.reply(this.ctx.t("vote.start"))]
+    // this.serviceMsgs = [await this.reply(this.ctx.t("vote.start"))]
+    await this.reply(this.ctx.t("vote.start"), undefined, "service")
 
     this.events = []
     this.aggregator = new Map()
@@ -358,7 +366,7 @@ export class Game implements GameInfo {
 
       await sleep(this.tickRate)
     }
-    this.cleanupMsgs()
+    this.cleanupMsgs(this.serviceMsgs)
     await this.cleanupPMs()
 
     const voteResultsMsg = await this.reply(`${this.ctx.t("vote.end")} ${this.ctx.t("vote.tally")}`)
@@ -511,9 +519,11 @@ export class Game implements GameInfo {
 
     await this.reply(
       `${this.ctx.t("game.roles")}\n${deck
-        .map(r => this.ctx.t(r.name))
+        .map(r => this.ctx.t(r.mask))
         .sort()
         .join("\n")}`,
+      undefined,
+      "trace",
     )
 
     return deck.some(r => isCopier(r))
@@ -544,15 +554,16 @@ export class Game implements GameInfo {
       await p.ctx?.prisma.stats.logGame(p, this)
     }
 
+    await this.cleanupMsgs(this.traceMsgs)
     deleteGame(this)
   }
 
   /**
    * Delete all service messages
    */
-  cleanupMsgs() {
-    this.serviceMsgs.forEach(msg => this.ctx.api.deleteMessage(this.chatId, msg.message_id))
-    this.serviceMsgs = []
+  cleanupMsgs(messages: (Message.TextMessage & Message)[]) {
+    messages.forEach(msg => this.ctx.api.deleteMessage(this.chatId, msg.message_id))
+    messages.length = 0
   }
 
   async cleanupPMs(fallback = Actions.Vote.fallback) {
@@ -575,16 +586,19 @@ export class Game implements GameInfo {
   ) {
     if (timeLeftReminders.map(x => duration - x).includes(ts)) {
       const left = duration - ts
-      this.serviceMsgs.push(
-        await this.reply(this.ctx.t("game.seconds_left", { time: left }), {
-          reply_markup: kb,
-        }),
-      )
+      await this.reply(this.ctx.t("game.seconds_left", { time: left }), {
+        reply_markup: kb,
+      }, "service")
     }
   }
 
-  async reply(msg: string, other?: Other<"sendMessage", "chat_id" | "text">) {
-    return this.ctx.reply(msg, { ...other, reply_to_message_id: this.topicId })
+  async reply(msg: string, other?: Other<"sendMessage", "chat_id" | "text">, type?: "trace" | "service") {
+    const rep = this.ctx.reply(msg, { ...other, reply_to_message_id: this.topicId })
+    if (type === "trace")
+      this.traceMsgs.push(await rep)
+    else if (type === "service")
+      this.serviceMsgs.push(await rep)
+    return rep
   }
 
   setupTimer() {

@@ -22,7 +22,7 @@ try {
 
   // Graceful shutdown
   onShutdown(async () => {
-    logger.info("shutdown");
+    logger.debug("shutdown");
 
     await bot.stop();
     await server.close();
@@ -71,7 +71,7 @@ try {
     await bot.start({
       allowed_updates: config.BOT_ALLOWED_UPDATES,
       onStart: ({ username }) =>
-        logger.info({
+        logger.debug({
           msg: "bot running...",
           username,
         }),
