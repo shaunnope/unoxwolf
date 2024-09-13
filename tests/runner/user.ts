@@ -16,3 +16,15 @@ export function mockUser(id: number, is_bot: boolean = false): User {
     is_bot,
   }
 }
+
+export function mockUsers(count: number, id: number = 0): User[] {
+  return Array.from(new Array(count), (_, i) => {
+    return {
+      last_name: "Tester",
+      id: id + i,
+      first_name: `mock-${id + i}`,
+      username: `@test${id + i}`,
+      is_bot: false,
+    }
+  })
+}

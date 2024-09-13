@@ -4,11 +4,8 @@ import type { ApiCallFn } from "grammy"
 
 import type { RawApi } from "node_modules/grammy/out/core/client"
 
+import type { Container } from "tests/container"
 import { createBot } from "~/bot"
-import { container } from "./container"
-
-import { MockChat } from "./runner/chat"
-import { mockUser } from "./runner/user"
 
 type TupleToObject<T extends any[]> = Omit<T, keyof any[]>
 
@@ -23,7 +20,10 @@ type ApiRequest<R extends RawApi> = TupleToObjectWithPropNames<
   ["method", "payload", "signal"]
 >
 
-try {
+export type RawApiRequest = ApiRequest<RawApi>
+
+/** Common setup and teardown process for testing */
+export function setupTestEnv(outgoing: ApiRequest<RawApi>[], container: Container) {
   const { redis, logger, prisma } = container
   const bot = createBot("test", {
     container,
@@ -32,12 +32,9 @@ try {
     }),
   })
 
-  let outgoingRequests: ApiRequest<RawApi>[] = []
-
   beforeAll(async () => {
     bot.api.config.use((prev, method, payload, signal) => {
-      logger.info("Push req")
-      outgoingRequests.push({ method, payload, signal })
+      outgoing.push({ method, payload, signal })
       return { ok: true, result: true } as ReturnType<ApiCallFn<RawApi>>
     })
 
@@ -47,7 +44,8 @@ try {
       is_bot: true,
       username: "bot",
       can_join_groups: true,
-      can_read_all_group_messages: false,
+      // to support testing, allow bot to read all messages in groups. (might not be needed)
+      can_read_all_group_messages: true,
       supports_inline_queries: false,
       can_connect_to_business: false,
       has_main_web_app: false,
@@ -59,33 +57,10 @@ try {
     logger.trace("Initialized test bot")
   }, 5000)
 
-  beforeEach(() => {
-    outgoingRequests = []
-  })
-
-  it("can handle /start in private", async () => {
-    logger.trace("test start command")
-
-    const user = mockUser(1234)
-    const chat = MockChat.fromUser(user)
-
-    await bot.handleUpdate(chat.mockCommand(user, "start"))
-
-    expect(outgoingRequests).toHaveLength(1)
-    // const result = outgoingRequests.pop();
-    // if (result && "text" in result.payload) {
-    //   expect(result.payload.text).toBe(1);
-    // } else {
-    //   throw new Error("No text in payload");
-    // }
-  }, 5000)
-
   afterAll(async () => {
     await bot.stop()
     await redis.quit()
   })
-}
-catch (error) {
-  container.logger.error(error)
-  process.exit(1)
+
+  return bot
 }
