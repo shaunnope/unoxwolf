@@ -1,13 +1,13 @@
-import type { InlineKeyboard } from 'grammy'
-import type { Message } from '@grammyjs/types'
+import type { Message } from "@grammyjs/types"
+import type { InlineKeyboard } from "grammy"
 
-import type { Context } from '~/bot/context'
-import { Team } from './enums'
-import type { Player } from './player'
-import type { Role } from './role'
-import type { Affliction } from './affliction'
+import type { Context } from "~/bot/context"
+import type { Affliction } from "./affliction"
+import type { Team } from "./enums"
+import type { Player } from "./player"
+import type { Role } from "./role"
 
-export type GameSettings = {
+export interface GameSettings {
   joinTimeout: number
   copyTimeout: number
   duskTimeout: number
@@ -30,7 +30,7 @@ export type GameSettings = {
   marks: Affliction[]
 }
 
-export type GameInfo = {
+export interface GameInfo {
   id: string
   ctx: Context
   createdBy: number
@@ -41,7 +41,7 @@ export type GameInfo = {
 
   players: Player[]
   playerMap: Map<number, Player>
-  state: 'lobby' | 'started' | 'ended'
+  state: "lobby" | "started" | "ended"
   teams: Map<Team, Player[]>
   unassignedRoles: Player[]
 
@@ -58,14 +58,14 @@ export type GameInfo = {
   aggregator: Map<number, Player[]>
 }
 
-export type GameFlags = {
+export interface GameFlags {
   killTimer?: true
   timerRunning?: true
   copyDone?: true
 }
 
-export type GameEvent = {
-  type: 'none' | 'vote' | 'swap' | 'peek' | 'copy' | 'reveal' | 'off' | 'rotate'
+export interface GameEvent {
+  type: "none" | "vote" | "swap" | "peek" | "copy" | "reveal" | "off" | "rotate"
   icon: string
   author: Player
   targets: Player[]

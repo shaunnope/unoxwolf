@@ -1,14 +1,14 @@
-import _ from 'lodash'
-import * as Roles from '~/game/roles'
+import _ from "lodash"
+import type { Role } from "~/game/models/role"
 
-import type { Role } from '~/game/models/role'
+import * as Roles from "~/game/roles"
 
-export const generateRoles = (
+export function generateRoles(
   n: number,
-  roles: (typeof Role)[] | Set<typeof Role>,
+  _roles: (typeof Role)[] | Set<typeof Role>,
   extra: number = 3,
-  shuffle: boolean = true
-) => {
+  shuffle: boolean = true,
+) {
   // TODO: dynamic role generation
   const deck: (typeof Role)[] = [
     Roles.Werewolf,
@@ -28,6 +28,7 @@ export const generateRoles = (
     Roles.Hunter,
     Roles.Tanner,
     Roles.Doppelganger,
+    Roles.Fool,
   ]
 
   if (shuffle) {
@@ -37,12 +38,11 @@ export const generateRoles = (
   return _.shuffle(deck.concat(addon).slice(0, n + extra)).map(R => new R())
 }
 
-export const balanceRoles = (n: number, roles: (typeof Role)[]) => {
-  let attempts = 0
-  const balanced = false
-  while (!balanced && attempts < 500) {
-    const deck = generateRoles(n, roles)
-
-    attempts++
-  }
+export function balanceRoles(_n: number, _roles: (typeof Role)[]) {
+  // const attempts = 0
+  // const balanced = false
+  // while (!balanced && attempts < 500) {
+  //   const deck = generateRoles(n, roles)
+  //   attempts++
+  // }
 }

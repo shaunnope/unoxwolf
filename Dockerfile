@@ -9,7 +9,7 @@ RUN corepack enable
 
 FROM base AS builder
 
-# Files required by npm install
+# Files required by yarn install
 COPY package.json ./
 COPY yarn.lock ./
 
@@ -27,8 +27,10 @@ FROM base AS runner
 # Bundle app source
 COPY . .
 
+RUN yarn plugin import workspace-tools
+
 # Install only production app dependencies
-RUN yarn install && yarn cache clean
+RUN yarn workspaces focus --production && yarn cache clean
 
 USER node
 

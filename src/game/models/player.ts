@@ -1,9 +1,9 @@
-import type { Context } from '~/bot/context'
-import * as Roles from '~/game/roles'
+import type { Context } from "~/bot/context"
+import * as Roles from "~/game/roles"
 
-import { isCopier } from '~/game/roles/copier'
-import { Role } from './role'
-import type { Affliction } from './affliction'
+import { isCopier } from "~/game/roles/copier"
+import type { Affliction } from "./affliction"
+import type { Role } from "./role"
 
 export class Player {
   id: number
@@ -37,7 +37,7 @@ export class Player {
     this.innateRole = role ?? new Roles.Villager()
     this.currentRole = this.innateRole
 
-    this.mark = { name: 'mark' }
+    this.mark = { name: "mark" }
     this.ctx = ctx
   }
 

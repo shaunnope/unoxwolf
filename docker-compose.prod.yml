@@ -1,5 +1,0 @@
-services:
-
-  bot:
-    env_file:
-      - docker-compose.bot.prod.env

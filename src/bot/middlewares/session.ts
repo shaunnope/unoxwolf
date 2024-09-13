@@ -1,10 +1,12 @@
-import { Middleware, session as createSession, StorageAdapter } from 'grammy'
-import type { Context } from '~/bot/context'
+import { session as createSession } from "grammy"
+import type { Middleware, StorageAdapter } from "grammy"
+import type { Context } from "~/bot/context"
 
-export const session = (storage: StorageAdapter<unknown>): Middleware<Context> =>
-  createSession({
+export function session(storage: StorageAdapter<unknown>): Middleware<Context> {
+  return createSession({
     initial: () => ({
       games: {},
     }),
     storage,
   })
+}

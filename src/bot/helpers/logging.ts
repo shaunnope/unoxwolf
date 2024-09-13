@@ -1,66 +1,71 @@
-import { Middleware, type Context } from 'grammy'
-import _ from 'lodash'
-import { updateHandledCounter } from '~/metrics'
+import _ from "lodash"
+import type { Context, Middleware } from "grammy"
 
-import { logger } from '~/logger'
-import { Player } from '~/game/models/player'
-import { GameInfo } from '~/game/models/game'
+import type { GameInfo } from "~/game/models/game"
 
-export const getChatInfo = (ctx: Context) => {
+import type { Player } from "~/game/models/player"
+import { logger } from "~/logger"
+import { updateHandledCounter } from "~/metrics"
+
+export function getChatInfo(ctx: Context) {
   if (!_.isNil(ctx.chat)) {
     return {
-      chat: _.pick(ctx.chat, ['id', 'type']),
+      chat: _.pick(ctx.chat, ["id", "type"]),
     }
   }
 
   return {}
 }
 
-export const getSenderInfo = (ctx: Context) => {
+export function getSenderInfo(ctx: Context) {
   if (!_.isNil(ctx.senderChat)) {
     return {
-      sender: _.pick(ctx.senderChat, ['id', 'type']),
+      sender: _.pick(ctx.senderChat, ["id", "type"]),
     }
   }
 
   if (!_.isNil(ctx.from)) {
     return {
-      sender: _.pick(ctx.from, ['id']),
+      sender: _.pick(ctx.from, ["id"]),
     }
   }
 
   return {}
 }
 
-export const getMetadata = (ctx: Context) => ({
-  message_id: ctx.msg?.message_id,
-  ...getChatInfo(ctx),
-  ...getSenderInfo(ctx),
-})
+export function getMetadata(ctx: Context) {
+  return {
+    message_id: ctx.msg?.message_id,
+    ...getChatInfo(ctx),
+    ...getSenderInfo(ctx),
+  }
+}
 
-export const getFullMetadata = (ctx: Context) => ({
-  ...ctx.update,
-})
+export function getFullMetadata(ctx: Context) {
+  return {
+    ...ctx.update,
+  }
+}
 
-export const logHandle =
-  (id: string): Middleware<Context> =>
-  (ctx, next) => {
+export function logHandle(id: string): Middleware<Context> {
+  return (ctx, next) => {
     updateHandledCounter.inc({
       from_id: ctx.from?.id,
       chat_id: ctx.chat?.id,
       handler_id: id,
     })
 
-    logger.info({
+    logger.debug({
       msg: `handle ${id}`,
-      ...(id === 'unhandled' ? getFullMetadata(ctx) : getMetadata(ctx)),
+      ...(id === "unhandled" ? getFullMetadata(ctx) : getMetadata(ctx)),
     })
 
     return next()
   }
+}
 
-export const logGameEvent = (id: string, game: GameInfo, player: Player, data?: object) => {
-  logger.info({
+export function logGameEvent(id: string, game: GameInfo, player: Player, data?: object) {
+  logger.debug({
     msg: `trigger game ${id}`,
     game: game.id,
     player: player.id,
@@ -68,7 +73,7 @@ export const logGameEvent = (id: string, game: GameInfo, player: Player, data?: 
   })
 }
 
-export const logConvoHandle = <C extends Context>(id: string, ctx: C, isLeave?: true) => {
+export function logConvoHandle<C extends Context>(id: string, ctx: C, isLeave?: true) {
   if (isLeave) {
     updateHandledCounter.inc({
       from_id: ctx.from?.id,
@@ -76,8 +81,8 @@ export const logConvoHandle = <C extends Context>(id: string, ctx: C, isLeave?: 
       handler_id: id,
     })
   }
-  logger.info({
-    msg: `convo ${isLeave ? 'leave' : 'enter'}-${id}`,
-    ...(id === 'unhandled' ? getFullMetadata(ctx) : getMetadata(ctx)),
+  logger.debug({
+    msg: `convo ${isLeave ? "leave" : "enter"}-${id}`,
+    ...(id === "unhandled" ? getFullMetadata(ctx) : getMetadata(ctx)),
   })
 }

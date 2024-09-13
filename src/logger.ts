@@ -1,31 +1,38 @@
-import pino from 'pino'
-import { config } from '~/config'
+import pino from "pino"
+import { config } from "~/config"
 
-export const logger = pino({
-  level: config.LOG_LEVEL,
-  transport: {
-    targets: [
-      ...(config.isDev
-        ? [
-            {
-              target: 'pino-pretty',
-              level: config.LOG_LEVEL,
-              options: {
-                ignore: 'pid,hostname',
-                colorize: true,
-                translateTime: true,
+type LogLevel = typeof config.LOG_LEVEL
+
+export function buildLogger(level: LogLevel | undefined = undefined) {
+  const log_level = level === undefined ? config.LOG_LEVEL : level
+  return pino({
+    level: log_level,
+    transport: {
+      targets: [
+        ...(config.isDev
+          ? [
+              {
+                target: "pino-pretty",
+                level: log_level,
+                options: {
+                  ignore: "pid,hostname",
+                  colorize: true,
+                  translateTime: true,
+                },
               },
-            },
-          ]
-        : [
-            {
-              target: 'pino/file',
-              level: config.LOG_LEVEL,
-              options: {},
-            },
-          ]),
-    ],
-  },
-})
+            ]
+          : [
+              {
+                target: "pino/file",
+                level: log_level,
+                options: {},
+              },
+            ]),
+      ],
+    },
+  })
+}
+
+export const logger = buildLogger()
 
 export type Logger = typeof logger

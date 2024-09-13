@@ -20,7 +20,6 @@ cp example.env .env
 | `BOT_ALLOWED_UPDATES` | Array of String | `[]` | <i>Optional.</i> A JSON-serialized list of the update types you want your bot to receive. See [Update](https://core.telegram.org/bots/api#update) for a complete list of available update types. |
 | `BOT_ADMIN_USER_ID` | Number or Array of Number | `[]` | <i>Optional.</i> Administrator user ID. Commands such as `/setcommands` will only be available to a user with this ID. |
 
-
 ## Acknowledgements
 The initial template for this project was adapted from [Telegram Bot Template](https://github.com/bot-base/telegram-bot-template)
 

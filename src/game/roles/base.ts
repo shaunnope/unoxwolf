@@ -1,52 +1,59 @@
-/* eslint-disable class-methods-use-this */ // TODO: consider how to refactor methods to avoid this
-import _ from 'lodash'
-import { GameInfo } from '~/game/models/game'
-import { Team } from '~/game/models/enums'
-import { Player } from '~/game/models/player'
-import { Role, RoleInfo } from '~/game/models/role'
+// TODO: consider how to refactor methods to avoid this
+import _ from "lodash"
+import * as Actions from "~/game/gameplay/actions"
+import { createVoteKB, getOptions, sendActionPrompt } from "~/game/helpers/keyboards"
+import { Team } from "~/game/models/enums"
+import * as Events from "~/game/models/events"
 
-import * as Actions from '~/game/gameplay/actions'
-import * as Events from '~/game/models/events'
-import { createVoteKB, getOptions, sendActionPrompt } from '~/game/helpers/keyboards'
+import type { GameInfo } from "~/game/models/game"
+import type { Player } from "~/game/models/player"
+import type { RoleInfo } from "~/game/models/role"
+import { Role } from "~/game/models/role"
 
-import { Copier } from './copier'
+import { Copier } from "./copier"
+
+function villageWin(player: Player, game: GameInfo): void {
+  // TODO: change when other non-village teams are added
+  player.won
+    = (game.teams.get(Team.Werewolf)?.length || 0) > 0 ? (game.deaths.get(Team.Werewolf)?.length || 0) > 0 : true
+}
 
 export class Villager extends Role {
   static readonly info: RoleInfo = {
-    name: 'villager',
+    name: "villager",
     team: Team.Village,
-    command: 'roleVG',
+    command: "roleVG",
   }
 
   checkWin(player: Player, game: GameInfo): void {
-    // TODO: change when other non-village teams are added
-    player.won =
-      (game.teams.get(Team.Werewolf)?.length || 0) > 0 ? (game.deaths.get(Team.Werewolf)?.length || 0) > 0 : true
+    villageWin(player, game)
   }
 }
 
 export class Werewolf extends Role {
   static readonly info: RoleInfo = {
-    name: 'werewolf',
+    name: "werewolf",
     team: Team.Werewolf,
-    command: 'roleWW',
+    command: "roleWW",
   }
 
   doNight(player: Player, game: GameInfo) {
-    if (player.ctx === undefined) return
+    if (player.ctx === undefined)
+      return
     const teamMembers = game.teams
       .get(this.info.team)! // NOTE: never undefined since self is in the team
       .filter(other => other.id !== player.id && !other.role.info.isAide)
-    let msg = ''
+    let msg = ""
     if (teamMembers.length === 0) {
-      msg = game.ctx.t('werewolf.lone')
+      msg = game.ctx.t("werewolf.lone")
       if (game.settings.loneWolf) {
         const role = _.sample(game.unassignedRoles)!.role.info.name
-        msg += `\n${game.ctx.t('werewolf.lone2', { role: game.ctx.t(role) })}`
+        msg += `\n${game.ctx.t("werewolf.lone2", { role: game.ctx.t(role) })}`
       }
-    } else {
-      msg = game.ctx.t('werewolf.reveal', {
-        wolves: teamMembers.map(p => p.name).join(', '),
+    }
+    else {
+      msg = game.ctx.t("werewolf.reveal", {
+        wolves: teamMembers.map(p => p.name).join(", "),
       })
     }
     player.ctx.reply(msg)
@@ -59,9 +66,9 @@ export class Werewolf extends Role {
 
 export class Seer extends Villager {
   static readonly info: RoleInfo = {
-    name: 'seer',
+    name: "seer",
     team: Team.Village,
-    command: 'roleSeer',
+    command: "roleSeer",
     priority: 2,
   }
 
@@ -72,7 +79,7 @@ export class Seer extends Villager {
     const options = getOptions(game.players, other => other.id !== player.id)
     const kb = createVoteKB(options, `peek${game.id}`)
 
-    const extraOptions = [[game.ctx.t('misc.unassigned', { count: 2 }), `peek${game.id}+un`]]
+    const extraOptions = [[game.ctx.t("misc.unassigned", { count: 2 }), `peek${game.id}+un`]]
     kb.text(extraOptions[0][0], extraOptions[0][1])
 
     game.privateMsgs.set(player.id, sendActionPrompt(player, kb)!)
@@ -81,9 +88,9 @@ export class Seer extends Villager {
 
 export class Robber extends Villager {
   static readonly info: RoleInfo = {
-    name: 'robber',
+    name: "robber",
     team: Team.Village,
-    command: 'roleRobber',
+    command: "roleRobber",
     priority: 3,
   }
 
@@ -101,9 +108,9 @@ export class Robber extends Villager {
 
 export class Troublemaker extends Villager {
   static readonly info: RoleInfo = {
-    name: 'troublemaker',
+    name: "troublemaker",
     team: Team.Village,
-    command: 'roleTM',
+    command: "roleTM",
     priority: 6,
   }
 
@@ -122,9 +129,9 @@ export class Troublemaker extends Villager {
 
 export class Drunk extends Villager {
   static readonly info: RoleInfo = {
-    name: 'drunk',
+    name: "drunk",
     team: Team.Village,
-    command: 'roleDrunk',
+    command: "roleDrunk",
     priority: 12,
   }
 
@@ -139,28 +146,30 @@ export class Drunk extends Villager {
       swapSelf: true,
       isAuto: true,
     })
-    player.ctx.reply(player.ctx.t('drunk.action', { role: target.name }))
+    player.ctx.reply(player.ctx.t("drunk.action", { role: target.name }))
   }
 }
 
 export class Mason extends Villager {
   static readonly info: RoleInfo = {
-    name: 'mason',
+    name: "mason",
     team: Team.Village,
-    command: 'roleMason',
+    command: "roleMason",
   }
 
   doNight(player: Player, game: GameInfo) {
-    if (player.ctx === undefined) return
+    if (player.ctx === undefined)
+      return
     const teamMembers = game.teams
       .get(this.info.team)!
       .filter(other => other.id !== player.id && other.role instanceof Mason)
-    let msg = ''
+    let msg = ""
     if (teamMembers.length === 0) {
-      msg = game.ctx.t('mason.lone')
-    } else {
-      msg = game.ctx.t('mason.reveal', {
-        masons: teamMembers.map(p => p.name).join(', '),
+      msg = game.ctx.t("mason.lone")
+    }
+    else {
+      msg = game.ctx.t("mason.reveal", {
+        masons: teamMembers.map(p => p.name).join(", "),
       })
     }
     player.ctx.reply(msg)
@@ -169,14 +178,15 @@ export class Mason extends Villager {
 
 export class Insomniac extends Villager {
   static readonly info: RoleInfo = {
-    name: 'insomniac',
+    name: "insomniac",
     team: Team.Village,
-    command: 'roleInsomniac',
+    command: "roleInsomniac",
     priority: 15,
   }
 
   doNight(player: Player, game: GameInfo) {
-    if (player.ctx === undefined) return
+    if (player.ctx === undefined)
+      return
 
     Actions.Peek.fn(game, player.ctx, [player], {
       priority: this.priority,
@@ -185,7 +195,7 @@ export class Insomniac extends Villager {
         player.ctx!.reply(
           player.ctx!.t(`insomniac.${(player.currentRole === player.innateRole).toString()}`, {
             role: player.ctx!.t(player.currentRole.name),
-          })
+          }),
         )
       },
     })
@@ -194,31 +204,33 @@ export class Insomniac extends Villager {
 
 export class Minion extends Werewolf {
   static readonly info: RoleInfo = {
-    name: 'minion',
+    name: "minion",
     team: Team.Werewolf,
-    command: 'roleMinion',
+    command: "roleMinion",
     isAide: true,
   }
 
   doNight(player: Player, game: GameInfo) {
-    if (player.ctx === undefined) return
+    if (player.ctx === undefined)
+      return
     const teamMembers = game.teams
       .get(this.info.team)!
       .filter(other => other.id !== player.id && !other.role.info.isAide)
-    let msg = ''
+    let msg = ""
     if (teamMembers.length === 0) {
-      msg = game.ctx.t('minion.lone')
-    } else {
-      msg = game.ctx.t('minion.reveal', {
-        wolves: teamMembers.map(p => p.name).join(', '),
+      msg = game.ctx.t("minion.lone")
+    }
+    else {
+      msg = game.ctx.t("minion.reveal", {
+        wolves: teamMembers.map(p => p.name).join(", "),
       })
     }
     player.ctx.reply(msg)
   }
 
   checkWin(player: Player, game: GameInfo): void {
-    player.won =
-      (game.teams.get(this.info.team)?.length || 0) === 0
+    player.won
+      = (game.teams.get(this.info.team)?.length || 0) === 0
         ? !player.isDead
         : (game.deaths.get(Team.Werewolf)?.length || 0) === 0
   }
@@ -226,9 +238,9 @@ export class Minion extends Werewolf {
 
 export class Hunter extends Villager {
   static readonly info: RoleInfo = {
-    name: 'hunter',
+    name: "hunter",
     team: Team.Village,
-    command: 'roleHunter',
+    command: "roleHunter",
   }
 
   unalive(player: Player, game: GameInfo) {
@@ -242,9 +254,9 @@ export class Hunter extends Villager {
 
 export class Tanner extends Villager {
   static readonly info: RoleInfo = {
-    name: 'tanner',
+    name: "tanner",
     team: Team.Tanner,
-    command: 'roleTanner',
+    command: "roleTanner",
   }
 
   checkWin(player: Player) {
@@ -254,14 +266,19 @@ export class Tanner extends Villager {
 
 export class Doppelganger extends Copier {
   static readonly info: RoleInfo = {
-    name: 'doppelganger',
+    name: "doppelganger",
     team: Team.Village,
-    command: 'roleDG',
+    command: "roleDG",
     priority: 1,
   }
 
   get priority() {
-    if (this.copiedRole === undefined) return super.priority
+    if (this.copiedRole === undefined)
+      return super.priority
     return this.tail.priority + 0.5
+  }
+
+  defaultWin(player: Player, game: GameInfo): void {
+    villageWin(player, game)
   }
 }

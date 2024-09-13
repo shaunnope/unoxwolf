@@ -1,40 +1,13 @@
-import pino from 'pino'
-import Redis from 'ioredis'
+import Redis from "ioredis"
 
-import { parseConfig } from '~/config'
-import { prisma } from '~/prisma'
-import type { Game } from '~/game'
+import { config } from "~/config"
+import type { Game } from "~/game"
+import { buildLogger, logger } from "~/logger"
 
-const config = parseConfig(process.env)
+import { buildPrisma } from "~/prisma"
 
-config.isDev = true
-
-const logger = pino({
-  level: config.LOG_LEVEL,
-  transport: {
-    targets: [
-      ...(config.isDev
-        ? [
-            {
-              target: 'pino-pretty',
-              level: config.LOG_LEVEL,
-              options: {
-                ignore: 'pid,hostname',
-                colorize: true,
-                translateTime: true,
-              },
-            },
-          ]
-        : [
-            {
-              target: 'pino/file',
-              level: config.LOG_LEVEL,
-              options: {},
-            },
-          ]),
-    ],
-  },
-})
+const serverLogger = buildLogger("error")
+const prisma = buildPrisma(serverLogger)
 
 const redis = new Redis(config.REDIS_URL)
 const games = new Map<string, Game>()

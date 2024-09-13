@@ -11,7 +11,7 @@ export enum Team {
   Mortician,
 }
 
-export type Status = {
+export interface Status {
   isCopy?: true
   isAlien?: true
 }

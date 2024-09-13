@@ -1,11 +1,11 @@
-import { Prisma, User } from '@prisma/client'
-import { Team } from '~/game/models/enums'
-import type { Player } from '~/game/models/player'
-import type { GameInfo } from '~/game/models/game'
+import { Prisma } from "@prisma/client"
+import { Team } from "~/game/models/enums"
+import type { GameInfo } from "~/game/models/game"
+import type { Player } from "~/game/models/player"
 
-import { PrismaClientX } from '.'
+import type { PrismaClientX } from "."
 
-const incTeamStat = (team: Team, p: Player, win: boolean) => {
+function incTeamStat(team: Team, p: Player, win: boolean) {
   return p.currentRole.info.team === team && p.won === win ? 1 : 0
 }
 
@@ -32,7 +32,7 @@ export const TEAM_WINLOSE = {
 // } & Record<keyof typeof TEAM_WINS, number>
 
 const statsExtension = Prisma.defineExtension({
-  name: 'stats',
+  name: "stats",
   result: {
     stats: {
       totalGames: {
@@ -72,17 +72,17 @@ const statsExtension = Prisma.defineExtension({
       async getUserChatStats(userId: number, chatId: number, aggregate: boolean = true) {
         return aggregate
           ? Prisma.getExtensionContext(this).aggregate({
-              _sum: {
-                ...TEAM_WINLOSE,
-              },
-              where: Prisma.getExtensionContext(this).byUserChat(userId, chatId),
-            })
+            _sum: {
+              ...TEAM_WINLOSE,
+            },
+            where: Prisma.getExtensionContext(this).byUserChat(userId, chatId),
+          })
           : Prisma.getExtensionContext(this).findMany({
-              where: Prisma.getExtensionContext(this).byUserChat(userId, chatId),
-              select: {
-                ...TEAM_WINLOSE,
-              },
-            })
+            where: Prisma.getExtensionContext(this).byUserChat(userId, chatId),
+            select: {
+              ...TEAM_WINLOSE,
+            },
+          })
       },
       async getUserStats(userId: number) {
         return Prisma.getExtensionContext(this).aggregate({
@@ -140,7 +140,7 @@ const statsExtension = Prisma.defineExtension({
 })
 
 export type UserStats = Awaited<
-  ReturnType<ReturnType<PrismaClientX['$extends']['extArgs']['model']['stats']['getUserStats']>>
+  ReturnType<ReturnType<PrismaClientX["$extends"]["extArgs"]["model"]["stats"]["getUserStats"]>>
 >
 
 export default statsExtension

@@ -1,23 +1,24 @@
-import { createHash } from 'crypto'
-import { InlineKeyboard } from 'grammy'
+import { createHash } from "node:crypto"
+import { InlineKeyboard } from "grammy"
 
-import type { Message } from '@grammyjs/types'
+import type { Other } from "@grammyjs/hydrate"
 
-import { Other } from '@grammyjs/hydrate'
-import { Team } from '~/game/models/enums'
-import { Player } from '~/game/models/player'
-import type { GameSettings, GameInfo, GameEvent, GameFlags } from '~/game/models/game'
+import type { Message } from "@grammyjs/types"
+import type { Context } from "~/bot/context"
+import { getForumTopicId } from "~/bot/helpers/forum"
+import { config } from "~/config"
 
-import * as Roles from '~/game/roles'
+import * as Actions from "~/game/gameplay/actions"
 
-import { Context } from '~/bot/context'
-import { getForumTopicId } from '~/bot/helpers/forum'
-import { sleep } from '~/game/helpers/timer'
-import * as Actions from '~/game/gameplay/actions'
-import { config } from '~/config'
-import { deleteGame, getChatTitle } from './helpers/game.context'
-import { generateRoles } from './roles/builder'
-import { isCopier } from './roles/copier'
+import { sleep } from "~/game/helpers/timer"
+import { Team } from "~/game/models/enums"
+import type { GameEvent, GameFlags, GameInfo, GameSettings } from "~/game/models/game"
+import { Player } from "~/game/models/player"
+import * as Roles from "~/game/roles"
+import { deleteGame, getChatTitle } from "./helpers/game.context"
+import { generateRoles } from "./roles/builder"
+import { isCopier } from "./roles/copier"
+import type { Role } from "./models/role"
 
 const defaultSettings: GameSettings = {
   joinTimeout: 180,
@@ -68,19 +69,25 @@ export class Game implements GameInfo {
 
   unassignedRoles: Player[] = []
 
+  roles?: Role[]
+
   deaths: Map<Team, Player[]> = new Map()
 
   winners: Map<Team, Player[]> = new Map()
 
-  state: 'lobby' | 'started' | 'ended'
+  state: "lobby" | "started" | "ended"
 
   readonly settings: GameSettings
 
-  private readonly tickRate: number = config.isDev ? 1000 : 1000
+  private readonly tickRate: number = config.isTest ? 10 : 1000
 
   flags: GameFlags = {}
 
+  /** Messages to be deleted at the end of each state */
   serviceMsgs: (Message.TextMessage & Message)[] = []
+
+  /** Messages to be deleted at the end of the game */
+  traceMsgs: (Message.TextMessage & Message)[] = []
 
   callToAction: InlineKeyboard | undefined = undefined
 
@@ -94,11 +101,11 @@ export class Game implements GameInfo {
 
   constructor(ctx: Context, settings: GameSettings = defaultSettings) {
     this.ctx = ctx
-    this.id = createHash('sha256').update(`${this.chatId.toString()}-${Date.now()}`).digest('hex').slice(0, 20)
+    this.id = createHash("sha256").update(`${this.chatId.toString()}-${Date.now()}`).digest("hex").slice(0, 20)
     this.createdBy = ctx.from?.id || 0
     this.createdTime = new Date()
 
-    this.state = 'lobby'
+    this.state = "lobby"
     this.settings = settings
 
     this.run()
@@ -122,19 +129,21 @@ export class Game implements GameInfo {
    */
   addPlayer(ctx: Context) {
     const sender = ctx.from
-    if (!sender) return
-    if (this.playerMap.has(sender.id)) return
+    if (!sender)
+      return
+    if (this.playerMap.has(sender.id))
+      return
     const player = new Player(sender.id, sender.first_name, undefined, ctx)
     this.newPlayers.set(sender.id, player)
     this.playerMap.set(sender.id, player)
 
     ctx.session.game = this.id
     ctx.session.actions = []
-    ctx.reply(ctx.t('join.success', { chat: getChatTitle(this.ctx) }))
+    ctx.reply(ctx.t("join.success", { chat: getChatTitle(this.ctx) }))
   }
 
   addPlayers(players: Player[]) {
-    players.forEach(p => {
+    players.forEach((p) => {
       this.newPlayers.set(p.id, p)
       this.playerMap.set(p.id, p)
     })
@@ -142,8 +151,10 @@ export class Game implements GameInfo {
 
   removePlayer(ctx: Context) {
     const sender = ctx.from
-    if (!sender) return
-    if (!this.playerMap.has(sender.id)) return
+    if (!sender)
+      return
+    if (!this.playerMap.has(sender.id))
+      return
     this.newPlayers.delete(sender.id)
     this.playerMap.delete(sender.id)
   }
@@ -152,14 +163,17 @@ export class Game implements GameInfo {
    * The main game loop
    */
   async run() {
-    if (!(await this.collectPlayers())) return
+    if (!(await this.collectPlayers()))
+      return
 
-    await this.reply(this.ctx.t('game_init.starting'))
+    await this.reply(this.ctx.t("game_init.starting"), undefined, "trace")
 
     await this.reply(
-      `${this.ctx.t('join.count', {
+      `${this.ctx.t("join.count", {
         count: this.players.length,
-      })}\n${this.players.map(p => p.name).join('\n')}`
+      })}\n${this.players.map(p => p.name).join("\n")}`,
+      undefined,
+      "trace",
     )
 
     const hasCopy = await this.assignRolesAndNotify()
@@ -187,20 +201,19 @@ export class Game implements GameInfo {
    */
   async collectPlayers() {
     this.callToAction = new InlineKeyboard().url(
-      this.ctx.t('join'),
-      `https://t.me/${this.ctx.me.username}?start=join${this.id}`
+      this.ctx.t("join"),
+      `https://t.me/${this.ctx.me.username}?start=join${this.id}`,
     )
 
-    this.serviceMsgs = [
-      await this.reply(
-        this.ctx.t('game_init', {
-          user: this.ctx.from?.first_name || this.ctx.t('misc.unknown_user'),
-        }),
-        {
-          reply_markup: this.callToAction,
-        }
-      ),
-    ]
+    await this.reply(
+      this.ctx.t("game_init", {
+        user: this.ctx.from?.first_name || this.ctx.t("misc.unknown_user"),
+      }),
+      {
+        reply_markup: this.callToAction,
+      },
+      "service",
+    )
 
     let count = this.playerMap.size
     let ts = 0
@@ -220,9 +233,9 @@ export class Game implements GameInfo {
       if (ts % 30 === 0 && this.newPlayers.size > 0) {
         const joinedPlayers = Array.from(this.newPlayers.values())
           .map(p => p.name)
-          .join(', ')
+          .join(", ")
         // TODO: add user links
-        this.reply(this.ctx.t('join.recent_list', { users: joinedPlayers }))
+        this.reply(this.ctx.t("join.recent_list", { users: joinedPlayers }), undefined, "service")
         this.newPlayers.clear()
       }
 
@@ -231,19 +244,21 @@ export class Game implements GameInfo {
       ts++
       await sleep(this.tickRate)
     }
-    this.state = 'started'
+    this.state = "started"
 
     // delete all countdown messages
-    this.cleanupMsgs()
+    this.cleanupMsgs(this.serviceMsgs)
 
     await sleep(2 * this.tickRate) // wait for last players to join
 
     // check if enough players
     if (this.playerMap.size < this.settings.minPlayers) {
       await this.reply(
-        this.ctx.t('game_init.not_enough_players', {
+        this.ctx.t("game_init.not_enough_players", {
           count: this.settings.minPlayers,
-        })
+        }),
+        undefined,
+        "trace",
       )
       this.end()
       return false
@@ -261,7 +276,7 @@ export class Game implements GameInfo {
 
     this.events = []
 
-    this.players.forEach(p => {
+    this.players.forEach((p) => {
       if (isCopier(p.innateRole)) {
         p.innateRole.copy(p, this)
       }
@@ -278,11 +293,11 @@ export class Game implements GameInfo {
 
       await sleep(this.tickRate)
     }
-    this.cleanupMsgs()
+    this.cleanupMsgs(this.serviceMsgs)
     await this.cleanupPMs(Actions.Copy.fallback)
     this.events.sort((a, b) => a.priority - b.priority)
     this.updateTimeline()
-    this.reply(this.ctx.t('copy.end'))
+    this.reply(this.ctx.t("copy.end"), undefined, "trace")
 
     await sleep(10 * this.tickRate)
   }
@@ -293,8 +308,8 @@ export class Game implements GameInfo {
    */
   async nightPhase() {
     this.privateMsgs = new Map()
-    this.serviceMsgs = []
-    await this.reply(this.ctx.t('night.start'))
+    // this.serviceMsgs = []
+    await this.reply(this.ctx.t("night.start"), undefined, "trace")
 
     this.events = []
 
@@ -311,9 +326,9 @@ export class Game implements GameInfo {
 
       await sleep(this.tickRate)
     }
-    this.cleanupMsgs()
+    this.cleanupMsgs(this.serviceMsgs)
     await this.cleanupPMs(() => {})
-    await this.reply(this.ctx.t('night.end'))
+    await this.reply(this.ctx.t("night.end"), undefined, "trace")
     this.events.sort((a, b) => a.priority - b.priority).forEach(e => e.fn())
     this.updateTimeline()
 
@@ -325,12 +340,13 @@ export class Game implements GameInfo {
    */
   async collectVotes() {
     this.privateMsgs = new Map()
-    this.serviceMsgs = [await this.reply(this.ctx.t('vote.start'))]
+    // this.serviceMsgs = [await this.reply(this.ctx.t("vote.start"))]
+    await this.reply(this.ctx.t("vote.start"), undefined, "service")
 
     this.events = []
     this.aggregator = new Map()
 
-    this.players.forEach(p => {
+    this.players.forEach((p) => {
       this.aggregator.set(p.id, [])
       if (p.ctx === undefined) {
         Actions.Vote.fallback(this, p)
@@ -350,22 +366,23 @@ export class Game implements GameInfo {
 
       await sleep(this.tickRate)
     }
-    this.cleanupMsgs()
+    this.cleanupMsgs(this.serviceMsgs)
     await this.cleanupPMs()
 
-    const voteResultsMsg = await this.reply(`${this.ctx.t('vote.end')} ${this.ctx.t('vote.tally')}`)
+    const voteResultsMsg = await this.reply(`${this.ctx.t("vote.end")} ${this.ctx.t("vote.tally")}`)
 
     this.events.sort((a, b) => a.priority - b.priority).forEach(e => e.fn())
 
-    const numVotes: [Player, number, Player[]][] = Array(this.aggregator.size).fill(undefined)
-    let voteResults = `${this.ctx.t('vote.end')}\n\n`
+    const numVotes: [Player, number, Player[]][] = new Array(this.aggregator.size).fill(undefined)
+    let voteResults = `${this.ctx.t("vote.end")}\n\n`
 
     this.teams = new Map() // now track the number of non-aide team members
 
     let i = -1
     Array.from(this.aggregator.entries()).forEach(([playerId, voters]) => {
       const player = this.playerMap.get(playerId)
-      if (player === undefined) return
+      if (player === undefined)
+        return
 
       numVotes[++i] = [player, voters.length, voters]
       // if (config.isDev) {
@@ -378,30 +395,31 @@ export class Game implements GameInfo {
 
       // collate non-aide players in main teams
       if (
-        !player.currentRole.info.isAide &&
-        [Team.Village, Team.Werewolf, Team.Vampire, Team.Alien].includes(player.currentRole.info.team)
+        !player.currentRole.info.isAide
+        && [Team.Village, Team.Werewolf, Team.Vampire, Team.Alien].includes(player.currentRole.info.team)
       ) {
         const teamMembers = this.teams.get(player.currentRole.info.team)
-        if (teamMembers === undefined) this.teams.set(player.currentRole.info.team, [player])
+        if (teamMembers === undefined)
+          this.teams.set(player.currentRole.info.team, [player])
         else teamMembers.push(player)
       }
 
       voteResults += `<strong>${player.name}:</strong>  (${numVotes[i][1]})\n`
 
-      voteResults += voters.length > 0 ? `${voters.map(p => p.name).join(', ')}\n\n` : '\n'
+      voteResults += voters.length > 0 ? `${voters.map(p => p.name).join(", ")}\n\n` : "\n"
     })
 
     await this.ctx.api.editMessageText(this.chatId, voteResultsMsg.message_id, voteResults)
 
     if (!numVotes.some(([, n]) => n > 1)) {
-      this.reply(this.ctx.t('vote.draw'))
+      this.reply(this.ctx.t("vote.draw"))
       return
     }
 
     this.events = []
     numVotes.sort((a, b) => b[1] - a[1])
-    let goal =
-      Array.from(this.teams.entries()).filter(([team, members]) => {
+    let goal
+      = Array.from(this.teams.entries()).filter(([team, members]) => {
         return team === Team.Village || members.some(p => !p.currentRole.info.isAide)
       }).length < 3
         ? 1
@@ -411,15 +429,16 @@ export class Game implements GameInfo {
     for (const [idx, [player, n]] of numVotes.entries()) {
       if (player.currentRole.lynch(player, this)) {
         out.push(player)
-        if (--goal <= 0 && n > numVotes[idx + 1][1]) break
+        if (--goal <= 0 && n > numVotes[idx + 1][1])
+          break
       }
     }
 
     await this.reply(
-      this.ctx.t('vote.results', {
-        users: out.map(p => p.name).join(', '),
+      this.ctx.t("vote.results", {
+        users: out.map(p => p.name).join(", "),
         num: out.length,
-      })
+      }),
     )
 
     await sleep(2 * this.tickRate)
@@ -438,28 +457,28 @@ export class Game implements GameInfo {
     this.players.forEach(p => p.currentRole.checkWin(p, this))
 
     const results = this.players
-      .map(p => {
-        const roleName =
-          isCopier(p.currentRole) && p.currentRole.copiedRole !== undefined
+      .map((p) => {
+        const roleName
+          = isCopier(p.currentRole) && p.currentRole.copiedRole !== undefined
             ? p.currentRole.fullRole(this.ctx)
             : this.ctx.t(p.currentRole.name)
-        return `${p.name}: ${p.won ? this.ctx.t('game.won') : this.ctx.t('game.lost')} ${
-          p.isDead ? this.ctx.t('game.dead') : this.ctx.t('game.alive')
+        return `${p.name}: ${p.won ? this.ctx.t("game.won") : this.ctx.t("game.lost")} ${
+          p.isDead ? this.ctx.t("game.dead") : this.ctx.t("game.alive")
         }  -  ${roleName}`
       })
-      .join('\n')
+      .join("\n")
 
     const unassigned = this.unassignedRoles
-      .map(r => {
+      .map((r) => {
         return isCopier(r.currentRole) && r.currentRole.copiedRole !== undefined
           ? r.currentRole.fullRole(this.ctx)
           : this.ctx.t(r.currentRole.name)
       })
-      .join(', ')
+      .join(", ")
 
-    const msg =
-      `<strong>${this.ctx.t('game.end')}</strong>\n\n${results}\n\n` +
-      `${this.ctx.t('vote.unassigned', {
+    const msg
+      = `<strong>${this.ctx.t("game.end")}</strong>\n\n${results}\n\n`
+      + `${this.ctx.t("vote.unassigned", {
         roles: unassigned,
       })}`
 
@@ -473,33 +492,38 @@ export class Game implements GameInfo {
   async assignRolesAndNotify() {
     this.teams = new Map()
     const deck = generateRoles(this.players.length, this.settings.roles, this.settings.extraRoles)
+    this.roles = deck
 
     this.players.forEach((p, i) => {
       p.setup(deck[i])
 
       // if (config.isDev && p.id === config.BOT_OWNER_USER_ID) {
-      //   const role = new Roles.Doppelganger()
+      //   const role = new Roles.Fool()
       //   p.setup(role)
       //   deck[i] = role
       // }
 
       // collate players by team
       const teamMembers = this.teams.get(p.role.info.team)
-      if (teamMembers === undefined) this.teams.set(p.role.info.team, [p])
+      if (teamMembers === undefined)
+        this.teams.set(p.role.info.team, [p])
       else teamMembers.push(p)
 
-      if (p.ctx === undefined) return
+      if (p.ctx === undefined)
+        return
       this.ctx.api.sendMessage(p.id, this.ctx.t(p.role.lore))
     })
     this.unassignedRoles = deck
       .slice(this.players.length)
-      .map((r, idx) => new Player(idx, this.ctx.t('misc.unassigned_role', { idx: idx + 1 }), r, undefined))
+      .map((r, idx) => new Player(idx, this.ctx.t("misc.unassigned_role", { idx: idx + 1 }), r, undefined))
 
     await this.reply(
-      `${this.ctx.t('game.roles')}\n${deck
-        .map(r => this.ctx.t(r.name))
+      `${this.ctx.t("game.roles")}\n${deck
+        .map(r => this.ctx.t(r.mask))
         .sort()
-        .join('\n')}`
+        .join("\n")}`,
+      undefined,
+      "trace",
     )
 
     return deck.some(r => isCopier(r))
@@ -510,35 +534,36 @@ export class Game implements GameInfo {
    */
   async announceTimeline() {
     const eventBlock = this.timeline
-      .map(e => {
+      .map((e) => {
         return `${e.icon} ${this.ctx.t(`events.${e.type}`)} -  ${e.author.name}:  [ ${e.targets
           .map(t => t.name)
-          .join(', ')} ]`
+          .join(", ")} ]`
       })
-      .join('\n')
+      .join("\n")
 
-    await this.reply(`${this.ctx.t('events')}\n\n${eventBlock}`)
+    await this.reply(`${this.ctx.t("events")}\n\n${eventBlock}`)
   }
 
   /**
    * End the game, updating the database with the results
    */
   async end() {
-    this.state = 'ended'
+    this.state = "ended"
 
     for (const p of this.players) {
       await p.ctx?.prisma.stats.logGame(p, this)
     }
 
+    await this.cleanupMsgs(this.traceMsgs)
     deleteGame(this)
   }
 
   /**
    * Delete all service messages
    */
-  cleanupMsgs() {
-    this.serviceMsgs.forEach(msg => this.ctx.api.deleteMessage(this.chatId, msg.message_id))
-    this.serviceMsgs = []
+  cleanupMsgs(messages: (Message.TextMessage & Message)[]) {
+    messages.forEach(msg => this.ctx.api.deleteMessage(this.chatId, msg.message_id))
+    messages.length = 0
   }
 
   async cleanupPMs(fallback = Actions.Vote.fallback) {
@@ -547,8 +572,8 @@ export class Game implements GameInfo {
 
       await player.ctx?.conversation.exit()
 
-      promise.then(msg => {
-        this.ctx.api.editMessageText(playerId, msg.message_id, this.ctx.t('game.times_up'))
+      promise.then((msg) => {
+        this.ctx.api.editMessageText(playerId, msg.message_id, this.ctx.t("game.times_up"))
         fallback(this, player)
       })
     }
@@ -557,20 +582,23 @@ export class Game implements GameInfo {
   async countdownPrompt(
     ts: number,
     duration: number = this.settings.joinTimeout,
-    kb: InlineKeyboard | undefined = undefined
+    kb: InlineKeyboard | undefined = undefined,
   ) {
     if (timeLeftReminders.map(x => duration - x).includes(ts)) {
       const left = duration - ts
-      this.serviceMsgs.push(
-        await this.reply(this.ctx.t('game.seconds_left', { time: left }), {
-          reply_markup: kb,
-        })
-      )
+      await this.reply(this.ctx.t("game.seconds_left", { time: left }), {
+        reply_markup: kb,
+      }, "service")
     }
   }
 
-  async reply(msg: string, other?: Other<'sendMessage', 'chat_id' | 'text'>) {
-    return this.ctx.reply(msg, { ...other, reply_to_message_id: this.topicId })
+  async reply(msg: string, other?: Other<"sendMessage", "chat_id" | "text">, type?: "trace" | "service") {
+    const rep = this.ctx.reply(msg, { ...other, reply_to_message_id: this.topicId })
+    if (type === "trace")
+      this.traceMsgs.push(await rep)
+    else if (type === "service")
+      this.serviceMsgs.push(await rep)
+    return rep
   }
 
   setupTimer() {

@@ -6,10 +6,11 @@ const config: Config = {
   setupFiles: ['./.jest/setEnvVars.ts'],
   // setupFilesAfterEnv: ['./.jest/setup.ts'],
 
-  modulePaths: ['<rootDir>/src'],
+  modulePaths: ['<rootDir>/src', '<rootDir>/tests'],
   moduleNameMapper: {
-    '^~/(.*)$': '<rootDir>/src/$1'
-  }
-};
+    '^~/(.*)$': '<rootDir>/src/$1',
+    '^(?:tests)/(.*)$': '<rootDir>/tests/$1',
+  },
+}
 
-export default config;
+export default config
