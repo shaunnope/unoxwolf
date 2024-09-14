@@ -4,8 +4,9 @@ import * as Actions from "~/game/gameplay/actions"
 import { createVoteKB, getOptions, sendActionPrompt } from "~/game/helpers/keyboards"
 import { Team } from "~/game/models/enums"
 import * as Events from "~/game/models/events"
-
 import type { GameInfo } from "~/game/models/game"
+
+import * as G from "~/game/models/game.fn"
 import type { Player } from "~/game/models/player"
 import type { RoleInfo } from "~/game/models/role"
 import { Role } from "~/game/models/role"
@@ -15,7 +16,9 @@ import { Copier } from "./copier"
 function villageWin(player: Player, game: GameInfo): void {
   // TODO: change when other non-village teams are added
   player.won
-    = (game.teams.get(Team.Werewolf)?.length || 0) > 0 ? (game.deaths.get(Team.Werewolf)?.length || 0) > 0 : true
+    = G.count(game, Team.Werewolf) > 0
+      ? G.dead(game, Team.Werewolf) > 0
+      : G.dead(game, Team.Tanner) === 0
 }
 
 export class Villager extends Role {
@@ -30,37 +33,52 @@ export class Villager extends Role {
   }
 }
 
-export class Werewolf extends Role {
+export class Mason extends Villager {
+  static readonly info: RoleInfo = {
+    ...super.info,
+    name: "mason",
+    command: "roleMason",
+  }
+
+  processLone(game: GameInfo) {
+    return game.ctx.t(this.locale("lone"))
+  }
+
+  processReveal(game: GameInfo, members: Player[]) {
+    return game.ctx.t(this.locale("reveal"), {
+      others: members.map(p => p.name).join(", "),
+    })
+  }
+
+  doNight(player: Player, game: GameInfo) {
+    if (player.ctx === undefined)
+      return
+    const teamMembers = G.members(game, player, this.info.team)
+    const msg = teamMembers.length === 0 ? this.processLone(game) : this.processReveal(game, teamMembers)
+
+    player.ctx.reply(msg)
+  }
+}
+
+export class Werewolf extends Mason {
   static readonly info: RoleInfo = {
     name: "werewolf",
     team: Team.Werewolf,
     command: "roleWW",
   }
 
-  doNight(player: Player, game: GameInfo) {
-    if (player.ctx === undefined)
-      return
-    const teamMembers = game.teams
-      .get(this.info.team)! // NOTE: never undefined since self is in the team
-      .filter(other => other.id !== player.id && !other.role.info.isAide)
-    let msg = ""
-    if (teamMembers.length === 0) {
-      msg = game.ctx.t("werewolf.lone")
-      if (game.settings.loneWolf) {
-        const role = _.sample(game.unassignedRoles)!.role.info.name
-        msg += `\n${game.ctx.t("werewolf.lone2", { role: game.ctx.t(role) })}`
-      }
+  processLone(game: GameInfo) {
+    let msg = game.ctx.t(this.locale("lone"))
+    if (game.settings.loneWolf) {
+      const role = _.sample(game.unassignedRoles)!.role.info.name
+      msg += `\n${game.ctx.t("werewolf.lone2", { role: game.ctx.t(role) })}`
     }
-    else {
-      msg = game.ctx.t("werewolf.reveal", {
-        wolves: teamMembers.map(p => p.name).join(", "),
-      })
-    }
-    player.ctx.reply(msg)
+
+    return msg
   }
 
   checkWin(player: Player, game: GameInfo): void {
-    player.won = (game.deaths.get(Team.Werewolf)?.length || 0) === 0
+    player.won = G.dead(game, Team.Tanner) === 0 && G.dead(game, Team.Werewolf) === 0
   }
 }
 
@@ -150,32 +168,6 @@ export class Drunk extends Villager {
   }
 }
 
-export class Mason extends Villager {
-  static readonly info: RoleInfo = {
-    name: "mason",
-    team: Team.Village,
-    command: "roleMason",
-  }
-
-  doNight(player: Player, game: GameInfo) {
-    if (player.ctx === undefined)
-      return
-    const teamMembers = game.teams
-      .get(this.info.team)!
-      .filter(other => other.id !== player.id && other.role instanceof Mason)
-    let msg = ""
-    if (teamMembers.length === 0) {
-      msg = game.ctx.t("mason.lone")
-    }
-    else {
-      msg = game.ctx.t("mason.reveal", {
-        masons: teamMembers.map(p => p.name).join(", "),
-      })
-    }
-    player.ctx.reply(msg)
-  }
-}
-
 export class Insomniac extends Villager {
   static readonly info: RoleInfo = {
     name: "insomniac",
@@ -204,35 +196,23 @@ export class Insomniac extends Villager {
 
 export class Minion extends Werewolf {
   static readonly info: RoleInfo = {
+    ...super.info,
     name: "minion",
-    team: Team.Werewolf,
     command: "roleMinion",
     isAide: true,
   }
 
-  doNight(player: Player, game: GameInfo) {
-    if (player.ctx === undefined)
-      return
-    const teamMembers = game.teams
-      .get(this.info.team)!
-      .filter(other => other.id !== player.id && !other.role.info.isAide)
-    let msg = ""
-    if (teamMembers.length === 0) {
-      msg = game.ctx.t("minion.lone")
-    }
-    else {
-      msg = game.ctx.t("minion.reveal", {
-        wolves: teamMembers.map(p => p.name).join(", "),
-      })
-    }
-    player.ctx.reply(msg)
+  processLone(game: GameInfo): string {
+    return game.ctx.t(this.locale("lone"))
   }
 
   checkWin(player: Player, game: GameInfo): void {
     player.won
-      = (game.teams.get(this.info.team)?.length || 0) === 0
-        ? !player.isDead
-        : (game.deaths.get(Team.Werewolf)?.length || 0) === 0
+      = G.dead(game, Team.Tanner) === 0 && (
+        G.count(game, Team.Werewolf) === 0
+          ? !player.isDead
+          : G.dead(game, Team.Werewolf) === 0
+      )
   }
 }
 

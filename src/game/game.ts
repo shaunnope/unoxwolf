@@ -380,9 +380,7 @@ export class Game implements GameInfo {
 
     let i = -1
     Array.from(this.aggregator.entries()).forEach(([playerId, voters]) => {
-      const player = this.playerMap.get(playerId)
-      if (player === undefined)
-        return
+      const player = this.playerMap.get(playerId)!
 
       numVotes[++i] = [player, voters.length, voters]
       // if (config.isDev) {
@@ -497,11 +495,11 @@ export class Game implements GameInfo {
     this.players.forEach((p, i) => {
       p.setup(deck[i])
 
-      // if (config.isDev && p.id === config.BOT_OWNER_USER_ID) {
-      //   const role = new Roles.Fool()
-      //   p.setup(role)
-      //   deck[i] = role
-      // }
+      if (config.isDev && p.id === config.BOT_OWNER_USER_ID) {
+        const role = new Roles.Minion()
+        p.setup(role)
+        deck[i] = role
+      }
 
       // collate players by team
       const teamMembers = this.teams.get(p.role.info.team)

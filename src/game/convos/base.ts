@@ -7,15 +7,12 @@ import { createVoteKB, getOptions } from "~/game/helpers/keyboards"
 
 export async function troublemaker(conversation: Conversation, ctx: Context) {
   const { gameId, targetId } = ctx.session.actions[0]
-  const game = games.get(gameId)
-  if (game === undefined)
-    return
+  const game = games.get(gameId)!
+
   if (!Number(targetId))
     return
-  const target = game.playerMap.get(Number(targetId))
-  const playerId = ctx.from?.id
-  if (playerId === undefined || target === undefined)
-    return
+  const target = game.playerMap.get(Number(targetId))!
+  const playerId = ctx.from!.id
 
   await conversation.external(() => {
     const leftOptions = getOptions(game.players, other => other.id !== playerId && other.id !== target.id)

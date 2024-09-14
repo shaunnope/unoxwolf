@@ -131,7 +131,7 @@ events = <strong>Order of Events:</strong>
 
 copy =
     .start = {""}
-    .end = As the sun sets, rumors of identity theft spread through the village.
+    .end = As the sun set, rumors of identity theft spread through the village.
 
 night =
     .start = Night falls...
@@ -228,7 +228,7 @@ werewolf = Werewolf
     .lore =
         You are a {werewolf.name}!
         Arise at night to meet your fellow lycantrophic brethren.
-    .reveal = You are werewolves together with { $wolves }
+    .reveal = You are werewolves together with { $others }
     .lone = You are the only werewolf.
     .lone2 = One of the unassigned roles is a { $role }
 
@@ -283,7 +283,7 @@ tanner = Tanner
         <em>The Tanner is on the {team.tanner} team.</em>
     .lore =
         You are the {tanner.name}
-        Sick of your job, you only win if you are killed tonight.
+        Sick of your job, you only win if you are killed by the end of the day.
 
 drunk = Drunk
     .name = {drunk} {drunk.emoji}
@@ -336,7 +336,7 @@ mason = Mason
         You are a {mason.name}
         At night, you will meet up with your fellow masons.
     .lone = You are the only mason.
-    .reveal = You are masons together with { $masons }.
+    .reveal = You are masons together with { $others }.
 
 minion = Minion
     .name = {minion} {minion.emoji}
@@ -348,7 +348,7 @@ minion = Minion
     .lore =
         You are the {minion.name}
         At night, you may meet your revered werewolves.
-    .reveal = The werewolves are { $wolves }.
+    .reveal = The werewolves are { $others }.
     .lone = There are no werewolves tonight. If none show up in the morning, survive the vote and you will win.
 
 doppelganger = Doppelgänger
@@ -382,12 +382,13 @@ apprentice_seer = Apprentice Seer
     .name = {apprentice_seer} {apprentice_seer.emoji}
     .emoji = 🙇
     .desc =
-        At night, the Apprentice Seer may learn the identity of the {seer.name} or look at one of the unassigned roles.
+        At night, the Apprentice Seer may look at one of the unassigned roles.
 
         <em>The Apprentice Seer is on the {team.village} team.</em>
     .lore =
         You are the {apprentice_seer.name}
-        Keen to learn the ways of the {seer.name}, you can choose to use your powers to learn the identity of the {seer.name} or look at one of the unassigned roles.
+        While the powers of the {seer.name} vastly surpasses yours, you know a thing or two about divination.
+        At night, you may use your abilities to look at one of the unassigned roles.
     .action = {seer.action}
     .reveal = A { $role } is unassigned tonight
     .reveal_seer = { $user } is the {seer.name}

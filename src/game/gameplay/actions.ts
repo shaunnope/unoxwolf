@@ -64,11 +64,8 @@ export const Vote: Action = {
     game.privateMsgs.set(player.id, sendActionPrompt(player, createVoteKB(options, `vote${game.id}`), "vote")!)
   },
   fn: (game: Game, playerCtx: Context, targets?: Player[]) => {
-    if (playerCtx.from?.id === undefined)
-      return
-    const player = game.playerMap.get(playerCtx.from?.id)
-    if (player === undefined)
-      return
+    const player = game.playerMap.get(playerCtx.from!.id)!
+
     if (game.privateMsgs.get(player.id) === undefined) {
       playerCtx.reply(playerCtx.t("game_error.wrong_qn"))
       return

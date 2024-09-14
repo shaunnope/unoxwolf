@@ -1,9 +1,11 @@
+import type { CallbackQueryContext } from "grammy"
+
 import type { Context } from "~/bot/context"
 
 import { getForumTopicId } from "~/bot/helpers/forum"
-
 import { games } from "~/container"
 import type { Game } from "~/game"
+
 import type { Player } from "~/game/models/player"
 
 // FIXME: middleware unable to get existing game
@@ -73,18 +75,14 @@ export function playerInGame(game: Game, ctx: Context): false | "already_in_game
  * @param ctx The context of the query
  * @returns On success, returns the game, player, and userId
  */
-export function validateCallbackQuery(ctx: Context) {
-  if (ctx.match === undefined)
-    return undefined
+export function validateCallbackQuery(ctx: CallbackQueryContext<Context>) {
   const [, gameId, userId] = ctx.match
   const game = games.get(gameId)
   if (game === undefined) {
     ctx.answerCallbackQuery(ctx.t("game.not_started"))
     return undefined
   }
-  if (ctx.from?.id === undefined)
-    return undefined
-  const player = game.playerMap.get(ctx.from?.id)
+  const player = game.playerMap.get(ctx.from.id)
   if (player === undefined) {
     ctx.answerCallbackQuery(ctx.t("game_error.not_in_game", { chat: getChatTitle(game.ctx) }))
     return undefined
@@ -107,13 +105,13 @@ export function validateTarget(ctx: Context, game: Game, player: Player, userId:
 
 export type MaybeCallbackRes = [string, number, string] | undefined
 
-export function validateConvoCallback(ctx: Context): MaybeCallbackRes {
-  const res = validateCallbackQuery(ctx)
-  if (res === undefined)
-    return undefined
-  const [game, player, userId] = res
-  return [game.id, player.id, userId]
-}
+// export function validateConvoCallback(ctx: Context): MaybeCallbackRes {
+//   const res = validateCallbackQuery(ctx)
+//   if (res === undefined)
+//     return undefined
+//   const [game, player, userId] = res
+//   return [game.id, player.id, userId]
+// }
 
 export function validateConvoTarget(ctx: Context, game: Game, player: Player, userId: string) {
   const target = validateTarget(ctx, game, player, userId)
