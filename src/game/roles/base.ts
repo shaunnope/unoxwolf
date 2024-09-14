@@ -1,7 +1,7 @@
 // TODO: consider how to refactor methods to avoid this
 import _ from "lodash"
 import * as Actions from "~/game/gameplay/actions"
-import { createVoteKB, getOptions, sendActionPrompt } from "~/game/helpers/keyboards"
+import { Keyboard } from "~/game/helpers/keyboards"
 import { Team } from "~/game/models/enums"
 import * as Events from "~/game/models/events"
 import type { GameInfo } from "~/game/models/game"
@@ -94,20 +94,19 @@ export class Seer extends Villager {
     if (player.ctx === undefined) {
       return
     }
-    const options = getOptions(game.players, other => other.id !== player.id)
-    const kb = createVoteKB(options, `peek${game.id}`)
+    const kb = new Keyboard(game)
+      .addPlayers(other => other.id !== player.id, "peek")
+      .addUnassigned("peek")
+      .addPass(player)
 
-    const extraOptions = [[game.ctx.t("misc.unassigned", { count: 2 }), `peek${game.id}+un`]]
-    kb.text(extraOptions[0][0], extraOptions[0][1])
-
-    game.privateMsgs.set(player.id, sendActionPrompt(player, kb)!)
+    game.privateMsgs.set(player.id, kb.send(player)!)
   }
 }
 
 export class Robber extends Villager {
   static readonly info: RoleInfo = {
+    ...super.info,
     name: "robber",
-    team: Team.Village,
     command: "roleRobber",
     priority: 3,
   }
@@ -117,31 +116,20 @@ export class Robber extends Villager {
       // TODO: fallback
       return
     }
-    const options = getOptions(game.players, other => other.id !== player.id)
-    const kb = createVoteKB(options, `swap${game.id}`)
+    const kb = new Keyboard(game)
+      .addPlayers(other => other.id !== player.id, "swap")
+      .addPass(player)
 
-    game.privateMsgs.set(player.id, sendActionPrompt(player, kb)!)
+    game.privateMsgs.set(player.id, kb.send(player)!)
   }
 }
 
-export class Troublemaker extends Villager {
+export class Troublemaker extends Robber {
   static readonly info: RoleInfo = {
+    ...super.info,
     name: "troublemaker",
-    team: Team.Village,
     command: "roleTM",
     priority: 6,
-  }
-
-  async doNight(player: Player, game: GameInfo) {
-    if (player.ctx === undefined) {
-      return
-    }
-
-    const options = getOptions(game.players, other => other.id !== player.id)
-    const kb = createVoteKB(options, `swap${game.id}`)
-    // TODO: add pass option
-
-    game.privateMsgs.set(player.id, sendActionPrompt(player, kb)!)
   }
 }
 

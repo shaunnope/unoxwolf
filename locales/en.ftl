@@ -272,7 +272,7 @@ troublemaker = Troublemaker
         Tonight, you may switch the roles of two other players without looking at those roles.
     .action = Whose roles would you like to switch?
     .action2 = Who would you like to switch { $user1 }'s role with?
-    .swap = You swapped { $user1 }'s role with { $user2 }'s role.
+    .swap = You swapped the roles of { $user1 } and { $user2 }.
 
 tanner = Tanner
     .name = {tanner} {tanner.emoji}

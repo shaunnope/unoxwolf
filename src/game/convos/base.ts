@@ -3,7 +3,7 @@ import type { Context, Conversation } from "~/bot/context"
 import { games } from "~/container"
 import * as Actions from "~/game/gameplay/actions"
 import { validateCallbackQuery, validateTarget } from "~/game/helpers/game.context"
-import { createVoteKB, getOptions } from "~/game/helpers/keyboards"
+import { Keyboard } from "~/game/helpers/keyboards"
 
 export async function troublemaker(conversation: Conversation, ctx: Context) {
   const { gameId, targetId } = ctx.session.actions[0]
@@ -15,15 +15,13 @@ export async function troublemaker(conversation: Conversation, ctx: Context) {
   const playerId = ctx.from!.id
 
   await conversation.external(() => {
-    const leftOptions = getOptions(game.players, other => other.id !== playerId && other.id !== target.id)
-    // const leftOptions = game.players.filter(other => other.id !== playerId && other.id !== target.id)
-    const leftKb = createVoteKB(leftOptions, `swap${game.id}`)
+    const kb = new Keyboard(game).addPlayers(other => other.id !== playerId && other.id !== target.id, "swap")
     game.privateMsgs.get(playerId)?.then((msg) => {
       ctx.api.editMessageText(playerId, msg.message_id, game.ctx.t("vote.cast", { user: target.name }))
     })
     game.privateMsgs.set(
       playerId,
-      ctx.reply(ctx.t("troublemaker.action2", { user1: target.name }), { reply_markup: leftKb }),
+      ctx.reply(ctx.t("troublemaker.action2", { user1: target.name }), { reply_markup: kb.kb }),
     )
   })
 

@@ -1,9 +1,10 @@
 import _ from "lodash"
 import type { Context } from "~/bot/context"
 
-import { createVoteKB, getOptions, sendActionPrompt } from "~/game/helpers/keyboards"
+import { Keyboard } from "~/game/helpers/keyboards"
 import * as Events from "~/game/models/events"
 import type { GameInfo as Game } from "~/game/models/game"
+import * as G from "~/game/models/game.fn"
 import type { Player } from "~/game/models/player"
 
 interface TranslationContext {
@@ -53,15 +54,20 @@ export interface Action {
  */
 export const Vote: Action = {
   fallback: (game: Game, player: Player) => {
-    const options = getOptions(game.players, other => other.id !== player.id)
+    const options = G.others(game, player)
 
     game.events.push(Events.Vote(player, options[Math.floor(Math.random() * options.length)], game))
   },
   setup: (game: Game, player: Player) => {
     if (player.ctx === undefined || !game.playerMap.has(player.id))
       return
-    const options = getOptions(game.players, other => other.id !== player.id)
-    game.privateMsgs.set(player.id, sendActionPrompt(player, createVoteKB(options, `vote${game.id}`), "vote")!)
+
+    game.privateMsgs.set(
+      player.id,
+      new Keyboard(game)
+        .addPlayers(other => other.id !== player.id, "vote")
+        .send(player, "vote")!,
+    )
   },
   fn: (game: Game, playerCtx: Context, targets?: Player[]) => {
     const player = game.playerMap.get(playerCtx.from!.id)!
@@ -91,8 +97,7 @@ export const Vote: Action = {
  */
 export const Swap: Action = {
   fallback: (game: Game, player: Player, other: ActionOptions = DEFAULT_ACTION_OPTIONS) => {
-    const options = getOptions(game.players, p => p.id !== player.id)
-    const targets = _.sampleSize(options, 2)
+    const targets = _.sampleSize(G.others(game, player), 2)
     if (other.swapSelf)
       targets[0] = player
 
@@ -101,8 +106,13 @@ export const Swap: Action = {
   setup: (game: Game, player: Player) => {
     if (player.ctx === undefined || !game.playerMap.has(player.id))
       return
-    const options = getOptions(game.players, p => p.id !== player.id)
-    game.privateMsgs.set(player.id, sendActionPrompt(player, createVoteKB(options, `swap${game.id}`))!)
+
+    game.privateMsgs.set(
+      player.id,
+      new Keyboard(game)
+        .addPlayers(other => other.id !== player.id, "swap")
+        .send(player)!,
+    )
   },
   fn: (game: Game, playerCtx: Context, targets?: Player[], other: ActionOptions = DEFAULT_ACTION_OPTIONS) => {
     if (playerCtx.from?.id === undefined)
@@ -183,7 +193,7 @@ export const Reveal: Action = {
  */
 export const Copy: Action = {
   fallback: (game: Game, player: Player) => {
-    const options = getOptions(game.players, p => p.id !== player.id)
+    const options = G.others(game, player)
 
     const copyEvent = Events.Copy(player, options[Math.floor(Math.random() * options.length)], game)
     game.events.push(copyEvent)
@@ -192,8 +202,13 @@ export const Copy: Action = {
   setup: (game: Game, player: Player) => {
     if (player.ctx === undefined || !game.playerMap.has(player.id))
       return
-    const options = getOptions(game.players, other => other.id !== player.id)
-    game.privateMsgs.set(player.id, sendActionPrompt(player, createVoteKB(options, `copy${game.id}`))!)
+
+    game.privateMsgs.set(
+      player.id,
+      new Keyboard(game)
+        .addPlayers(other => other.id !== player.id, "copy")
+        .send(player)!,
+    )
   },
   fn: (game: Game, playerCtx: Context, targets?: Player[]) => {
     if (playerCtx.from?.id === undefined)
@@ -235,8 +250,13 @@ export const Rotate: Action = {
   setup: (game: Game, player: Player) => {
     if (player.ctx === undefined || !game.playerMap.has(player.id))
       return
-    const options = getOptions(game.players, p => p.id !== player.id)
-    game.privateMsgs.set(player.id, sendActionPrompt(player, createVoteKB(options, `swap${game.id}`))!)
+
+    game.privateMsgs.set(
+      player.id,
+      new Keyboard(game)
+        .addPlayers(other => other.id !== player.id, "rotate")
+        .send(player)!,
+    )
   },
   fn: (game: Game, playerCtx: Context, targets?: Player[], other: ActionOptions = DEFAULT_ACTION_OPTIONS) => {
     if (playerCtx.from?.id === undefined)
@@ -256,5 +276,31 @@ export const Rotate: Action = {
     game.events.push(Events.Swap(player, targets, game, other.priority, !other.isAuto))
     if (!other.isAuto)
       playerCtx.answerCallbackQuery()
+  },
+}
+
+/**
+ * Forfeit action
+ */
+export const Pass: Action = {
+  fallback: (_game: Game, _player: Player) => {},
+  setup: (_game: Game, _player: Player) => {},
+  fn: (game: Game, playerCtx: Context) => {
+    if (playerCtx.from === undefined)
+      return
+    const player = game.playerMap.get(playerCtx.from.id)
+    if (player === undefined)
+      return
+    if (game.privateMsgs.get(player.id) === undefined) {
+      playerCtx.reply(playerCtx.t("game_error.wrong_qn"))
+      return
+    }
+
+    game.privateMsgs.get(player.id)?.then((msg) => {
+      game.ctx.api.editMessageText(player.id, msg.message_id, game.ctx.t("misc.passed"))
+    })
+
+    playerCtx.answerCallbackQuery()
+    game.privateMsgs.delete(player.id)
   },
 }

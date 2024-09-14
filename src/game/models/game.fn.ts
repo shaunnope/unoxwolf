@@ -34,3 +34,13 @@ export function members(game: GameInfo, player: Player, team: Team) {
     .get(team)!
     .filter(other => other.id !== player.id && !other.role.info.isAide)
 }
+
+/**
+ * Get array of all other players in game
+ * @param game
+ * @param player
+ * @returns
+ */
+export function others(game: GameInfo, player: Player) {
+  return game.players.filter(other => other.id !== player.id)
+}
