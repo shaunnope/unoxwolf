@@ -6,7 +6,7 @@ import type { RoleInfo } from "~/game/models/role"
 
 import { Seer } from "."
 
-import { createVoteKB, getOptions, sendActionPrompt } from "../helpers/keyboards"
+import { Keyboard } from "../helpers/keyboards"
 
 export class Fool extends Seer {
   static readonly info: RoleInfo = {
@@ -18,17 +18,23 @@ export class Fool extends Seer {
   }
   // TODO: the fool should be masked as the seer only if there is no seer in game
   // otherwise, mask as villager
+  // TODO: the fool should act as the village idiot in onuw. Issue: no clear notion of left/right atm
+}
+
+export class ApprenticeSeer extends Seer {
+  static readonly info: RoleInfo = {
+    name: "apprentice_seer",
+    team: Team.Village,
+    command: "roleAppS",
+    priority: 2,
+  }
 
   doNight(player: Player, game: GameInfo) {
     if (player.ctx === undefined) {
       return
     }
-    const options = getOptions(game.players, other => other.id !== player.id)
-    const kb = createVoteKB(options, `peek${game.id}`)
+    const kb = new Keyboard(game).addUnassigned("peek", 1).addPass(player)
 
-    const extraOptions = [[game.ctx.t("misc.unassigned", { count: 2 }), `peek${game.id}+un`]]
-    kb.text(extraOptions[0][0], extraOptions[0][1])
-
-    game.privateMsgs.set(player.id, sendActionPrompt(player, kb)!)
+    game.privateMsgs.set(player.id, kb.send(player)!)
   }
 }

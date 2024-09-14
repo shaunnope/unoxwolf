@@ -51,6 +51,7 @@ export class Keyboard {
     return this
   }
 
+  // TODO: attach game id to zero-width href in message text to circumvent callback data limit
   send(player: Player, key?: string) {
     return player.ctx?.reply(player.ctx.t(key || player.role.locale("action")), { reply_markup: this.kb })
   }

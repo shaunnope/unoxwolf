@@ -44,7 +44,15 @@ feature.callbackQuery(/peek([\w.]+)\+([\w.]+)/, logHandle("callback-peek"), asyn
   let payload: string
   if (userId === "un") {
     targets.push(..._.sampleSize(game.unassignedRoles, 2))
-    payload = ctx.t("misc.unassigned", { count: 2 })
+
+    // TODO: payload can be extracted from context by finding the button with matching data
+    if (player.role instanceof Roles.ApprenticeSeer) {
+      targets.splice(1)
+      payload = ctx.t("misc.unassigned", { count: 1 })
+    }
+    else {
+      payload = ctx.t("misc.unassigned", { count: 2 })
+    }
   }
   else {
     const target = game.playerMap.get(Number(userId))

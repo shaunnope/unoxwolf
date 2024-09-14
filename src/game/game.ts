@@ -496,7 +496,7 @@ export class Game implements GameInfo {
       p.setup(deck[i])
 
       if (config.isDev && p.id === config.BOT_OWNER_USER_ID) {
-        const role = new Roles.Troublemaker()
+        const role = new Roles.ApprenticeSeer()
         p.setup(role)
         deck[i] = role
       }

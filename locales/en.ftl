@@ -387,7 +387,7 @@ apprentice_seer = Apprentice Seer
         <em>The Apprentice Seer is on the {team.village} team.</em>
     .lore =
         You are the {apprentice_seer.name}
-        While the powers of the {seer.name} vastly surpasses yours, you know a thing or two about divination.
+        While the powers of the {seer} vastly surpasses yours, you know a thing or two about divination.
         At night, you may use your abilities to look at one of the unassigned roles.
     .action = {seer.action}
     .reveal = A { $role } is unassigned tonight
@@ -397,7 +397,7 @@ wildchild = Wild Child
     .name = {wildchild} {wildchild.emoji}
     .emoji = 👶
     .desc =
-        At night, the Wild Child may view the roles of two other players, one at a time. If they view a role that is not on the {team.village} team, they must stop looking and join the team of the role they viewed.
+        At night, the {wildchild} may view the roles of two other players, one at a time. If they view a role that is not on the {team.village} team, they must stop looking and join the team of the role they viewed.
 
         <em>The Wild Child is on the {team.village} team, unless they view a role that is not on the {team.village} team, then they join that team.</em>
     .lore =
