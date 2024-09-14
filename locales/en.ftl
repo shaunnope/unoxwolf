@@ -230,7 +230,7 @@ werewolf = Werewolf
         Arise at night to meet your fellow lycantrophic brethren.
     .reveal = You are werewolves together with { $others }
     .lone = You are the only werewolf.
-    .lone2 = One of the unassigned roles is a { $role }
+    .lone2 = { misc.peek_role }
 
 seer = Seer
     .name = {seer} {seer.emoji}
@@ -294,8 +294,7 @@ drunk = Drunk
         <em>The Drunk is on the {team.village} team.</em>
     .lore =
         You are the {drunk.name}
-        Of course, you're not usually drunk. You just had a few too many drinks tonight.
-        At night, you will stumble upon your actual role among the unassigned roles.
+        Of course, you're not usually drunk. You just had a few too many drinks tonight. Hopefully you'll sober up by morning.
     .action = In your drunken stupor, you swapped your role with { $role }
     .secret = {villager.lore}
 
@@ -344,20 +343,20 @@ minion = Minion
     .desc =
         At night, the Minion learns who the Werewolves are.
 
-        <em>The Minion is on the {team.werewolf} team. If there are no Werewolves in play, the Minion wins if they are not killed.</em>
+        <em>The Minion is on the {team.werewolf} team. If there are no active Werewolves, the Minion wins if they survive.</em>
     .lore =
         You are the {minion.name}
         At night, you may meet your revered werewolves.
     .reveal = The werewolves are { $others }.
-    .lone = There are no werewolves tonight. If none show up in the morning, survive the vote and you will win.
+    .lone = There are no werewolves tonight.
 
 doppelganger = Doppelgänger
     .name = {doppelganger} {doppelganger.emoji}
     .emoji = 🎭
     .desc =
-        At dusk, the Doppelgänger assumes another player's role. Any actions that the Doppelgänger performs will occur after the original player's actions.
+        At dusk, the Doppelgänger assumes another player's role. Any actions that the Doppelgänger performs will be performed after the target's actions.
 
-        <em>The Doppelgänger is on the team of the role they copy.</em>
+        <em>The Doppelgänger is on the team of the role they assume.</em>
     .lore =
         You are the {doppelganger.name}
         At dusk, you will assume another player's role.
@@ -454,7 +453,7 @@ fool = Fool
     .name = {fool} {fool.emoji}
     .emoji = 🃏
     .desc =
-        The Fool is delulu. While they may believe that they share powers with the {seer.name}, their foresight is random at best.
+        The Fool is delulu. While they may believe that they share powers with the {seer}, their foresight is random at best.
 
         <em>The Fool is on the {team.village} team.</em>
     .extra =
