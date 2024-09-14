@@ -213,7 +213,7 @@ villager = Villager
 
         <em>Villagers are on the {team.village} team.</em>
     .lore =
-        You are a simple {villager.name}
+        You are a {villager.name}
         Rest well tonight and don't let the werewolves bite!
 
 werewolf = Werewolf
@@ -251,7 +251,7 @@ robber = Robber
     .name = {robber} {robber.emoji}
     .emoji = 😈
     .desc =
-        At night, the Robber may choose to rob another player's role, swapping it with their own. The Robber then looks at their new role.
+        At night, the Robber may rob another player's role, swapping it with their own. The Robber then looks at their new role.
 
         <em>The Robber is on the {team.village} team.</em>
     .lore =
@@ -264,7 +264,7 @@ troublemaker = Troublemaker
     .name = {troublemaker} {troublemaker.emoji}
     .emoji = 🙅
     .desc =
-        At night, the Troublemaker may choose to switch the roles of two other players without looking at those roles.
+        At night, the Troublemaker may switch the roles of two other players without looking at those roles.
 
         <em>The Troublemaker is on the {team.village} team.</em>
     .lore =
@@ -283,7 +283,7 @@ tanner = Tanner
         <em>The Tanner is on the {team.tanner} team.</em>
     .lore =
         You are the {tanner.name}
-        Sick of your job, you only win if you are killed by the end of the day.
+        Sick of your job, you hope that whatever chaos lurks in the village puts an end to your lowly life.
 
 drunk = Drunk
     .name = {drunk} {drunk.emoji}
@@ -393,19 +393,20 @@ apprentice_seer = Apprentice Seer
     .reveal = A { $role } is unassigned tonight
     .reveal_seer = { $user } is the {seer.name}
 
-detective = Detective
-    .name = {detective} {detective.emoji}
-    .emoji = 🕵️
+wildchild = Wild Child
+    .name = {wildchild} {wildchild.emoji}
+    .emoji = 👶
     .desc =
-        At night, the Detective may view the roles of two other players, one at a time. If they view a role that is not on the {team.village} team, they must stop looking and join the team of the role they viewed.
+        At night, the Wild Child may view the roles of two other players, one at a time. If they view a role that is not on the {team.village} team, they must stop looking and join the team of the role they viewed.
 
-        <em>The Detective is on the {team.village} team, unless they view a role that is not on the {team.village} team, then they join that team.</em>
+        <em>The Wild Child is on the {team.village} team, unless they view a role that is not on the {team.village} team, then they join that team.</em>
     .lore =
-        You are the {detective.name}
-        Morbidly curious, yet highly impressionable, you yearn to learn the roles of your fellow villagers. Tonight, you may view the roles of two other players, one at a time. If you view a role that is not on the {team.village} team, you must stop looking and join the team of the role you viewed.
-    .action = Who would you like to visit?
+        You are the {wildchild.name}
+        Morbidly curious, yet highly impressionable, you yearn to learn the about your fellow villagers, even if it means risking your humanity.
+        Tonight, you may spy on two other players, one at a time, and learn their roles.
+    .action = Who would you like to spy on?
     .reveal = {misc.peek_role}
-    .reveal2 = {misc.peek_role} ! { misc.self_team_changed }
+    .reveal2 = {misc.peek_role}! { misc.self_team_changed }
 
 revealer = Revealer
     .name = {revealer} {revealer.emoji}
@@ -416,7 +417,7 @@ revealer = Revealer
         <em>The Revealer is on the {team.village} team.</em>
     .lore =
         You are the {revealer.name}
-        At the end of the night, you may choose to reveal the role of one player. If the revealed role is not on the {team.village} team, the role is not revealed.
+        At the end of the night, you may choose to reveal the role of one player. If the player you choose is not on the {team.village} team, their role is not revealed.
     .action = Whose role would you like to reveal?
     .reveal = {misc.peek_role}
     .fail = You cautiously back away. {misc.peek_role}! Their role will not be revealed in the morning.
@@ -425,7 +426,7 @@ curator = Curator
     .name = {curator} {curator.emoji}
     .emoji = 📜
     .desc =
-        A collector of ancient wares, the Curator may give any player an unrevealed artifact . They may not give an artifact to a protected player.
+        A collector of ancient wares, the Curator may give any player an unrevealed artifact. They may not give an artifact to a protected player.
 
         <em>The Curator is on the {team.village} team.</em>
     .lore =
@@ -444,11 +445,9 @@ witch = Witch
         <em>The Witch is on the {team.village} team.</em>
     .lore =
         You are the {witch.name}
-        A master of cartomancy, you harness the energy to transform the fates of others. Tonight, you may perform a card reading on a player, including yourself, to learn one of the unassigned roles, changing their role in the process.
+        As a skillful cartomancer, you harness the energy to transform the fates of others. Tonight, you may perform a card reading on a player, including yourself, to learn one of the unassigned roles, changing their role in the process.
     .action = Who would you like to perform a reading on?
-    .reveal = From your deck of cards, you draw out {$card}.
-    .swap = {$user} is now a {$role}
-    .swap_self = You are now a {$role}
+    .reveal = { misc.peek_role }
 
 ## TODO: reconsider how to add extra behaviour to the fool
 fool = Fool
@@ -522,7 +521,7 @@ copycat = Copycat
     .desc =
         At dusk, the Copycat assumes the role of one of the unassigned roles.
 
-        <em> The Copycat is on the team of the role they first view.</em>
+        <em> The Copycat is on the team of the role they assume.</em>
     .lore = You are the {copycat.name}, but not for long!
     .result = Rummaging through the unassigned roles, you pick out { $card }. { misc.self_role_changed }
 
@@ -981,7 +980,7 @@ roles =
     .page_daybreak = 11
         /roleSentinel - {sentinel.name}
         /roleAppS - {apprentice_seer.name}
-        /rolePI - {detective.name}
+        /rolePI - {wildchild.name}
         /roleRevealer - {revealer.name}
         /roleCurator - {curator.name}
         /roleWitch - {witch.name}
