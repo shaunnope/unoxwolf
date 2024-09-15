@@ -108,7 +108,7 @@ export class Game implements GameInfo {
     this.state = "lobby"
     this.settings = settings
 
-    this.run()
+    this.init()
   }
 
   get chatId(): number {
@@ -196,10 +196,9 @@ export class Game implements GameInfo {
   }
 
   /**
-   * Wait for players to join the game.
-   * @returns true if enough players joined, false if not
+   * Initialize game. Send first join message.
    */
-  async collectPlayers() {
+  async init() {
     this.callToAction = new InlineKeyboard().url(
       this.ctx.t("join"),
       `https://t.me/${this.ctx.me.username}?start=join${this.id}`,
@@ -214,7 +213,13 @@ export class Game implements GameInfo {
       },
       "service",
     )
+  }
 
+  /**
+   * Wait for players to join the game.
+   * @returns true if enough players joined, false if not
+   */
+  async collectPlayers() {
     let count = this.playerMap.size
     let ts = 0
     this.setupTimer()
@@ -260,7 +265,7 @@ export class Game implements GameInfo {
         undefined,
         "trace",
       )
-      this.end()
+      this.end(true)
       return false
     }
 
@@ -545,14 +550,16 @@ export class Game implements GameInfo {
   /**
    * End the game, updating the database with the results
    */
-  async end() {
+  async end(aborted?: true) {
     this.state = "ended"
 
-    for (const p of this.players) {
-      await p.ctx?.prisma.stats.logGame(p, this)
+    if (!aborted) {
+      for (const p of this.players) {
+        await p.ctx?.prisma.stats.logGame(p, this)
+      }
     }
 
-    await this.cleanupMsgs(this.traceMsgs)
+    this.cleanupMsgs(this.traceMsgs)
     deleteGame(this)
   }
 

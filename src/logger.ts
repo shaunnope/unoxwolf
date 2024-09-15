@@ -18,6 +18,7 @@ export function buildLogger(level: LogLevel | undefined = undefined) {
                   ignore: "pid,hostname",
                   colorize: true,
                   translateTime: true,
+                  sync: config.isTest,
                 },
               },
             ]

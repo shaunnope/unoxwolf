@@ -1,6 +1,7 @@
 import { Composer } from "grammy"
 import type { Context } from "~/bot/context"
 
+import { config } from "~/config"
 import { devGameFeature, gameFeature, helpFeature } from "./features"
 
 export { Game } from "./game"
@@ -9,7 +10,7 @@ const composer = new Composer<Context>()
 
 const feature = composer
 
-if (process.env.NODE_ENV === "development") {
+if (config.isDev) {
   feature.use(devGameFeature)
 }
 

@@ -64,3 +64,33 @@ export function setupTestEnv(outgoing: ApiRequest<RawApi>[], container: Containe
 
   return bot
 }
+
+export function expectRequests(actual: RawApiRequest[], expected: string[]) {
+  expect(actual).toHaveLength(expected.length)
+  while (actual.length > 0) {
+    const result = actual.pop()
+
+    if (result?.method !== "sendMessage") {
+      expect(result?.method).toBe(expected.pop())
+    }
+    else if (result && "text" in result.payload) {
+      expect(result.payload.text).toBe(expected.pop())
+    }
+    else {
+      throw new Error("No text in payload")
+    }
+  }
+}
+
+export function getGameId(request: RawApiRequest) {
+  if (!(
+    "reply_markup" in request.payload
+    && request.payload.reply_markup !== undefined
+    && "inline_keyboard" in request.payload.reply_markup
+    && "url" in request.payload.reply_markup.inline_keyboard[0][0]
+  )) {
+    throw new Error("Not a join message")
+  }
+
+  return request.payload.reply_markup.inline_keyboard[0][0].url.slice(27)
+}

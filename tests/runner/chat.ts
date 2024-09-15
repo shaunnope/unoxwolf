@@ -24,6 +24,10 @@ export class MockChat {
     })
   }
 
+  static fromUsers(users: User[]): MockChat[] {
+    return users.map(user => MockChat.fromUser(user))
+  }
+
   mockMessage(user: User, text: string): Update {
     this.message_id += step(10)
     this.update_id += step(10)

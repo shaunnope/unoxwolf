@@ -82,6 +82,7 @@ join = Join
     .success = You joined the game in { $chat }!
     .already_in_game = You have already joined the game in { $chat }!
     .in_another_game = You are already in another game in { $chat }!
+    .not_found = Could not find the game to join
     .failure = You cannot join the game now!
     .count = <strong>Number of players:</strong> {$count}
     .recent_list = { $users } joined the game in the last 30 seconds.
