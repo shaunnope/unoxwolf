@@ -18,7 +18,7 @@ function villageWin(player: Player, game: GameInfo): void {
   player.won
     = G.count(game, Team.Werewolf) > 0
       ? G.dead(game, Team.Werewolf) > 0
-      : G.dead(game, Team.Tanner) === 0
+      : (G.dead(game, Team.Tanner) === 0 && G.dead(game, Team.Village) === 0)
 }
 
 export class Villager extends Role {
