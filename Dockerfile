@@ -27,8 +27,6 @@ FROM base AS runner
 # Bundle app source
 COPY . .
 
-RUN yarn plugin import workspace-tools
-
 # Install only production app dependencies
 RUN yarn workspaces focus --production && yarn cache clean
 
