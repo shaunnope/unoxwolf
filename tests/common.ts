@@ -68,17 +68,26 @@ export function setupTestEnv(outgoing: ApiRequest<RawApi>[], container: Containe
 export function expectRequests(actual: RawApiRequest[], expected: string[]) {
   expect(actual).toHaveLength(expected.length)
   while (actual.length > 0) {
-    const result = actual.pop()
+    const result = actual.pop()!
 
-    if (result?.method !== "sendMessage") {
-      expect(result?.method).toBe(expected.pop())
+    if (result.method !== "sendMessage") {
+      expect(result.method).toBe(expected.pop())
     }
-    else if (result && "text" in result.payload) {
+    else if ("text" in result.payload) {
       expect(result.payload.text).toBe(expected.pop())
     }
     else {
       throw new Error("No text in payload")
     }
+  }
+}
+
+export function expectPayload(result: RawApiRequest, expected: string[]) {
+  if ("text" in result.payload) {
+    expect(result.payload.text).toBe(expected.pop())
+  }
+  else {
+    throw new Error("No text in payload")
   }
 }
 

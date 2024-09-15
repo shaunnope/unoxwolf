@@ -5,16 +5,27 @@ function step(val: number): number {
   return Math.floor(Math.random() * val)
 }
 
+type NonChannelChat = Chat.PrivateChat | Chat.GroupChat | Chat.SupergroupChat
+
 export class MockChat {
-  #chat: Chat.PrivateChat | Chat.GroupChat | Chat.SupergroupChat
+  #chat: NonChannelChat
   message_id: number
   update_id: number
 
-  constructor(chat: Chat.PrivateChat | Chat.GroupChat | Chat.SupergroupChat) {
+  constructor(chat: NonChannelChat) {
     this.#chat = chat
 
     this.message_id = 0
     this.update_id = 0
+  }
+
+  get user() {
+    if (this.#chat.type === "private") {
+      return {
+        ...this.#chat,
+        is_bot: false,
+      } as User
+    }
   }
 
   static fromUser(user: User): MockChat {

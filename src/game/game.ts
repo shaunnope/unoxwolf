@@ -495,6 +495,21 @@ export class Game implements GameInfo {
   async assignRolesAndNotify() {
     this.teams = new Map()
     const deck = generateRoles(this.players.length, this.settings.roles, this.settings.extraRoles)
+    this.assign(deck)
+
+    await this.reply(
+      `${this.ctx.t("game.roles")}\n${deck
+        .map(r => this.ctx.t(r.mask))
+        .sort()
+        .join("\n")}`,
+      undefined,
+      "trace",
+    )
+
+    return deck.some(r => isCopier(r))
+  }
+
+  assign(deck: Role[]) {
     this.roles = deck
 
     this.players.forEach((p, i) => {
@@ -519,17 +534,6 @@ export class Game implements GameInfo {
     this.unassignedRoles = deck
       .slice(this.players.length)
       .map((r, idx) => new Player(idx, this.ctx.t("misc.unassigned_role", { idx: idx + 1 }), r, undefined))
-
-    await this.reply(
-      `${this.ctx.t("game.roles")}\n${deck
-        .map(r => this.ctx.t(r.mask))
-        .sort()
-        .join("\n")}`,
-      undefined,
-      "trace",
-    )
-
-    return deck.some(r => isCopier(r))
   }
 
   /**
