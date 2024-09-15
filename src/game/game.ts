@@ -20,6 +20,8 @@ import { generateRoles } from "./roles/builder"
 import { isCopier } from "./roles/copier"
 import type { Role } from "./models/role"
 
+type Votes = [Player, number, Player[]]
+
 const defaultSettings: GameSettings = {
   joinTimeout: 180,
   copyTimeout: 120,
@@ -180,11 +182,11 @@ export class Game implements GameInfo {
     if (hasCopy) {
       await this.copyPhase()
     }
-    await sleep(2 * this.tickRate)
+    // await sleep(2 * this.tickRate)
 
     await this.nightPhase()
 
-    await this.collectVotes()
+    await this.votePhase()
 
     await this.getWinners()
 
@@ -341,11 +343,19 @@ export class Game implements GameInfo {
   }
 
   /**
-   * Wait for players to vote, then tally the votes and announce the results
+   * Run voting phase
    */
-  async collectVotes() {
+  async votePhase() {
+    await this.setupVotes()
+    const votes = await this.collectVotes()
+    await this.processVotes(votes)
+  }
+
+  /**
+   * Setup for votes
+   */
+  async setupVotes() {
     this.privateMsgs = new Map()
-    // this.serviceMsgs = [await this.reply(this.ctx.t("vote.start"))]
     await this.reply(this.ctx.t("vote.start"), undefined, "service")
 
     this.events = []
@@ -359,7 +369,12 @@ export class Game implements GameInfo {
       }
       Actions.Vote.setup(this, p)
     })
+  }
 
+  /**
+   * Wait for players to vote, then tally the votes and announce the results
+   */
+  async collectVotes() {
     this.setupTimer()
     for (let i = 0; i < this.settings.voteTimeout; i++) {
       if (this.flags.killTimer || this.canExit(i)) {
@@ -378,7 +393,7 @@ export class Game implements GameInfo {
 
     this.events.sort((a, b) => a.priority - b.priority).forEach(e => e.fn())
 
-    const numVotes: [Player, number, Player[]][] = new Array(this.aggregator.size).fill(undefined)
+    const votes: Votes[] = new Array(this.aggregator.size).fill(undefined)
     let voteResults = `${this.ctx.t("vote.end")}\n\n`
 
     this.teams = new Map() // now track the number of non-aide team members
@@ -387,7 +402,7 @@ export class Game implements GameInfo {
     Array.from(this.aggregator.entries()).forEach(([playerId, voters]) => {
       const player = this.playerMap.get(playerId)!
 
-      numVotes[++i] = [player, voters.length, voters]
+      votes[++i] = [player, voters.length, voters]
       // if (config.isDev) {
       //   if (player.id === config.BOT_OWNER_USER_ID) {
       //     numVotes[i] = [player, 20, voters]
@@ -407,20 +422,28 @@ export class Game implements GameInfo {
         else teamMembers.push(player)
       }
 
-      voteResults += `<strong>${player.name}:</strong>  (${numVotes[i][1]})\n`
+      voteResults += `<strong>${player.name}:</strong>  (${votes[i][1]})\n`
 
       voteResults += voters.length > 0 ? `${voters.map(p => p.name).join(", ")}\n\n` : "\n"
     })
 
     await this.ctx.api.editMessageText(this.chatId, voteResultsMsg.message_id, voteResults)
 
-    if (!numVotes.some(([, n]) => n > 1)) {
+    return votes
+  }
+
+  /**
+   * Tally votes, process vote actions, and announce the vote counts
+   */
+  async processVotes(votes: [Player, number, Player[]][]) {
+    if (!votes.some(([, n]) => n > 1)) {
       this.reply(this.ctx.t("vote.draw"))
       return
     }
 
     this.events = []
-    numVotes.sort((a, b) => b[1] - a[1])
+    votes.sort((a, b) => b[1] - a[1])
+
     let goal
       = Array.from(this.teams.entries()).filter(([team, members]) => {
         return team === Team.Village || members.some(p => !p.currentRole.info.isAide)
@@ -429,10 +452,10 @@ export class Game implements GameInfo {
         : 2
 
     const out: Player[] = []
-    for (const [idx, [player, n]] of numVotes.entries()) {
+    for (const [idx, [player, n]] of votes.entries()) {
       if (player.currentRole.lynch(player, this)) {
         out.push(player)
-        if (--goal <= 0 && n > numVotes[idx + 1][1])
+        if (--goal <= 0 && n > votes[idx + 1][1])
           break
       }
     }
@@ -454,7 +477,7 @@ export class Game implements GameInfo {
   }
 
   /**
-   * Determine the winners of the game
+   * Determine and display the outcome of the game
    */
   async getWinners() {
     this.players.forEach(p => p.currentRole.checkWin(p, this))
@@ -511,7 +534,6 @@ export class Game implements GameInfo {
 
   assign(deck: Role[]) {
     this.roles = deck
-
     this.players.forEach((p, i) => {
       p.setup(deck[i])
 

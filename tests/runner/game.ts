@@ -1,28 +1,38 @@
 import { getGameId } from "tests/common"
-import type { User } from "@grammyjs/types"
+import type { Message, User } from "@grammyjs/types"
 import type { RawApiRequest } from "tests/common"
 import type { Bot } from "~/bot"
 import type { Game } from "~/game"
+import type { Role } from "~/game/models/role"
 import type { MockChat } from "./chat"
 
 export class MockGame {
   #game: Game
   #bot: Bot
   #chat: MockChat
+  #creator: User
+  #playerChats: MockChat[]
 
   #collected?: true
   #assigned?: true
+  #voted?: "setup" | true
+  #ended?: true
 
-  constructor(game: Game, bot: Bot, chat: MockChat) {
+  constructor(game: Game, bot: Bot, chat: MockChat, user: User) {
     this.#game = game
     this.#bot = bot
     this.#chat = chat
+    this.#creator = user
+    this.#playerChats = []
   }
 
   get id() {
     return this.#game.id
   }
 
+  /**
+   * Start a new MockGame
+   */
   static async start(
     bot: Bot,
     chat: MockChat,
@@ -35,21 +45,63 @@ export class MockGame {
     if (game === undefined) {
       throw new Error("A game should exist after /startgame")
     }
-    return new MockGame(game, bot, chat)
+    return new MockGame(game, bot, chat, user)
   }
 
-  collectPlayers() {
-    if (this.#collected)
-      return
-    this.#collected = true
-    return this.#game.collectPlayers()
+  /**
+   * Initialize a MockGame
+   */
+  static async init(
+    bot: Bot,
+    chat: MockChat,
+    users: MockChat[],
+    games: Map<string, Game>,
+    queue: RawApiRequest[],
+  ) {
+    const game = await MockGame.start(bot, chat, users[0].user!, games, queue)
+    await game.addPlayers(users)
+    await game.skip()
+    queue.length = 0
+
+    return game
   }
 
-  assign() {
+  skip() {
+    return this.#bot.handleUpdate(this.#chat.mockCommand(this.#creator, "forcenext"))
+  }
+
+  assign(roles: Role[]) {
     if (this.#assigned)
-      return
+      throw new Error("Roles already assigned")
+
     this.#assigned = true
-    return this.#game.assignRolesAndNotify()
+    this.#game.assign(roles)
+
+    return this
+  }
+
+  /**
+   * Mock votes
+   * @param queue should contain the vote keyboards
+   * @param targets indices of vote targets
+   */
+  async vote(
+    queue: RawApiRequest[],
+    targets: number[],
+  ) {
+    if (this.#voted !== "setup")
+      throw new Error("Not ready to vote")
+    if (this.#playerChats.length !== targets.length)
+      throw new Error("Vote targets should match no. of players")
+
+    for (const [idx, chat] of this.#playerChats.entries()) {
+      const target = this.#playerChats[targets[idx]].user!
+      const message = queue.shift()!.payload as Message
+      message.from = this.#bot.botInfo
+      message.chat = chat.chat
+      await this.#bot
+        .handleUpdate(chat.mockCallbackQuery(chat.user!, message, `vote${this.id}+${target.id}`))
+    }
   }
 
   async addPlayers(users: MockChat[]) {
@@ -58,5 +110,49 @@ export class MockGame {
       await this.#bot
         .handleUpdate(chat.mockCommand(chat.user!, "start", `join${this.id}`))
     }
+    this.#playerChats.push(...users)
+  }
+
+  // --- Game wrappers ---
+
+  collectPlayers() {
+    if (this.#collected)
+      return
+    this.#collected = true
+    return this.#game.collectPlayers()
+  }
+
+  assignRolesAndNotify() {
+    if (this.#assigned)
+      return
+    this.#assigned = true
+    return this.#game.assignRolesAndNotify()
+  }
+
+  async setupVotes() {
+    if (this.#voted)
+      return
+    this.#voted = this.#voted || "setup"
+    await this.#game.setupVotes()
+
+    for (const [_, message] of this.#game.privateMsgs) {
+      await message
+    }
+  }
+
+  async collectVotes() {
+    if (this.#voted === true)
+      return
+    if (this.#voted === undefined)
+      await this.setupVotes()
+    this.#voted = true
+
+    return this.#game.collectVotes()
+  }
+
+  async end() {
+    if (this.#ended)
+      return
+    return this.#game.end(true)
   }
 }

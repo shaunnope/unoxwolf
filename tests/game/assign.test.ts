@@ -25,12 +25,9 @@ try {
   })
 
   it("can assign roles", async () => {
-    const game = await MockGame.start(bot, chat, users[0], games, queue)
-    await game.addPlayers(dms)
-    await bot.handleUpdate(chat.mockCommand(users[0], "forcenext"))
-    queue.length = 0
+    const game = await MockGame.init(bot, chat, dms, games, queue)
 
-    await game.assign()
+    await game.assignRolesAndNotify()
     await jest.runAllTimersAsync()
 
     expect(queue).toHaveLength(users.length + 2)

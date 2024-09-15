@@ -12,7 +12,7 @@ try {
   const bot = setupTestEnv(queue, container)
   const { games } = container
 
-  const users = mockUsers(5)
+  const users = mockUsers(3)
   const chat = new MockChat({
     type: "group",
     id: -2,
@@ -60,7 +60,7 @@ try {
     await bot.handleUpdate(dms[2].mockCommand(users[2], "start", `join${game.id}`))
 
     await bot.handleUpdate(chat.mockCommand(users[1], "leave"))
-    await bot.handleUpdate(chat.mockCommand(users[0], "forcenext"))
+    await game.skip()
 
     await jest.runAllTimersAsync()
 
@@ -90,7 +90,7 @@ try {
     await bot.handleUpdate(dms[1].mockCommand(users[1], "start", `join${game.id}`))
     await bot.handleUpdate(dms[2].mockCommand(users[2], "start", `join${game.id}`))
 
-    await bot.handleUpdate(chat.mockCommand(users[0], "forcenext"))
+    await game.skip()
 
     await jest.runAllTimersAsync()
 

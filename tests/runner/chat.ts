@@ -1,4 +1,4 @@
-import type { Chat, Update, User } from "@grammyjs/types"
+import type { Chat, Message, Update, User } from "@grammyjs/types"
 
 /** Random step */
 function step(val: number): number {
@@ -11,12 +11,14 @@ export class MockChat {
   #chat: NonChannelChat
   message_id: number
   update_id: number
+  callback_id: number
 
   constructor(chat: NonChannelChat) {
     this.#chat = chat
 
     this.message_id = 0
     this.update_id = 0
+    this.callback_id = 0
   }
 
   get user() {
@@ -26,6 +28,10 @@ export class MockChat {
         is_bot: false,
       } as User
     }
+  }
+
+  get chat() {
+    return this.#chat
   }
 
   static fromUser(user: User): MockChat {
@@ -68,8 +74,20 @@ export class MockChat {
 
     return message
   }
-}
 
-export class ChannelContext {
+  mockCallbackQuery(user: User, message: Message, data?: string): Update {
+    this.update_id += step(10)
+    this.callback_id += step(10)
 
+    return {
+      update_id: this.update_id,
+      callback_query: {
+        id: this.callback_id.toString(),
+        from: user,
+        message,
+        chat_instance: this.#chat.id.toString(),
+        data,
+      },
+    }
+  }
 }
