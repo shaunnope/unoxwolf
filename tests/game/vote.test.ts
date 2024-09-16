@@ -8,6 +8,7 @@ import { MockGame } from "tests/runner/game"
 import { mockUsers } from "tests/runner/user"
 import type { RawApiRequest } from "tests/common"
 
+import type { Votes } from "~/game/game"
 import type { Role } from "~/game/models/role"
 import * as Roles from "~/game/roles"
 
@@ -17,6 +18,9 @@ try {
   const bot = setupTestEnv(queue, container)
   const { games } = container
 
+  /**
+   * Basic role setup. One active, one unassigned non-villager
+   */
   const roles: (typeof Role)[] = [
     Roles.Werewolf,
     Roles.Villager,
@@ -48,23 +52,24 @@ try {
     await game.end()
   })
 
-  it("can collect votes", async () => {
+  it("can collect votes with fallback", async () => {
     await game.setupVotes()
     expect(queue).toHaveLength(n + 1)
     queue.shift()
 
-    await game.vote(queue, _.range(n).map(x => (x + 1) % n))
-    game.collectVotes()
+    const targets: (number | undefined)[] = _.range(n).map(x => (x + 1) % n)
+    targets[1] = undefined
+
+    await game.vote(queue, targets)
+    const votes = game.collectVotes()
 
     await game.skip()
     await jest.runAllTimersAsync()
 
-    expect(queue).toHaveLength(2 * n + 5)
     expectRequests(queue, [
+      "sendMessage",
       "answerCallbackQuery",
       "You selected mock-1",
-      "answerCallbackQuery",
-      "You selected mock-2",
       "answerCallbackQuery",
       "You selected mock-3",
       "answerCallbackQuery",
@@ -76,18 +81,69 @@ try {
       "<em>Skipping forward...</em>",
       "deleteMessage",
       "deleteMessage",
+      "Time's up!",
       "Voting has ended! Tallying votes...",
       "editMessageText",
+    ])
+
+    const final_votes = await votes
+    if (final_votes === undefined) {
+      throw new Error("Should have votes")
+    }
+
+    expect(final_votes[1][0].votedFor).toBeDefined()
+  })
+
+  it("should not lynch when all counts one", async () => {
+    const votes: Votes[] = game.players.map((player, idx) => [
+      player,
+      1,
+      [game.players[(idx - 1) % game.players.length]],
+    ])
+
+    game.processVotes(votes)
+    await jest.runAllTimersAsync()
+
+    expectRequests(queue, [
+      "No one received more than one vote!",
+      "deleteMessage",
     ])
   })
 
   describe("highest voted is lynched", () => {
     it("can lynch unanimous", async () => {
+      const votes = new Array(game.players.length).fill(0)
+      votes[0] = 1
 
+      game.processVotes(game.collate(votes))
+      await jest.runAllTimersAsync()
+
+      expectRequests(queue, [
+        "At the end of the vote, mock-0 was executed!",
+        "deleteMessage",
+      ])
     })
 
     it("can lynch w/o unanimous", async () => {
+      const votes = [1, 2, 1, 4, 5, 0]
+      game.processVotes(game.collate(votes))
+      await jest.runAllTimersAsync()
 
+      expectRequests(queue, [
+        "At the end of the vote, mock-1 was executed!",
+        "deleteMessage",
+      ])
+    })
+
+    it("can lynch multiple", async () => {
+      const votes = [1, 2, 0, 2, 1, 0]
+      game.processVotes(game.collate(votes))
+      await jest.runAllTimersAsync()
+
+      expectRequests(queue, [
+        "At the end of the vote, mock-0, mock-1, mock-2 were executed!",
+        "deleteMessage",
+      ])
     })
   })
 }

@@ -20,7 +20,7 @@ import { generateRoles } from "./roles/builder"
 import { isCopier } from "./roles/copier"
 import type { Role } from "./models/role"
 
-type Votes = [Player, number, Player[]]
+export type Votes = [Player, number, Player[]]
 
 const defaultSettings: GameSettings = {
   joinTimeout: 180,
@@ -403,13 +403,13 @@ export class Game implements GameInfo {
       const player = this.playerMap.get(playerId)!
 
       votes[++i] = [player, voters.length, voters]
-      // if (config.isDev) {
-      //   if (player.id === config.BOT_OWNER_USER_ID) {
-      //     numVotes[i] = [player, 20, voters]
-      //     player.currentRole = new Roles.Hunter()
-      //     numVotes[0][0].currentRole = new Roles.Hunter()
-      //   }
-      // }
+      if (false && config.isDev) {
+        if (player.id === config.BOT_OWNER_USER_ID) {
+          votes[i] = [player, 20, voters]
+          player.currentRole = new Roles.Hunter()
+          votes[0][0].currentRole = new Roles.Hunter()
+        }
+      }
 
       // collate non-aide players in main teams
       if (
@@ -435,7 +435,7 @@ export class Game implements GameInfo {
   /**
    * Tally votes, process vote actions, and announce the vote counts
    */
-  async processVotes(votes: [Player, number, Player[]][]) {
+  async processVotes(votes: Votes[]) {
     if (!votes.some(([, n]) => n > 1)) {
       this.reply(this.ctx.t("vote.draw"))
       return
@@ -537,7 +537,7 @@ export class Game implements GameInfo {
     this.players.forEach((p, i) => {
       p.setup(deck[i])
 
-      if (config.isDev && p.id === config.BOT_OWNER_USER_ID) {
+      if (false && config.isDev && p.id === config.BOT_OWNER_USER_ID) {
         const role = new Roles.ApprenticeSeer()
         p.setup(role)
         deck[i] = role

@@ -3,6 +3,7 @@ import type { Message, User } from "@grammyjs/types"
 import type { RawApiRequest } from "tests/common"
 import type { Bot } from "~/bot"
 import type { Game } from "~/game"
+import type { Votes } from "~/game/game"
 import type { Role } from "~/game/models/role"
 import type { MockChat } from "./chat"
 
@@ -28,6 +29,14 @@ export class MockGame {
 
   get id() {
     return this.#game.id
+  }
+
+  get players() {
+    return this.#game.players
+  }
+
+  get info() {
+    return this.#game
   }
 
   /**
@@ -81,13 +90,13 @@ export class MockGame {
   }
 
   /**
-   * Mock votes
+   * Mock voting stage
    * @param queue should contain the vote keyboards
    * @param targets indices of vote targets
    */
   async vote(
     queue: RawApiRequest[],
-    targets: number[],
+    targets: (number | undefined)[],
   ) {
     if (this.#voted !== "setup")
       throw new Error("Not ready to vote")
@@ -95,13 +104,39 @@ export class MockGame {
       throw new Error("Vote targets should match no. of players")
 
     for (const [idx, chat] of this.#playerChats.entries()) {
-      const target = this.#playerChats[targets[idx]].user!
+      const tar = targets[idx]
+      if (tar === undefined)
+        continue
+      const target = this.#playerChats[tar].user!
       const message = queue.shift()!.payload as Message
       message.from = this.#bot.botInfo
       message.chat = chat.chat
       await this.#bot
         .handleUpdate(chat.mockCallbackQuery(chat.user!, message, `vote${this.id}+${target.id}`))
     }
+  }
+
+  /**
+   * Transform targets into votes
+   * @param targets
+   */
+  collate(targets: number[]) {
+    if (this.#playerChats.length !== targets.length)
+      throw new Error("Vote targets should match no. of players")
+
+    const votes: Votes[] = this.#game.players.map(player => [
+      player,
+      0,
+      [],
+    ])
+    this.#game.players.forEach((player, idx) => {
+      const target = targets[idx]
+      const vote = votes[target]
+      vote[1]++
+      vote[2].push(player)
+    })
+
+    return votes
   }
 
   async addPlayers(users: MockChat[]) {
@@ -154,5 +189,9 @@ export class MockGame {
     if (this.#ended)
       return
     return this.#game.end(true)
+  }
+
+  processVotes(votes: Votes[]) {
+    return this.#game.processVotes(votes)
   }
 }
