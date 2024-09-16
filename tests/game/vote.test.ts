@@ -19,11 +19,11 @@ try {
   const { games } = container
 
   /**
-   * Basic role setup. One active, one unassigned non-villager
+   * Basic role setup. Villager + Tanner + Non-villager
    */
   const roles: (typeof Role)[] = [
     Roles.Werewolf,
-    Roles.Villager,
+    Roles.Tanner,
     Roles.Villager,
     Roles.Villager,
     Roles.Villager,
@@ -48,7 +48,7 @@ try {
   })
 
   afterEach(async () => {
-    jest.runAllTimersAsync()
+    await jest.runAllTimersAsync()
     await game.end()
   })
 
@@ -112,8 +112,7 @@ try {
 
   describe("highest voted is lynched", () => {
     it("can lynch unanimous", async () => {
-      const votes = new Array(game.players.length).fill(0)
-      votes[0] = 1
+      const votes = game.players.map((_, idx) => idx === 0 ? 1 : 0)
 
       game.processVotes(game.collate(votes))
       await jest.runAllTimersAsync()

@@ -51,13 +51,9 @@ export class Copier extends Role implements CanCopy {
     this.tail.doNight(player, game)
   }
 
-  defaultWin(player: Player, _game: GameInfo): void {
-    player.won = false
-  }
-
   checkWin(player: Player, game: GameInfo): void {
     if (this.copiedRole === undefined) {
-      this.defaultWin(player, game)
+      super.checkWin(player, game)
       return
     }
     this.tail.checkWin(player, game)

@@ -45,6 +45,7 @@ export interface GameInfo {
   teams: Map<Team, Player[]>
   unassignedRoles: Player[]
 
+  winInfo: WinInfo
   deaths: Map<Team, Player[]>
   winners: Map<Team, Player[]>
 
@@ -72,3 +73,5 @@ export interface GameEvent {
   priority: number
   fn: () => Promise<void>
 }
+
+export type WinInfo = boolean[]

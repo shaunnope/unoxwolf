@@ -124,7 +124,7 @@ export class Role {
    * @param player
    * @param _game
    */
-  checkWin(player: Player, _game: GameInfo): void {
-    player.won = false
+  checkWin(player: Player, game: GameInfo): void {
+    player.won = game.winInfo[this.info.team]
   }
 }

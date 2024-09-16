@@ -9,6 +9,7 @@ export enum Team {
   Synth,
   Symbiote,
   Mortician,
+  __LENGTH,
 }
 
 export interface Status {

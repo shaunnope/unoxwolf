@@ -12,12 +12,13 @@ import * as Actions from "~/game/gameplay/actions"
 
 import { sleep } from "~/game/helpers/timer"
 import { Team } from "~/game/models/enums"
-import type { GameEvent, GameFlags, GameInfo, GameSettings } from "~/game/models/game"
+import type { GameEvent, GameFlags, GameInfo, GameSettings, WinInfo } from "~/game/models/game"
 import { Player } from "~/game/models/player"
 import * as Roles from "~/game/roles"
 import { deleteGame, getChatTitle } from "./helpers/game.context"
 import { generateRoles } from "./roles/builder"
 import { isCopier } from "./roles/copier"
+import { setWins } from "./roles/win"
 import type { Role } from "./models/role"
 
 export type Votes = [Player, number, Player[]]
@@ -53,36 +54,29 @@ const defaultSettings: GameSettings = {
 const timeLeftReminders = [10, 30, 60]
 
 export class Game implements GameInfo {
+  // metadata
   readonly id: string
-
   readonly createdTime: Date
-
   readonly createdBy: number
-
   endTime: Date | undefined = undefined
-
   ctx: Context
 
+  // player data
   private newPlayers: Map<number, Player> = new Map()
-
   playerMap: Map<number, Player> = new Map()
-
   teams: Map<Team, Player[]> = new Map()
-
   unassignedRoles: Player[] = []
-
   roles?: Role[]
 
+  // endgame data
+  winInfo: WinInfo = new Array(Team.__LENGTH).fill(false)
   deaths: Map<Team, Player[]> = new Map()
-
   winners: Map<Team, Player[]> = new Map()
 
+  // game conditions
   state: "lobby" | "started" | "ended"
-
   readonly settings: GameSettings
-
   private readonly tickRate: number = config.isTest ? 10 : 1000
-
   flags: GameFlags = {}
 
   /** Messages to be deleted at the end of each state */
@@ -187,6 +181,8 @@ export class Game implements GameInfo {
     await this.nightPhase()
 
     await this.votePhase()
+
+    await sleep(2 * this.tickRate)
 
     await this.getWinners()
 
@@ -444,9 +440,17 @@ export class Game implements GameInfo {
     this.events = []
     votes.sort((a, b) => b[1] - a[1])
 
+    /**
+     * Number of players to lynch. Depends on presence of epic battles
+     *
+     * ### Epic battle
+     * Occurs when at least 3 distinct teams (excluding Tanner) are in play at the end of the game.
+     */
     let goal
       = Array.from(this.teams.entries()).filter(([team, members]) => {
-        return team === Team.Village || members.some(p => !p.currentRole.info.isAide)
+        return team !== Team.Tanner && (
+          team === Team.Village || members.some(p => !p.currentRole.info.isAide)
+        )
       }).length < 3
         ? 1
         : 2
@@ -467,8 +471,6 @@ export class Game implements GameInfo {
       }),
     )
 
-    await sleep(2 * this.tickRate)
-
     while (this.events.length > 0) {
       const event = this.events.shift()!
       await event.fn()
@@ -480,6 +482,8 @@ export class Game implements GameInfo {
    * Determine and display the outcome of the game
    */
   async getWinners() {
+    setWins(this)
+
     this.players.forEach(p => p.currentRole.checkWin(p, this))
 
     const results = this.players

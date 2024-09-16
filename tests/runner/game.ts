@@ -194,4 +194,8 @@ export class MockGame {
   processVotes(votes: Votes[]) {
     return this.#game.processVotes(votes)
   }
+
+  getWinners() {
+    return this.#game.getWinners()
+  }
 }

@@ -1,4 +1,3 @@
-// TODO: consider how to refactor methods to avoid this
 import _ from "lodash"
 import * as Actions from "~/game/gameplay/actions"
 import { Keyboard } from "~/game/helpers/keyboards"
@@ -13,23 +12,11 @@ import { Role } from "~/game/models/role"
 
 import { Copier } from "./copier"
 
-function villageWin(player: Player, game: GameInfo): void {
-  // TODO: change when other non-village teams are added
-  player.won
-    = G.count(game, Team.Werewolf) > 0
-      ? G.dead(game, Team.Werewolf) > 0
-      : (G.dead(game, Team.Tanner) === 0 && G.dead(game, Team.Village) === 0)
-}
-
 export class Villager extends Role {
   static readonly info: RoleInfo = {
     name: "villager",
     team: Team.Village,
     command: "roleVG",
-  }
-
-  checkWin(player: Player, game: GameInfo): void {
-    villageWin(player, game)
   }
 }
 
@@ -247,6 +234,6 @@ export class Doppelganger extends Copier {
   }
 
   defaultWin(player: Player, game: GameInfo): void {
-    villageWin(player, game)
+    player.won = game.winInfo[this.info.team]
   }
 }
