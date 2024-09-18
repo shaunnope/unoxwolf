@@ -209,8 +209,4 @@ export class Doppelganger extends Copier {
       return super.priority
     return this.tail.priority + 0.5
   }
-
-  defaultWin(player: Player, game: GameInfo): void {
-    player.won = game.winInfo[this.info.team]
-  }
 }

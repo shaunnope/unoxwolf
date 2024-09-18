@@ -26,8 +26,14 @@ export class Player {
 
   won?: boolean
 
+  /** Canonical reference to effective innate role. Accounts for copier roles */
   get role() {
     return isCopier(this.innateRole) ? this.innateRole.tail : this.innateRole
+  }
+
+  /** Canonical reference to effective current role. Accounts for copier roles */
+  get current() {
+    return isCopier(this.currentRole) ? this.currentRole.tail : this.currentRole
   }
 
   constructor(id: number, name: string, role?: Role, ctx?: Context) {

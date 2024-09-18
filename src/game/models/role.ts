@@ -1,3 +1,5 @@
+import type { Context } from "~/bot/context"
+import { isCopier } from "~/game/roles/copier"
 import { Team } from "./enums"
 import type { Status } from "./enums"
 import type { GameInfo } from "./game"
@@ -18,6 +20,10 @@ export class Role {
     name: "role",
     team: Team.None,
     command: "rolelist",
+  }
+
+  static toString() {
+    return this.info.name
   }
 
   static locale(key: string) {
@@ -74,6 +80,12 @@ export class Role {
     return this.info.priority || -1
   }
 
+  fullRole(ctx: Context): string {
+    return isCopier(this) && this.copiedRole !== undefined
+      ? `${ctx.t(this.tail.name)}${ctx.t(this.emoji)}`
+      : ctx.t(this.name)
+  }
+
   status: Status = {}
 
   constructor(status?: Status) {
@@ -109,11 +121,11 @@ export class Role {
     if (player.isDead)
       return false
     player.isDead = true
-    if (player.currentRole.info.isAide)
+    if (player.current.info.isAide)
       return true
-    const teamDeaths = game.deaths.get(player.currentRole.info.team)
+    const teamDeaths = game.deaths.get(player.current.info.team)
     if (teamDeaths === undefined)
-      game.deaths.set(player.currentRole.info.team, [player])
+      game.deaths.set(player.current.info.team, [player])
     else teamDeaths.push(player)
 
     return true
@@ -122,7 +134,7 @@ export class Role {
   /**
    * Check win condition of a player
    * @param player
-   * @param _game
+   * @param game
    */
   checkWin(player: Player, game: GameInfo): void {
     player.won = game.winInfo[this.info.team]

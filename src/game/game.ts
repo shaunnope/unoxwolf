@@ -423,12 +423,12 @@ export class Game implements GameInfo {
 
       // collate non-aide players in main teams
       if (
-        !player.currentRole.info.isAide
-        && [Team.Village, Team.Werewolf, Team.Vampire, Team.Alien].includes(player.currentRole.info.team)
+        !player.current.info.isAide
+        && [Team.Village, Team.Werewolf, Team.Vampire, Team.Alien].includes(player.current.info.team)
       ) {
-        const teamMembers = this.teams.get(player.currentRole.info.team)
+        const teamMembers = this.teams.get(player.current.info.team)
         if (teamMembers === undefined)
-          this.teams.set(player.currentRole.info.team, [player])
+          this.teams.set(player.current.info.team, [player])
         else teamMembers.push(player)
       }
 
@@ -463,7 +463,7 @@ export class Game implements GameInfo {
     let goal
       = Array.from(this.teams.entries()).filter(([team, members]) => {
         return team !== Team.Tanner && (
-          team === Team.Village || members.some(p => !p.currentRole.info.isAide)
+          team === Team.Village || members.some(p => !p.current.info.isAide)
         )
       }).length < 3
         ? 1
@@ -471,7 +471,7 @@ export class Game implements GameInfo {
 
     const out: Player[] = []
     for (const [idx, [player, n]] of votes.entries()) {
-      if (player.currentRole.lynch(player, this)) {
+      if (player.current.lynch(player, this)) {
         out.push(player)
         if (--goal <= 0 && n > votes[idx + 1][1])
           break
@@ -498,14 +498,12 @@ export class Game implements GameInfo {
   async getWinners() {
     setWins(this)
 
-    this.players.forEach(p => p.currentRole.checkWin(p, this))
+    this.players.forEach(p => p.current.checkWin(p, this))
 
     const results = this.players
       .map((p) => {
         const roleName
-          = isCopier(p.currentRole) && p.currentRole.copiedRole !== undefined
-            ? p.currentRole.fullRole(this.ctx)
-            : this.ctx.t(p.currentRole.name)
+          = p.currentRole.fullRole(this.ctx)
         return `${p.name}: ${p.won ? this.ctx.t("game.won") : this.ctx.t("game.lost")} ${
           p.isDead ? this.ctx.t("game.dead") : this.ctx.t("game.alive")
         }  -  ${roleName}`
@@ -514,9 +512,7 @@ export class Game implements GameInfo {
 
     const unassigned = this.unassignedRoles
       .map((r) => {
-        return isCopier(r.currentRole) && r.currentRole.copiedRole !== undefined
-          ? r.currentRole.fullRole(this.ctx)
-          : this.ctx.t(r.currentRole.name)
+        return r.currentRole.fullRole(this.ctx)
       })
       .join(", ")
 

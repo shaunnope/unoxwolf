@@ -50,9 +50,7 @@ export function Swap(
       if (sendReply && player.ctx !== undefined) {
         const { ctx } = player
         const newRole
-          = isCopier(targets[0].currentRole) && targets[0].currentRole.copiedRole !== undefined
-            ? targets[0].currentRole.fullRole(ctx)
-            : ctx.t(targets[0].currentRole.name)
+          = targets[0].currentRole.fullRole(ctx)
 
         return ctx.reply(
           ctx.t(player.role.locale("swap"), {

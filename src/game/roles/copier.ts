@@ -1,4 +1,3 @@
-import type { Context } from "~/bot/context"
 import * as Actions from "~/game/gameplay/actions"
 import { Team } from "~/game/models/enums"
 import type { GameInfo } from "~/game/models/game"
@@ -29,10 +28,6 @@ export abstract class Copier extends Role implements CanCopy {
     if (!isCopier(this.copiedRole))
       return this.copiedRole
     return this.copiedRole.tail
-  }
-
-  fullRole(ctx: Context) {
-    return `${ctx.t(this.tail.name)}${ctx.t(this.emoji)}`
   }
 
   copy(player: Player, game: GameInfo): void {
