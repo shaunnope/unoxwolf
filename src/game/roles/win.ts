@@ -14,12 +14,14 @@ import * as G from "~/game/models/game.fn"
 export function setWins(game: GameInfo) {
   const wins = new Array(Team.__LENGTH).fill(false)
 
+  wins[Team.Tanner] = G.dead(game, Team.Tanner) > 0
+
   // TODO: change when other non-village teams are added
   wins[Team.Village] = G.count(game, Team.Werewolf) > 0
     ? G.dead(game, Team.Werewolf) > 0
-    : (G.dead(game, Team.Tanner) === 0 && G.dead(game, Team.Village) === 0)
+    : (!wins[Team.Tanner] && G.dead(game, Team.Village) === 0)
 
-  wins[Team.Werewolf] = G.dead(game, Team.Tanner) === 0 && G.dead(game, Team.Werewolf) === 0
+  wins[Team.Werewolf] = !wins[Team.Tanner] && G.dead(game, Team.Werewolf) === 0
 
   game.winInfo = wins
 }

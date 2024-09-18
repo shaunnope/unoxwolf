@@ -90,6 +90,49 @@ try {
       })
     })
   })
+
+  describe("with tanner", () => {
+    beforeEach(async () => {
+      roles = [
+        Roles.Tanner,
+        Roles.Werewolf,
+        Roles.Werewolf,
+        Roles.Minion,
+      ]
+      chats = MockChat.fromUsers(mockUsers(roles.length))
+
+      game = await MockGame.init(bot, chat, chats, games, queue)
+      game.assign(roles.map(R => new R()))
+
+      queue.length = 0
+    })
+
+    it("win when no death", async () => {
+      const votes = game.players.map((_, idx) => (idx + 1) % game.players.length)
+
+      game.processVotes(game.collate(votes)).then(() => game.getWinners())
+      await jest.runAllTimersAsync()
+
+      expect(game.info.winInfo[Team.Tanner]).toBe(false)
+      expect(game.info.winInfo[Team.Werewolf]).toBe(true)
+      game.players.forEach((player) => {
+        expect(player.won).toBe(player.team === Team.Werewolf)
+      })
+    })
+
+    it("lose when tanner death", async () => {
+      const votes = game.players.map(_player => 0)
+
+      game.processVotes(game.collate(votes)).then(() => game.getWinners())
+      await jest.runAllTimersAsync()
+
+      expect(game.info.winInfo[Team.Tanner]).toBe(true)
+      expect(game.info.winInfo[Team.Werewolf]).toBe(false)
+      game.players.forEach((player) => {
+        expect(player.won).toBe(player.team !== Team.Werewolf)
+      })
+    })
+  })
 }
 catch (error) {
   container.logger.error(error)
