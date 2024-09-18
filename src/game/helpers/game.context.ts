@@ -22,7 +22,6 @@ export function playerAddGame(ctx: Context, game: Game) {
 
 export function deleteGame(game: Game) {
   games.delete(game.id)
-  delete game.ctx.session.games[getForumTopicId(game.ctx) || -1]
 }
 
 export function getChatTitle(ctx: Context) {

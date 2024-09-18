@@ -4,6 +4,8 @@ import type { RawApiRequest } from "tests/common"
 import type { Bot } from "~/bot"
 import type { Game } from "~/game"
 import type { Votes } from "~/game/game"
+import { deleteGame } from "~/game/helpers/game.context"
+import type { Phase } from "~/game/models/enums"
 import type { Role } from "~/game/models/role"
 import type { MockChat } from "./chat"
 
@@ -76,10 +78,12 @@ export class MockGame {
   }
 
   skip() {
+    this.#check()
     return this.#bot.handleUpdate(this.#chat.mockCommand(this.#creator, "forcenext"))
   }
 
   assign(roles: Role[]) {
+    this.#check()
     if (this.#assigned)
       throw new Error("Roles already assigned")
 
@@ -87,6 +91,39 @@ export class MockGame {
     this.#game.assign(roles)
 
     return this
+  }
+
+  async doAction(index: number, message: Message, action: string, target?: string) {
+    this.#check()
+    const chat = this.#playerChats[index]
+    message.from = this.#bot.botInfo
+    message.chat = chat.chat
+
+    const data = target === undefined ? `${action}${this.id}` : `${action}${this.id}+${target}`
+
+    await this.#bot
+      .handleUpdate(chat.mockCallbackQuery(chat.user!, message, data))
+  }
+
+  /**
+   * Perform actions
+   * @param keyboards A queue of requests containing actionable inline keyboards
+   * @param actions
+   */
+  async doActions(keyboards: RawApiRequest[], actions: MaybeAction[]) {
+    this.#check()
+    for (const kb of keyboards) {
+      const payload = kb.payload
+      if (!("reply_markup" in payload && "chat_id" in payload))
+        throw new Error("Action queue should have inline keyboard")
+      const idx = payload.chat_id as number
+      const action = actions[idx]
+      if (action === undefined)
+        continue
+
+      await this.doAction(idx, payload as Message, ...action)
+    }
+    keyboards.length = 0
   }
 
   /**
@@ -98,21 +135,20 @@ export class MockGame {
     queue: RawApiRequest[],
     targets: (number | undefined)[],
   ) {
+    this.#check()
     if (this.#voted !== "setup")
       throw new Error("Not ready to vote")
     if (this.#playerChats.length !== targets.length)
       throw new Error("Vote targets should match no. of players")
 
-    for (const [idx, chat] of this.#playerChats.entries()) {
+    for (const idx of this.#playerChats.keys()) {
       const tar = targets[idx]
       if (tar === undefined)
         continue
       const target = this.#playerChats[tar].user!
       const message = queue.shift()!.payload as Message
-      message.from = this.#bot.botInfo
-      message.chat = chat.chat
-      await this.#bot
-        .handleUpdate(chat.mockCallbackQuery(chat.user!, message, `vote${this.id}+${target.id}`))
+
+      await this.doAction(idx, message, "vote", target.id.toString())
     }
   }
 
@@ -121,6 +157,7 @@ export class MockGame {
    * @param targets
    */
   collate(targets: number[]) {
+    this.#check()
     if (this.#playerChats.length !== targets.length)
       throw new Error("Vote targets should match no. of players")
 
@@ -140,6 +177,7 @@ export class MockGame {
   }
 
   async addPlayers(users: MockChat[]) {
+    this.#check()
     this.collectPlayers()
     for (const chat of users) {
       await this.#bot
@@ -148,9 +186,15 @@ export class MockGame {
     this.#playerChats.push(...users)
   }
 
+  #check() {
+    if (this.#ended)
+      throw new Error("Game already ended")
+  }
+
   // --- Game wrappers ---
 
   collectPlayers() {
+    this.#check()
     if (this.#collected)
       return
     this.#collected = true
@@ -158,6 +202,7 @@ export class MockGame {
   }
 
   assignRolesAndNotify() {
+    this.#check()
     if (this.#assigned)
       return
     this.#assigned = true
@@ -165,6 +210,7 @@ export class MockGame {
   }
 
   async setupVotes() {
+    this.#check()
     if (this.#voted)
       return
     this.#voted = this.#voted || "setup"
@@ -176,6 +222,7 @@ export class MockGame {
   }
 
   async collectVotes() {
+    this.#check()
     if (this.#voted === true)
       return
     if (this.#voted === undefined)
@@ -185,17 +232,38 @@ export class MockGame {
     return this.#game.collectVotes()
   }
 
+  async unload() {
+    await this.#game.unload()
+  }
+
   async end() {
-    if (this.#ended)
-      return
-    return this.#game.end(true)
+    this.#check()
+    this.#ended = true
+    deleteGame(this.#game)
+    await this.#game.unload()
   }
 
   processVotes(votes: Votes[]) {
+    this.#check()
     return this.#game.processVotes(votes)
   }
 
   getWinners() {
+    this.#check()
     return this.#game.getWinners()
   }
+
+  setupPhase(phase: Phase) {
+    this.#check()
+    return this.#game.setupPhase(phase)
+  }
+
+  runPhase(phase: Phase) {
+    this.#check()
+    return this.#game.runPhase(phase)
+  }
 }
+
+type _Target = string | undefined
+type Action = [string, _Target]
+type MaybeAction = Action | undefined

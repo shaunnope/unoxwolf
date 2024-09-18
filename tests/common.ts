@@ -1,11 +1,9 @@
 import { RedisAdapter } from "@grammyjs/storage-redis"
 
-import type { ApiCallFn } from "grammy"
-
-import type { RawApi } from "node_modules/grammy/out/core/client"
+import type { ApiCallFn, RawApi } from "grammy"
 
 import type { Container } from "tests/container"
-import { createBot } from "~/bot"
+import { type Bot, createBot } from "~/bot"
 
 type TupleToObject<T extends any[]> = Omit<T, keyof any[]>
 
@@ -23,7 +21,11 @@ type ApiRequest<R extends RawApi> = TupleToObjectWithPropNames<
 export type RawApiRequest = ApiRequest<RawApi>
 
 /** Common setup and teardown process for testing */
-export function setupTestEnv(outgoing: ApiRequest<RawApi>[], container: Container) {
+export function setupTestEnv(
+  outgoing: ApiRequest<RawApi>[],
+  container: Container,
+  hook?: (bot: Bot) => void,
+) {
   const { redis, logger, prisma } = container
   const bot = createBot("test", {
     container,
@@ -37,6 +39,9 @@ export function setupTestEnv(outgoing: ApiRequest<RawApi>[], container: Containe
       outgoing.push({ method, payload, signal })
       return { ok: true, result: true } as ReturnType<ApiCallFn<RawApi>>
     })
+
+    if (hook !== undefined)
+      hook(bot)
 
     bot.botInfo = {
       id: 42,

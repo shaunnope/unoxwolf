@@ -9,6 +9,7 @@ import * as G from "~/game/models/game.fn"
 import type { Player } from "~/game/models/player"
 import type { RoleInfo } from "~/game/models/role"
 import { Role } from "~/game/models/role"
+import * as Actors from "~/game/roles/actors"
 
 import { Copier } from "./copier"
 
@@ -20,34 +21,19 @@ export class Villager extends Role {
   }
 }
 
-export class Mason extends Villager {
+export class Mason extends Actors.Revealer {
   static readonly info: RoleInfo = {
-    ...super.info,
     name: "mason",
+    team: Team.Village,
     command: "roleMason",
   }
 
-  processLone(game: GameInfo) {
-    return game.ctx.t(this.locale("lone"))
-  }
-
-  processReveal(game: GameInfo, members: Player[]) {
-    return game.ctx.t(this.locale("reveal"), {
-      others: members.map(p => p.name).join(", "),
-    })
-  }
-
-  doNight(player: Player, game: GameInfo) {
-    if (player.ctx === undefined)
-      return
-    const teamMembers = G.members(game, player, this.info.team)
-    const msg = teamMembers.length === 0 ? this.processLone(game) : this.processReveal(game, teamMembers)
-
-    player.ctx.reply(msg)
+  filter(other: Player) {
+    return other.role instanceof Mason
   }
 }
 
-export class Werewolf extends Mason {
+export class Werewolf extends Actors.Revealer {
   static readonly info: RoleInfo = {
     name: "werewolf",
     team: Team.Werewolf,
@@ -62,6 +48,10 @@ export class Werewolf extends Mason {
     }
 
     return msg
+  }
+
+  filter(other: Player) {
+    return !other.role.info.isAide
   }
 
   checkWin(player: Player, game: GameInfo): void {
@@ -90,36 +80,25 @@ export class Seer extends Villager {
   }
 }
 
-export class Robber extends Villager {
+export class Robber extends Actors.Swapper {
   static readonly info: RoleInfo = {
-    ...super.info,
     name: "robber",
+    team: Team.Village,
     command: "roleRobber",
     priority: 3,
   }
-
-  doNight(player: Player, game: GameInfo) {
-    if (player.ctx === undefined) {
-      // TODO: fallback
-      return
-    }
-    const kb = new Keyboard(game)
-      .addPlayers(other => other.id !== player.id, "swap")
-      .addPass(player)
-
-    game.privateMsgs.set(player.id, kb.send(player)!)
-  }
 }
 
-export class Troublemaker extends Robber {
+export class Troublemaker extends Actors.Swapper {
   static readonly info: RoleInfo = {
-    ...super.info,
     name: "troublemaker",
+    team: Team.Village,
     command: "roleTM",
     priority: 6,
   }
 }
 
+// Drunk does not extend Swapper class since swap behaviour is auto
 export class Drunk extends Villager {
   static readonly info: RoleInfo = {
     name: "drunk",
@@ -183,11 +162,9 @@ export class Minion extends Werewolf {
 
   checkWin(player: Player, game: GameInfo): void {
     player.won
-      = G.dead(game, Team.Tanner) === 0 && (
-        G.count(game, Team.Werewolf) === 0
-          ? !player.isDead
-          : G.dead(game, Team.Werewolf) === 0
-      )
+      = G.count(game, Team.Werewolf) === 0
+        ? !player.isDead
+        : game.winInfo[Team.Werewolf]
   }
 }
 

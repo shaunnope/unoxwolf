@@ -12,17 +12,17 @@ export interface CanCopy {
   copy: (player: Player, game: GameInfo) => void
 }
 
-export class Copier extends Role implements CanCopy {
+export abstract class Copier extends Role implements CanCopy {
   static readonly info: RoleInfo = {
     name: "role",
-    team: Team.Village,
+    team: Team.None,
     command: "rolelist",
   }
 
   copiedRole?: Role
 
   // NOTE: can fail with cycles (more than 1 active doppelganger)
-  // Ultimately a non-issue since at most 1 doppelganger can be active at a time
+  // Ultimately a non-issue since at most 1 doppelganger should be active at a time (for now)
   get tail(): Role {
     if (this.copiedRole === undefined)
       return this

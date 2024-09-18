@@ -6,7 +6,6 @@ import type { Player } from "./player"
  * Get number of dead team members in game
  * @param game
  * @param team
- * @returns
  */
 export function dead(game: GameInfo, team: Team) {
   return game.deaths.get(team)?.length || 0
@@ -16,7 +15,6 @@ export function dead(game: GameInfo, team: Team) {
  * Get number of team members in game
  * @param game
  * @param team
- * @returns
  */
 export function count(game: GameInfo, team: Team) {
   return game.teams.get(team)?.length || 0
@@ -27,19 +25,17 @@ export function count(game: GameInfo, team: Team) {
  * @param game
  * @param player
  * @param team
- * @returns
  */
-export function members(game: GameInfo, player: Player, team: Team) {
+export function members(game: GameInfo, player: Player, team: Team, also: (other: Player) => boolean) {
   return game.teams
     .get(team)!
-    .filter(other => other.id !== player.id && !other.role.info.isAide)
+    .filter(other => other.id !== player.id && also(other))
 }
 
 /**
  * Get array of all other players in game
  * @param game
  * @param player
- * @returns
  */
 export function others(game: GameInfo, player: Player) {
   return game.players.filter(other => other.id !== player.id)

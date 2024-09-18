@@ -348,7 +348,10 @@ minion = Minion
     .lore =
         You are the {minion.name}
         At night, you may meet your revered werewolves.
-    .reveal = The werewolves are { $others }.
+    .reveal = { $others } { $num ->
+                    [one] is a werewolf
+                    *[other] are werewolves
+                }!
     .lone = There are no werewolves tonight.
 
 doppelganger = Doppelgänger

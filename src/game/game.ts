@@ -11,7 +11,7 @@ import { config } from "~/config"
 import * as Actions from "~/game/gameplay/actions"
 
 import { sleep } from "~/game/helpers/timer"
-import { Team } from "~/game/models/enums"
+import { Phase, Team } from "~/game/models/enums"
 import type { GameEvent, GameFlags, GameInfo, GameSettings, WinInfo } from "~/game/models/game"
 import { Player } from "~/game/models/player"
 import * as Roles from "~/game/roles"
@@ -95,6 +95,9 @@ export class Game implements GameInfo {
 
   aggregator: Map<number, Player[]> = new Map()
 
+  /** Store off all emitted promises during gameplay. For testing */
+  private bin: Promise<any>[] = []
+
   constructor(ctx: Context, settings: GameSettings = defaultSettings) {
     this.ctx = ctx
     this.id = createHash("sha256").update(`${this.chatId.toString()}-${Date.now()}`).digest("hex").slice(0, 20)
@@ -135,7 +138,7 @@ export class Game implements GameInfo {
 
     ctx.session.game = this.id
     ctx.session.actions = []
-    ctx.reply(ctx.t("join.success", { chat: getChatTitle(this.ctx) }))
+    this.bin.push(ctx.reply(ctx.t("join.success", { chat: getChatTitle(this.ctx) })))
   }
 
   addPlayers(players: Player[]) {
@@ -176,12 +179,12 @@ export class Game implements GameInfo {
     if (hasCopy) {
       await this.copyPhase()
     }
-    // await sleep(2 * this.tickRate)
+    await sleep(2 * this.tickRate)
 
     await this.nightPhase()
+    await sleep(5 * this.tickRate)
 
     await this.votePhase()
-
     await sleep(2 * this.tickRate)
 
     await this.getWinners()
@@ -275,34 +278,9 @@ export class Game implements GameInfo {
    *
    */
   async copyPhase() {
-    this.privateMsgs = new Map()
+    await this.setupPhase(Phase.Copy)
 
-    this.events = []
-
-    this.players.forEach((p) => {
-      if (isCopier(p.innateRole)) {
-        p.innateRole.copy(p, this)
-      }
-    })
-
-    this.setupTimer()
-    for (let i = 0; i < this.settings.copyTimeout; i++) {
-      if (this.flags.killTimer || this.canExit(i)) {
-        delete this.flags.timerRunning
-        break
-      }
-
-      await this.countdownPrompt(i, this.settings.copyTimeout)
-
-      await sleep(this.tickRate)
-    }
-    this.cleanupMsgs(this.serviceMsgs)
-    await this.cleanupPMs(Actions.Copy.fallback)
-    this.events.sort((a, b) => a.priority - b.priority)
-    this.updateTimeline()
-    this.reply(this.ctx.t("copy.end"), undefined, "trace")
-
-    await sleep(10 * this.tickRate)
+    await this.runPhase(Phase.Copy)
   }
 
   /**
@@ -310,32 +288,68 @@ export class Game implements GameInfo {
    *
    */
   async nightPhase() {
-    this.privateMsgs = new Map()
-    // this.serviceMsgs = []
     await this.reply(this.ctx.t("night.start"), undefined, "trace")
+    await this.setupPhase(Phase.Night)
 
+    await this.runPhase(Phase.Night)
+  }
+
+  async setupPhase(phase: Phase) {
+    let callback: (player: Player) => void
+    switch (phase) {
+      case Phase.Copy:
+        callback = (p) => {
+          if (isCopier(p.innateRole)) {
+            p.innateRole.copy(p, this)
+          }
+        }
+        break
+      case Phase.Night:
+        callback = p => p.role.doNight(p, this)
+        break
+      default:
+        return
+    }
+
+    this.privateMsgs = new Map()
     this.events = []
 
-    this.players.forEach(p => p.role.doNight(p, this))
+    this.players.forEach(callback)
+  }
 
+  /**
+   * Run phase timer and teardown
+   * @param phase
+   */
+  async runPhase(phase: Phase) {
+    switch (phase) {
+      case Phase.Copy:
+        await this.phaseTimer("copy", this.settings.copyTimeout)
+        break
+      case Phase.Night:
+        await this.phaseTimer("night", this.settings.nightTimeout)
+        break
+      default:
+    }
+  }
+
+  async phaseTimer(phase: string, timeout: number) {
     this.setupTimer()
-    for (let i = 0; i < this.settings.nightTimeout; i++) {
+    for (let i = 0; i < timeout; i++) {
       if (this.flags.killTimer || this.canExit(i)) {
         delete this.flags.timerRunning
         break
       }
 
-      await this.countdownPrompt(i, this.settings.nightTimeout)
+      await this.countdownPrompt(i, timeout)
 
       await sleep(this.tickRate)
     }
     this.cleanupMsgs(this.serviceMsgs)
     await this.cleanupPMs(() => {})
-    await this.reply(this.ctx.t("night.end"), undefined, "trace")
-    this.events.sort((a, b) => a.priority - b.priority).forEach(e => e.fn())
+    this.events.sort((a, b) => a.priority - b.priority).forEach(e => this.bin.push(e.fn()))
     this.updateTimeline()
-
-    await sleep(10 * this.tickRate)
+    await this.reply(this.ctx.t(`${phase}.end`), undefined, "trace")
   }
 
   /**
@@ -387,7 +401,7 @@ export class Game implements GameInfo {
 
     const voteResultsMsg = await this.reply(`${this.ctx.t("vote.end")} ${this.ctx.t("vote.tally")}`)
 
-    this.events.sort((a, b) => a.priority - b.priority).forEach(e => e.fn())
+    this.events.sort((a, b) => a.priority - b.priority).forEach(e => this.bin.push(e.fn()))
 
     const votes: Votes[] = new Array(this.aggregator.size).fill(undefined)
     let voteResults = `${this.ctx.t("vote.end")}\n\n`
@@ -593,11 +607,15 @@ export class Game implements GameInfo {
     deleteGame(this)
   }
 
+  async unload() {
+    await Promise.all(this.bin)
+  }
+
   /**
    * Delete all service messages
    */
   cleanupMsgs(messages: (Message.TextMessage & Message)[]) {
-    messages.forEach(msg => this.ctx.api.deleteMessage(this.chatId, msg.message_id))
+    messages.forEach(msg => this.bin.push(this.ctx.api.deleteMessage(this.chatId, msg.message_id)))
     messages.length = 0
   }
 

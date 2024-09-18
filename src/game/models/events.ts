@@ -54,7 +54,7 @@ export function Swap(
             ? targets[0].currentRole.fullRole(ctx)
             : ctx.t(targets[0].currentRole.name)
 
-        ctx.reply(
+        return ctx.reply(
           ctx.t(player.role.locale("swap"), {
             user1: targets[0].name,
             user2: targets[1].name,
@@ -64,6 +64,15 @@ export function Swap(
       }
     },
   } as GameEvent
+}
+
+function defaultPeek(player: Player, targets: Player[]) {
+  return () => {
+    if (player.ctx === undefined)
+      return
+    const { ctx } = player
+    return ctx.reply(targets.map(t => ctx.t("misc.peek_role", { user: t.name, role: ctx.t(t.role.name) })).join("\n"))
+  }
 }
 
 export function Peek(player: Player, targets: Player[], callbackFn?: () => void, priority: number = 2) {
@@ -76,12 +85,7 @@ export function Peek(player: Player, targets: Player[], callbackFn?: () => void,
     fn:
       callbackFn !== undefined
         ? callbackFn
-        : () => {
-            if (player.ctx === undefined)
-              return
-            const { ctx } = player
-            ctx.reply(targets.map(t => ctx.t("misc.peek_role", { user: t.name, role: ctx.t(t.role.name) })).join("\n"))
-          },
+        : defaultPeek(player, targets),
   } as GameEvent
 }
 
@@ -95,12 +99,7 @@ export function Reveal(player: Player, targets: Player[], callbackFn?: () => voi
     fn:
       callbackFn !== undefined
         ? callbackFn
-        : () => {
-            if (player.ctx === undefined)
-              return
-            const ctx = player.ctx!
-            ctx.reply(targets.map(t => ctx.t("misc.peek_role", { user: t.name, role: ctx.t(t.role.name) })).join("\n"))
-          },
+        : defaultPeek(player, targets),
   } as GameEvent
 }
 
@@ -149,7 +148,7 @@ export function Copy(player: Player, target: Player, game: Game) {
 
       if (player.ctx === undefined)
         return
-      player.ctx.reply(player.ctx.t(target.role.lore))
+      return player.ctx.reply(player.ctx.t(target.role.lore))
     },
   } as GameEvent
 }

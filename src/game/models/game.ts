@@ -71,7 +71,7 @@ export interface GameEvent {
   author: Player
   targets: Player[]
   priority: number
-  fn: () => Promise<void>
+  fn: () => Promise<any>
 }
 
 export type WinInfo = boolean[]
