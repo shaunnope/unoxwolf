@@ -405,8 +405,9 @@ wildchild = Wild Child
         <em>The Wild Child is on the {team.village} team, unless they view a role that is not on the {team.village} team, then they join that team.</em>
     .lore =
         You are the {wildchild.name}
-        Morbidly curious, yet highly impressionable, you yearn to learn the about your fellow villagers, even if it means risking your humanity.
+        Morbidly curious, yet highly impressionable, you yearn to learn more about your fellow villagers, even if it means risking your humanity.
         Tonight, you may spy on two other players, one at a time, and learn their roles.
+        Careful, though: if you view a role that is not on the {team.village} team, you will join the role of that team.
     .action = Who would you like to spy on?
     .reveal = {misc.peek_role}
     .reveal2 = {misc.peek_role}! { misc.self_team_changed }
@@ -632,7 +633,7 @@ priest = Priest
     .name = {priest} {priest.emoji}
     .emoji = 🙏
     .desc =
-        At night, the Priest clears himself of all inflictions, and may choose to do the same for one other player.
+        At night, the Priest clears himself of all afflictions, and may choose to do the same for one other player.
 
         <em> The Priest is on the {team.village} team.</em>
     .lore =
@@ -978,58 +979,3 @@ empath = Empath
     .lore =
         You are the {empath.name}
         At night, you may watch the actions of random players.
-
-roles =
-    .page_daybreak = 11
-        /roleSentinel - {sentinel.name}
-        /roleAppS - {apprentice_seer.name}
-        /rolePI - {wildchild.name}
-        /roleRevealer - {revealer.name}
-        /roleCurator - {curator.name}
-        /roleWitch - {witch.name}
-        /roleFool - {fool.name}
-        /roleBG - {bodyguard.name}
-        /roleAW - {alpha_wolf.name}
-        /roleMW - {mystic_wolf.name}
-        /roleDW - {dream_wolf.name}
-
-    .page_vampire = 14
-        /roleCopycat - {copycat.name}
-        /roleVampire - {vampire.name}
-        /roleMaster - {vampire_master.name}
-        /roleCount - {vampire_count.name}
-        /roleRenfield - {renfield.name}
-        /roleCupid - {cupid.name}
-        /roleDiseased - {diseased.name}
-        /roleInstigator - {instigator.name}
-        /rolePriest - {priest.name}
-        /roleAssassin - {assassin.name}
-        /roleAppA - {apprentice_assassin.name}
-        /roleMarksman - {marksman.name}
-        /rolePickpocket - {pickpocket.name}
-        /roleGremlin - {gremlin.name}
-
-    .page_aliens = 11
-        /roleAlien - {alien}
-        /roleSynthA - {synthetic_alien}
-        /roleCow - {cow}
-        /roleGroob - {groob}
-        /roleZerb - {zerb}
-        /roleLeader - {leader}
-        /rolePsychic - {psychic}
-        /roleRascal - {rascal}
-        /roleExposer - {exposer}
-        /roleBlob - {blob}
-        /roleMortician - {mortician}
-
-    .page_bonus = 10
-        /roleAuraS - {aura_seer}
-        /roleCursed - {cursed}
-        /rolePrince - {prince}
-        /roleAppT - {apprentice_tanner}
-        /roleBeholder - {beholder}
-        /roleSquire - {squire}
-        /roleThing - {thing}
-        /roleNostradamus - {nostradamus}
-        /roleBodyS - {body_snatcher}
-        /roleEmpath - {empath}
