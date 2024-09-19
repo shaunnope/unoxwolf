@@ -7,6 +7,7 @@ import * as Actions from "~/game/gameplay/actions"
 import { validateCallbackQuery } from "~/game/helpers/game.context"
 import type { Player } from "~/game/models/player"
 import * as Roles from "~/game/roles"
+import * as Actors from "~/game/roles/actors"
 
 const composer = new Composer<Context>()
 
@@ -98,7 +99,7 @@ feature.callbackQuery(/swap([\w.]+)\+([\w.]+)/, logHandle("callback-swap"), asyn
     return
   }
 
-  if (!(player.role instanceof Roles.Robber))
+  if (!(player.role instanceof Actors.Swapper))
     return
 
   const target = game.playerMap.get(Number(userId))

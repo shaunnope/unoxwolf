@@ -49,6 +49,11 @@ export interface Action {
   fn: (game: Game, playerContext: Context, targets?: Player[], other?: ActionOptions) => void
 }
 
+export interface DebugAction {
+  force: (game: Game, player: Player, targets?: Player[]) => void
+
+}
+
 /**
  * Vote for a player
  */
@@ -191,13 +196,17 @@ export const Reveal: Action = {
 /**
  * Copy another player's role
  */
-export const Copy: Action = {
-  fallback: (game: Game, player: Player) => {
-    const options = G.others(game, player)
-
-    const copyEvent = Events.Copy(player, options[Math.floor(Math.random() * options.length)], game)
+export const Copy: Action & DebugAction = {
+  force: (game: Game, player: Player, targets?: Player[]) => {
+    if (targets === undefined)
+      return
+    const copyEvent = Events.Copy(player, targets[0], game)
     game.events.push(copyEvent)
     copyEvent.fn()
+  },
+  fallback: (game: Game, player: Player) => {
+    const options = G.others(game, player)
+    Copy.force(game, player, [options[Math.floor(Math.random() * options.length)]])
   },
   setup: (game: Game, player: Player) => {
     if (player.ctx === undefined || !game.playerMap.has(player.id))
@@ -232,7 +241,7 @@ export const Copy: Action = {
 
     const copyEvent = Events.Copy(player, targets[0], game)
     game.events.push(copyEvent)
-    copyEvent.fn()
+    // copyEvent.fn()
 
     playerCtx.answerCallbackQuery()
     game.privateMsgs.delete(player.id)
