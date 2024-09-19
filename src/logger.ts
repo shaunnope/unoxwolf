@@ -3,7 +3,7 @@ import { config } from "~/config"
 
 type LogLevel = typeof config.LOG_LEVEL
 
-export function buildLogger(level: LogLevel | undefined = undefined) {
+export function buildLogger(level?: LogLevel) {
   const log_level = level === undefined ? config.LOG_LEVEL : level
   return pino({
     level: log_level,
