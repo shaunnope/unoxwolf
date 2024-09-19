@@ -30,13 +30,13 @@ const PLAYERS = [
   "Zander",
 ]
 
-export function createPlayers(count: number) {
+export function createPlayers(count: number, start: number = 0) {
   count = _.clamp(count, 1, 10)
   const names = _.sampleSize(PLAYERS, count)
 
   const players = new Array<Player>(count)
   for (let i = 0; i < count; i++) {
-    players[i] = new Player(i, names[i])
+    players[i] = new Player(start + i, names[i])
   }
   return players
 }

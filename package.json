@@ -48,8 +48,8 @@
     "typescript": "^5.1.6"
   },
   "scripts": {
-    "lint": "eslint \"src/**/*.ts\"",
-    "format": "eslint \"src/**/*.ts\" --fix",
+    "lint": "eslint \"src/**/*.ts\" \"tests/**/*.ts\"",
+    "format": "eslint \"src/**/*.ts\" \"tests/**/*.ts\" --fix",
     "typecheck": "tsc",
     "dev": "tsc-watch --onSuccess \"tsx ./scripts/start.ts\"",
     "build": "tsc --noEmit false",

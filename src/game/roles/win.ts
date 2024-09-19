@@ -9,7 +9,6 @@ import * as G from "~/game/models/game.fn"
  * due to game mechanics
  *
  * @param game
- * @returns
  */
 export function setWins(game: GameInfo) {
   const wins = new Array(Team.__LENGTH).fill(false)

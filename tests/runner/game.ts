@@ -4,6 +4,7 @@ import type { RawApiRequest } from "tests/common"
 import type { Bot } from "~/bot"
 import type { Game } from "~/game"
 import type { Votes } from "~/game/game"
+import { createPlayers } from "~/game/helpers/create-players"
 import { deleteGame } from "~/game/helpers/game.context"
 import type { Phase } from "~/game/models/enums"
 import type { Role } from "~/game/models/role"
@@ -184,6 +185,15 @@ export class MockGame {
         .handleUpdate(chat.mockCommand(chat.user!, "start", `join${this.id}`))
     }
     this.#playerChats.push(...users)
+  }
+
+  async addFakePlayers(roles: (typeof Role)[]) {
+    this.#game.addPlayers(
+      createPlayers(roles.length, this.players.length).map((player, idx) => {
+        player.setup(new roles[idx]())
+        return player
+      }),
+    )
   }
 
   #check() {

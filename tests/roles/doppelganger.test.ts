@@ -7,6 +7,7 @@ import { mockUsers } from "tests/runner/user"
 
 import type { RawApiRequest } from "tests/common"
 import { Copy } from "~/game/gameplay/actions"
+import { createPlayers } from "~/game/helpers/create-players"
 import { Team } from "~/game/models/enums"
 import type { Role } from "~/game/models/role"
 import * as Roles from "~/game/roles"
@@ -48,6 +49,8 @@ try {
     Roles.Insomniac,
     Roles.Hunter,
     Roles.Doppelganger,
+    Roles.ApprenticeSeer,
+    Roles.Fool,
   ] as (typeof Role)[])("village: %s", (role) => {
     const roles = [
       Roles.Doppelganger,
@@ -89,21 +92,25 @@ try {
   describe.each([
     Roles.Werewolf,
     Roles.Minion,
-  ] as (typeof Role)[])("wolf: %s", (role) => {
+  ] as (typeof Role)[])("wolf: %s", (TRole) => {
     const roles = [
       Roles.Doppelganger,
-      role,
       Roles.Werewolf,
+      Roles.Minion,
     ]
     const n = roles.length
     const chats = MockChat.fromUsers(mockUsers(n))
 
-    const deathWin = role === Roles.Minion
+    const deathWin = TRole === Roles.Minion
 
     beforeEach(async () => {
       game = (await MockGame.init(bot, group, chats, games, queue))
         .assign(roles.map(R => new R()))
-      Copy.fallback(game.info, game.players[0])
+      const targets = createPlayers(1, game.players.length).map((player) => {
+        player.setup(new TRole())
+        return player
+      })
+      Copy.force(game.info, game.players[0], targets)
 
       queue.length = 0
       keyboards.length = 0
@@ -135,11 +142,10 @@ try {
   describe("actions", () => {
     const roles: (typeof Role)[] = [
       Roles.Doppelganger,
-      Roles.Villager,
-      Roles.Werewolf,
     ]
     const unassigned: (typeof Role)[] = [
       Roles.Villager,
+      Roles.Werewolf,
     ]
     const n = roles.length
     const chats = MockChat.fromUsers(mockUsers(n))
@@ -152,40 +158,24 @@ try {
       keyboards.length = 0
     })
 
-    it("can peek player", async () => {
-      // await game.setupPhase(Phase.Night)
+    it.each([
+      Roles.Seer,
+    ])("%s can peek player", async (_role) => {
+      // game.addFakePlayers([role])
+      // await game.setupPhase(Phase.Copy)
       // await game.doActions(
       //   keyboards,
       //   [
-      //     undefined,
-      //     undefined,
-      //     ["peek", "1"],
-      //     undefined,
-      //     undefined,
+      //     ["copy", "1"]
       //   ],
       // )
-      // game.runPhase(Phase.Night)
+      // game.runPhase(Phase.Copy)
       // await game.skip()
       // await jest.runAllTimersAsync()
       // await game.unload()
 
-      // expectRequests(
-      //   queue,
-      //   [
-      //     "You are the only werewolf.",
-      //     "You are the only mason.",
-      //     "Whose role would you like to look at?",
-      //     "Whose role would you like to look at?",
-      //     "answerCallbackQuery",
-      //     "You selected mock-1",
-      //     "<em>Skipping forward...</em>",
-      //     "deleteMessage",
-      //     "Time's up!",
-      //     "mock-1 is a Mason 👷",
-      //     "You are still the Insomniac 😴",
-      //     "The sun rises...",
-      //   ],
-      // )
+      // console.log(queue)
+
     })
   })
 }
