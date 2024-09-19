@@ -1,4 +1,3 @@
-import type { Context } from "~/bot/context"
 import * as Actions from "~/game/gameplay/actions"
 import { Team } from "~/game/models/enums"
 import type { GameInfo } from "~/game/models/game"
@@ -12,27 +11,23 @@ export interface CanCopy {
   copy: (player: Player, game: GameInfo) => void
 }
 
-export class Copier extends Role implements CanCopy {
+export abstract class Copier extends Role implements CanCopy {
   static readonly info: RoleInfo = {
     name: "role",
-    team: Team.Village,
+    team: Team.None,
     command: "rolelist",
   }
 
   copiedRole?: Role
 
   // NOTE: can fail with cycles (more than 1 active doppelganger)
-  // Ultimately a non-issue since at most 1 doppelganger can be active at a time
+  // Ultimately a non-issue since at most 1 doppelganger should be active at a time (for now)
   get tail(): Role {
     if (this.copiedRole === undefined)
       return this
     if (!isCopier(this.copiedRole))
       return this.copiedRole
     return this.copiedRole.tail
-  }
-
-  fullRole(ctx: Context) {
-    return `${ctx.t(this.tail.name)}${ctx.t(this.emoji)}`
   }
 
   copy(player: Player, game: GameInfo): void {
@@ -51,13 +46,9 @@ export class Copier extends Role implements CanCopy {
     this.tail.doNight(player, game)
   }
 
-  defaultWin(player: Player, _game: GameInfo): void {
-    player.won = false
-  }
-
   checkWin(player: Player, game: GameInfo): void {
     if (this.copiedRole === undefined) {
-      this.defaultWin(player, game)
+      super.checkWin(player, game)
       return
     }
     this.tail.checkWin(player, game)

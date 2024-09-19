@@ -44,7 +44,15 @@ feature.callbackQuery(/peek([\w.]+)\+([\w.]+)/, logHandle("callback-peek"), asyn
   let payload: string
   if (userId === "un") {
     targets.push(..._.sampleSize(game.unassignedRoles, 2))
-    payload = ctx.t("misc.unassigned", { count: 2 })
+
+    // TODO: payload can be extracted from context by finding the button with matching data
+    if (player.role instanceof Roles.ApprenticeSeer) {
+      targets.splice(1)
+      payload = ctx.t("misc.unassigned", { count: 1 })
+    }
+    else {
+      payload = ctx.t("misc.unassigned", { count: 2 })
+    }
   }
   else {
     const target = game.playerMap.get(Number(userId))
@@ -90,30 +98,16 @@ feature.callbackQuery(/swap([\w.]+)\+([\w.]+)/, logHandle("callback-swap"), asyn
     return
   }
 
-  if (player.role instanceof Roles.Robber) {
-    const target = game.playerMap.get(Number(userId))
-    if (target === undefined) {
-      ctx.answerCallbackQuery(ctx.t("game_error.invalid_vote", { user: userId }))
-      return
-    }
+  if (!(player.role instanceof Roles.Robber))
+    return
 
-    game.privateMsgs.get(player.id)?.then((msg) => {
-      game.ctx.api.editMessageText(player.id, msg.message_id, game.ctx.t("vote.cast", { user: target.name }))
-    })
-    game.privateMsgs.delete(player.id)
-
-    Actions.Swap.fn(game, ctx, [player, target], {
-      priority: player.role.priority,
-      swapSelf: true,
-    })
+  const target = game.playerMap.get(Number(userId))
+  if (target === undefined) {
+    ctx.answerCallbackQuery(ctx.t("game_error.invalid_vote", { user: userId }))
+    return
   }
-  else if (player.role instanceof Roles.Troublemaker) {
-    const target = game.playerMap.get(Number(userId))
-    if (target === undefined) {
-      ctx.answerCallbackQuery(ctx.t("game_error.invalid_vote", { user: userId }))
-      return
-    }
 
+  if (player.role instanceof Roles.Troublemaker) {
     ctx.session.actions = [
       {
         name: "swap",
@@ -123,6 +117,17 @@ feature.callbackQuery(/swap([\w.]+)\+([\w.]+)/, logHandle("callback-swap"), asyn
       },
     ]
     await ctx.conversation.enter("troublemaker")
+  }
+  else if (player.role instanceof Roles.Robber) {
+    game.privateMsgs.get(player.id)?.then((msg) => {
+      game.ctx.api.editMessageText(player.id, msg.message_id, game.ctx.t("vote.cast", { user: target.name }))
+    })
+    game.privateMsgs.delete(player.id)
+
+    Actions.Swap.fn(game, ctx, [player, target], {
+      priority: player.role.priority,
+      swapSelf: true,
+    })
   }
 })
 
@@ -146,6 +151,18 @@ feature.callbackQuery(/copy([\w.]+)\+([\w.]+)/, logHandle("callback-swap"), asyn
       priority: player.role.priority,
     })
   }
+})
+
+/**
+ * Generic pass action. Forfeit turn
+ */
+feature.callbackQuery(/pass([\w.]+)\+([\w.]+)/, logHandle("callback-pass"), async (ctx) => {
+  const res = validateCallbackQuery(ctx)
+  if (res === undefined)
+    return
+  const [game] = res
+
+  Actions.Pass.fn(game, ctx)
 })
 
 export { composer as gameActions }

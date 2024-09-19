@@ -1,12 +1,13 @@
 import { createConversation } from "@grammyjs/conversations"
 import { Composer, InlineKeyboard } from "grammy"
-import _ from "lodash"
 import type { Context, Conversation } from "~/bot/context"
 
 import { logHandle } from "~/bot/helpers/logging"
+import { config } from "~/config"
 import { Game } from "~/game"
 import { createPlayers } from "~/game/helpers/create-players"
-import { getGameFromCtx, setGame } from "~/game/helpers/game.context"
+import { getGameFromCtx } from "~/game/helpers/game.context"
+import { startGame } from "../middlewares/game"
 
 const composer = new Composer<Context>()
 
@@ -17,19 +18,23 @@ composer.command("debug", logHandle("command-debug"), (ctx) => {
 const feature = composer.chatType(["group", "supergroup"])
 const pmFeature = composer.chatType("private")
 
-feature.command("startgame", logHandle("command-startgame-dev"), async (ctx) => {
-  // check if game is already started
-  if (getGameFromCtx(ctx) !== undefined) {
-    ctx.reply(ctx.t("game.already_started"))
+feature.command("startgame", logHandle("command-startgame-dev"), startGame(), async (ctx) => {
+  if (config.isTest)
     return
-  }
-  const game = new Game(ctx)
-  setGame(ctx, game)
+  const game = getGameFromCtx(ctx)!
+  game.run()
 
   if (Number(ctx.match) && Number(ctx.match) > 0) {
-    game.addPlayers(createPlayers(_.clamp(Number(ctx.match), 1, 10)))
+    game.addPlayers(createPlayers(Number(ctx.match)))
   }
 })
+
+if (config.isTest) {
+  feature.command("spawn", async (ctx) => {
+    const game = new Game(ctx)
+    ctx.games.set(game.id, game)
+  })
+}
 
 pmFeature.command("mockcb", logHandle("command-mockcb"), async (ctx) => {
   const action = ctx.match || "vote"

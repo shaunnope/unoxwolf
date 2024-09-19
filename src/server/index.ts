@@ -9,7 +9,7 @@ export async function createServer(bot: Bot, container: Container) {
   const { logger, prisma } = container
 
   const server = fastify({
-    logger,
+    loggerInstance: logger,
   })
 
   server.setErrorHandler(async (error, req, res) => {

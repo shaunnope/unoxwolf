@@ -4,6 +4,7 @@ import { logger } from "~/logger"
 
 import { prisma } from "~/prisma"
 
+// TODO: consider collision likelihood
 export const games = new Map<string, Game>()
 
 export const container = {

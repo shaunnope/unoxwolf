@@ -17,12 +17,13 @@ export const BASE_ROLES = [
 
 export const DAWN_ROLES = [
   Roles.Fool,
+  Roles.ApprenticeSeer,
 ]
 
 export const ALL_ROLES = [...BASE_ROLES, ...DAWN_ROLES]
 
 export const PHASES = {
   copy: [Roles.Doppelganger],
-  night: [Roles.Seer, Roles.Robber, Roles.Troublemaker, Roles.Drunk, Roles.Insomniac],
+  night: [Roles.Seer, Roles.ApprenticeSeer, Roles.Robber, Roles.Troublemaker, Roles.Drunk, Roles.Insomniac],
   passive: [Roles.Villager, Roles.Werewolf, Roles.Minion, Roles.Mason, Roles.Hunter, Roles.Tanner, Roles.Fool],
 }

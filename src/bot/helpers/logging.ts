@@ -47,7 +47,7 @@ export function getFullMetadata(ctx: Context) {
   }
 }
 
-export function logHandle(id: string): Middleware<Context> {
+export function logHandle(id: string, full?: true): Middleware<Context> {
   return (ctx, next) => {
     updateHandledCounter.inc({
       from_id: ctx.from?.id,
@@ -57,7 +57,7 @@ export function logHandle(id: string): Middleware<Context> {
 
     logger.debug({
       msg: `handle ${id}`,
-      ...(id === "unhandled" ? getFullMetadata(ctx) : getMetadata(ctx)),
+      ...(id === "unhandled" || full ? getFullMetadata(ctx) : getMetadata(ctx)),
     })
 
     return next()

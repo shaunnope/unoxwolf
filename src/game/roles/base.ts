@@ -1,22 +1,17 @@
-// TODO: consider how to refactor methods to avoid this
 import _ from "lodash"
 import * as Actions from "~/game/gameplay/actions"
-import { createVoteKB, getOptions, sendActionPrompt } from "~/game/helpers/keyboards"
+import { Keyboard } from "~/game/helpers/keyboards"
 import { Team } from "~/game/models/enums"
 import * as Events from "~/game/models/events"
-
 import type { GameInfo } from "~/game/models/game"
+
+import * as G from "~/game/models/game.fn"
 import type { Player } from "~/game/models/player"
 import type { RoleInfo } from "~/game/models/role"
 import { Role } from "~/game/models/role"
+import * as Actors from "~/game/roles/actors"
 
 import { Copier } from "./copier"
-
-function villageWin(player: Player, game: GameInfo): void {
-  // TODO: change when other non-village teams are added
-  player.won
-    = (game.teams.get(Team.Werewolf)?.length || 0) > 0 ? (game.deaths.get(Team.Werewolf)?.length || 0) > 0 : true
-}
 
 export class Villager extends Role {
   static readonly info: RoleInfo = {
@@ -24,43 +19,43 @@ export class Villager extends Role {
     team: Team.Village,
     command: "roleVG",
   }
+}
 
-  checkWin(player: Player, game: GameInfo): void {
-    villageWin(player, game)
+export class Mason extends Actors.Revealer {
+  static readonly info: RoleInfo = {
+    name: "mason",
+    team: Team.Village,
+    command: "roleMason",
+  }
+
+  filter(other: Player) {
+    return other.role instanceof Mason
   }
 }
 
-export class Werewolf extends Role {
+export class Werewolf extends Actors.Revealer {
   static readonly info: RoleInfo = {
     name: "werewolf",
     team: Team.Werewolf,
     command: "roleWW",
   }
 
-  doNight(player: Player, game: GameInfo) {
-    if (player.ctx === undefined)
-      return
-    const teamMembers = game.teams
-      .get(this.info.team)! // NOTE: never undefined since self is in the team
-      .filter(other => other.id !== player.id && !other.role.info.isAide)
-    let msg = ""
-    if (teamMembers.length === 0) {
-      msg = game.ctx.t("werewolf.lone")
-      if (game.settings.loneWolf) {
-        const role = _.sample(game.unassignedRoles)!.role.info.name
-        msg += `\n${game.ctx.t("werewolf.lone2", { role: game.ctx.t(role) })}`
-      }
+  processLone(game: GameInfo) {
+    let msg = game.ctx.t(this.locale("lone"))
+    if (game.settings.loneWolf) {
+      const role = _.sample(game.unassignedRoles)!.role.info.name
+      msg += `\n${game.ctx.t("werewolf.lone2", { role: game.ctx.t(role) })}`
     }
-    else {
-      msg = game.ctx.t("werewolf.reveal", {
-        wolves: teamMembers.map(p => p.name).join(", "),
-      })
-    }
-    player.ctx.reply(msg)
+
+    return msg
+  }
+
+  filter(other: Player) {
+    return !other.role.info.isAide
   }
 
   checkWin(player: Player, game: GameInfo): void {
-    player.won = (game.deaths.get(Team.Werewolf)?.length || 0) === 0
+    player.won = G.dead(game, Team.Tanner) === 0 && G.dead(game, Team.Werewolf) === 0
   }
 }
 
@@ -76,57 +71,34 @@ export class Seer extends Villager {
     if (player.ctx === undefined) {
       return
     }
-    const options = getOptions(game.players, other => other.id !== player.id)
-    const kb = createVoteKB(options, `peek${game.id}`)
+    const kb = new Keyboard(game)
+      .addPlayers(other => other.id !== player.id, "peek")
+      .addUnassigned("peek")
+      .addPass(player)
 
-    const extraOptions = [[game.ctx.t("misc.unassigned", { count: 2 }), `peek${game.id}+un`]]
-    kb.text(extraOptions[0][0], extraOptions[0][1])
-
-    game.privateMsgs.set(player.id, sendActionPrompt(player, kb)!)
+    game.privateMsgs.set(player.id, kb.send(player)!)
   }
 }
 
-export class Robber extends Villager {
+export class Robber extends Actors.Swapper {
   static readonly info: RoleInfo = {
     name: "robber",
     team: Team.Village,
     command: "roleRobber",
     priority: 3,
   }
-
-  doNight(player: Player, game: GameInfo) {
-    if (player.ctx === undefined) {
-      // TODO: fallback
-      return
-    }
-    const options = getOptions(game.players, other => other.id !== player.id)
-    const kb = createVoteKB(options, `swap${game.id}`)
-
-    game.privateMsgs.set(player.id, sendActionPrompt(player, kb)!)
-  }
 }
 
-export class Troublemaker extends Villager {
+export class Troublemaker extends Actors.Swapper {
   static readonly info: RoleInfo = {
     name: "troublemaker",
     team: Team.Village,
     command: "roleTM",
     priority: 6,
   }
-
-  async doNight(player: Player, game: GameInfo) {
-    if (player.ctx === undefined) {
-      return
-    }
-
-    const options = getOptions(game.players, other => other.id !== player.id)
-    const kb = createVoteKB(options, `swap${game.id}`)
-    // TODO: add pass option
-
-    game.privateMsgs.set(player.id, sendActionPrompt(player, kb)!)
-  }
 }
 
+// Drunk does not extend Swapper class since swap behaviour is auto
 export class Drunk extends Villager {
   static readonly info: RoleInfo = {
     name: "drunk",
@@ -147,32 +119,6 @@ export class Drunk extends Villager {
       isAuto: true,
     })
     player.ctx.reply(player.ctx.t("drunk.action", { role: target.name }))
-  }
-}
-
-export class Mason extends Villager {
-  static readonly info: RoleInfo = {
-    name: "mason",
-    team: Team.Village,
-    command: "roleMason",
-  }
-
-  doNight(player: Player, game: GameInfo) {
-    if (player.ctx === undefined)
-      return
-    const teamMembers = game.teams
-      .get(this.info.team)!
-      .filter(other => other.id !== player.id && other.role instanceof Mason)
-    let msg = ""
-    if (teamMembers.length === 0) {
-      msg = game.ctx.t("mason.lone")
-    }
-    else {
-      msg = game.ctx.t("mason.reveal", {
-        masons: teamMembers.map(p => p.name).join(", "),
-      })
-    }
-    player.ctx.reply(msg)
   }
 }
 
@@ -204,35 +150,21 @@ export class Insomniac extends Villager {
 
 export class Minion extends Werewolf {
   static readonly info: RoleInfo = {
+    ...super.info,
     name: "minion",
-    team: Team.Werewolf,
     command: "roleMinion",
     isAide: true,
   }
 
-  doNight(player: Player, game: GameInfo) {
-    if (player.ctx === undefined)
-      return
-    const teamMembers = game.teams
-      .get(this.info.team)!
-      .filter(other => other.id !== player.id && !other.role.info.isAide)
-    let msg = ""
-    if (teamMembers.length === 0) {
-      msg = game.ctx.t("minion.lone")
-    }
-    else {
-      msg = game.ctx.t("minion.reveal", {
-        wolves: teamMembers.map(p => p.name).join(", "),
-      })
-    }
-    player.ctx.reply(msg)
+  processLone(game: GameInfo): string {
+    return game.ctx.t(this.locale("lone"))
   }
 
   checkWin(player: Player, game: GameInfo): void {
     player.won
-      = (game.teams.get(this.info.team)?.length || 0) === 0
+      = G.count(game, Team.Werewolf) === 0
         ? !player.isDead
-        : (game.deaths.get(Team.Werewolf)?.length || 0) === 0
+        : game.winInfo[Team.Werewolf]
   }
 }
 
@@ -276,9 +208,5 @@ export class Doppelganger extends Copier {
     if (this.copiedRole === undefined)
       return super.priority
     return this.tail.priority + 0.5
-  }
-
-  defaultWin(player: Player, game: GameInfo): void {
-    villageWin(player, game)
   }
 }

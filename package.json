@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "A Telegram bot for playing Unoxian Werewolf.",
   "author": "shaunnope <seanyap123@gmail.com>",
-  "packageManager": "yarn@3.8.5+sha256.6fd0fd785cdf2b18a9a9e2589726a11530ff018d193f8eda64be485a080f75b9",
+  "packageManager": "yarn@4.5.0",
   "private": true,
   "type": "module",
   "dependencies": {
@@ -18,7 +18,7 @@
     "callback-data": "^1.0.2",
     "dateformat": "^5.0.3",
     "dotenv": "^16.3.1",
-    "fastify": "^4.28.1",
+    "fastify": "^5.0.0",
     "grammy": "^1.30.0",
     "grammy-guard": "^0.5.0",
     "ioredis": "^5.3.2",
@@ -38,7 +38,7 @@
     "@types/jest": "^29.5.4",
     "@types/lodash": "^4.14.197",
     "@types/node": "^20.4.9",
-    "eslint": "^8.46.0",
+    "eslint": "^9.10.0",
     "jest": "^29.7.0",
     "prisma": "^5.19.1",
     "ts-jest": "^29.2.5",
@@ -48,8 +48,8 @@
     "typescript": "^5.1.6"
   },
   "scripts": {
-    "lint": "eslint \"src/**/*.ts\"",
-    "format": "eslint \"src/**/*.ts\" --fix",
+    "lint": "eslint \"src/**/*.ts\" \"tests/**/*.ts\"",
+    "format": "eslint \"src/**/*.ts\" \"tests/**/*.ts\" --fix",
     "typecheck": "tsc",
     "dev": "tsc-watch --onSuccess \"tsx ./scripts/start.ts\"",
     "build": "tsc --noEmit false",
