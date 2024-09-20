@@ -1,11 +1,11 @@
 import type { Message } from "@grammyjs/types"
 import type { InlineKeyboard } from "grammy"
 
-import type { Context } from "~/bot/context"
 import type { Affliction } from "./affliction"
 import type { Team } from "./enums"
 import type { Player } from "./player"
 import type { Role } from "./role"
+import type { Context } from "~/bot/context"
 
 export interface GameSettings {
   joinTimeout: number

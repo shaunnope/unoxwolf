@@ -1,15 +1,16 @@
+import type { Other } from "@grammyjs/hydrate"
+import type { Message } from "@grammyjs/types"
+
+import type { Role } from "./models/role"
+
 import { createHash } from "node:crypto"
 import { InlineKeyboard } from "grammy"
-
-import type { Other } from "@grammyjs/hydrate"
-
-import type { Message } from "@grammyjs/types"
 import type { Context } from "~/bot/context"
 import { getForumTopicId } from "~/bot/helpers/forum"
+
 import { config } from "~/config"
 
 import * as Actions from "~/game/gameplay/actions"
-
 import { sleep } from "~/game/helpers/timer"
 import { Phase, Team } from "~/game/models/enums"
 import type { GameEvent, GameFlags, GameInfo, GameSettings, WinInfo } from "~/game/models/game"
@@ -19,7 +20,6 @@ import { deleteGame, getChatTitle } from "./helpers/game.context"
 import { generateRoles } from "./roles/builder"
 import { isCopier } from "./roles/copier"
 import { setWins } from "./roles/win"
-import type { Role } from "./models/role"
 
 export type Votes = [Player, number, Player[]]
 

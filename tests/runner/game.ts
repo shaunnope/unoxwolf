@@ -1,6 +1,7 @@
-import { getGameId } from "tests/common"
 import type { Message, User } from "@grammyjs/types"
 import type { RawApiRequest } from "tests/common"
+import type { MockChat } from "./chat"
+import { getGameId } from "tests/common"
 import type { Bot } from "~/bot"
 import type { Game } from "~/game"
 import type { Votes } from "~/game/game"
@@ -8,7 +9,6 @@ import { createPlayers } from "~/game/helpers/create-players"
 import { deleteGame } from "~/game/helpers/game.context"
 import type { Phase } from "~/game/models/enums"
 import type { Role } from "~/game/models/role"
-import type { MockChat } from "./chat"
 
 export class MockGame {
   #game: Game

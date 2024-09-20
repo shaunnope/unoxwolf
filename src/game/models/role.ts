@@ -1,9 +1,9 @@
-import type { Context } from "~/bot/context"
-import { isCopier } from "~/game/roles/copier"
-import { Team } from "./enums"
 import type { Status } from "./enums"
 import type { GameInfo } from "./game"
 import type { Player } from "./player"
+import type { Context } from "~/bot/context"
+import { isCopier } from "~/game/roles/copier"
+import { Team } from "./enums"
 
 export interface RoleInfo {
   name: string

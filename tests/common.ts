@@ -1,8 +1,8 @@
-import { RedisAdapter } from "@grammyjs/storage-redis"
-
 import type { ApiCallFn, RawApi } from "grammy"
 
 import type { Container } from "tests/container"
+
+import { RedisAdapter } from "@grammyjs/storage-redis"
 import { type Bot, createBot } from "~/bot"
 
 type TupleToObject<T extends any[]> = Omit<T, keyof any[]>
