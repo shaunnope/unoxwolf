@@ -1,9 +1,9 @@
+import type { PrismaClientX } from "."
 import { Prisma } from "@prisma/client"
 import { Team } from "~/game/models/enums"
 import type { GameInfo } from "~/game/models/game"
-import type { Player } from "~/game/models/player"
 
-import type { PrismaClientX } from "."
+import type { Player } from "~/game/models/player"
 
 function incTeamStat(team: Team, p: Player, win: boolean) {
   return p.currentRole.info.team === team && p.won === win ? 1 : 0

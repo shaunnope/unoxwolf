@@ -1,9 +1,9 @@
-import type { Context } from "~/bot/context"
-import * as Roles from "~/game/roles"
-
-import { isCopier } from "~/game/roles/copier"
 import type { Affliction } from "./affliction"
 import type { Role } from "./role"
+
+import type { Context } from "~/bot/context"
+import * as Roles from "~/game/roles"
+import { isCopier } from "~/game/roles/copier"
 
 export class Player {
   id: number

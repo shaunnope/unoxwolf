@@ -1,11 +1,11 @@
-import { setupTestEnv } from "tests/common"
+import type { RawApiRequest } from "tests/common"
 
+import { setupTestEnv } from "tests/common"
 import { container } from "tests/container"
 import { MockChat } from "tests/runner/chat"
 import { MockGame } from "tests/runner/game"
-import { mockUsers } from "tests/runner/user"
 
-import type { RawApiRequest } from "tests/common"
+import { mockUsers } from "tests/runner/user"
 import { Copy } from "~/game/gameplay/actions"
 import { createPlayers } from "~/game/helpers/create-players"
 import { Team } from "~/game/models/enums"

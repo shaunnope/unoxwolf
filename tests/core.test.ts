@@ -1,9 +1,9 @@
+import type { RawApiRequest } from "tests/common"
 import { setupTestEnv } from "tests/common"
-import { container } from "tests/container"
 
+import { container } from "tests/container"
 import { MockChat } from "tests/runner/chat"
 import { mockUser } from "tests/runner/user"
-import type { RawApiRequest } from "tests/common"
 
 try {
   const outgoingRequests: RawApiRequest[] = []

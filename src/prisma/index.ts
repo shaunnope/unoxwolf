@@ -1,5 +1,5 @@
-import { PrismaClient } from "@prisma/client"
 import type { Prisma } from "@prisma/client"
+import { PrismaClient } from "@prisma/client"
 import { logger, type Logger } from "~/logger"
 
 import statsExtension from "./stats.extension"

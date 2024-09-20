@@ -1,9 +1,10 @@
+import type { BotConfig, StorageAdapter } from "grammy"
+import type { Context } from "./context"
 import { autoChatAction } from "@grammyjs/auto-chat-action"
 import { conversations } from "@grammyjs/conversations"
 import { hydrate } from "@grammyjs/hydrate"
 import { hydrateReply, parseMode } from "@grammyjs/parse-mode"
 import { Bot as TelegramBot } from "grammy"
-import type { BotConfig, StorageAdapter } from "grammy"
 import type { Container } from "~/container"
 import { gameFeature } from "~/game"
 import { createContextConstructor } from "./context"
@@ -11,7 +12,6 @@ import { botAdminFeature, languageFeature, miscFeature, welcomeFeature } from ".
 import { errorHandler, unhandledHandler } from "./handlers"
 import { isMultipleLocales } from "./i18n"
 import { i18n, metrics, session, setScope, updateLogger } from "./middlewares"
-import type { Context } from "./context"
 
 interface Dependencies {
   container: Container
