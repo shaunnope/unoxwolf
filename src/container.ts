@@ -1,15 +1,16 @@
-import { config } from '~/config'
-import { logger } from '~/logger'
-import { prisma, PrismaClientX } from '~/prisma'
+import { config } from "~/config"
+import type { Game } from "~/game"
+import { logger } from "~/logger"
 
-import type { Game } from '~/game'
+import { prisma } from "~/prisma"
 
+// TODO: consider collision likelihood
 export const games = new Map<string, Game>()
 
 export const container = {
   config,
   logger,
-  prisma: prisma as PrismaClientX,
+  prisma,
   games,
 }
 

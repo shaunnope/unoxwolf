@@ -20,10 +20,9 @@ cp example.env .env
 | `BOT_ALLOWED_UPDATES` | Array of String | `[]` | <i>Optional.</i> A JSON-serialized list of the update types you want your bot to receive. See [Update](https://core.telegram.org/bots/api#update) for a complete list of available update types. |
 | `BOT_ADMIN_USER_ID` | Number or Array of Number | `[]` | <i>Optional.</i> Administrator user ID. Commands such as `/setcommands` will only be available to a user with this ID. |
 
-
 ## Acknowledgements
 The initial template for this project was adapted from [Telegram Bot Template](https://github.com/bot-base/telegram-bot-template)
 
 The mechanics of the game are inspired by the [One Night Ultimate Series](https://beziergames.com/products/one-night-ultimate-werewolf) by Ted Alspach and Akihisa Okui.
 
-The infrastructure behind the game is adapted from that used in [Werewolf for Telegram](https://github.com/GreyWolfDev/Werewolf)
+The infrastructure behind the game is inspired from that used in [Werewolf for Telegram](https://github.com/GreyWolfDev/Werewolf)

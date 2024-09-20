@@ -1,1 +1,1 @@
-export * from './is-bot-admin'
+export * from "./is-bot-admin"

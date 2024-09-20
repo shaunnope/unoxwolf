@@ -1,3 +1,3 @@
-import { createUserRequestRegistry } from 'grammy-guard'
+import { createUserRequestRegistry } from "grammy-guard"
 
-export const userRequests = createUserRequestRegistry().add('make-admin', 1)
+export const userRequests = createUserRequestRegistry().add("make-admin", 1)

@@ -1,9 +1,42 @@
-import { Player } from '~/game/models/player'
+import _ from "lodash"
+import { Player } from "~/game/models/player"
 
-export const createPlayers = (count: number) => {
+const PLAYERS = [
+  "Alice",
+  "Bianca",
+  "Cavin",
+  "Destin",
+  "Eugene",
+  "Franz",
+  "Gerry",
+  "Henry",
+  "Irene",
+  "Jonah",
+  "Keane",
+  "Louis",
+  "Moses",
+  "Nicole",
+  "Oscar",
+  "Peter",
+  "Quinn",
+  "Robin",
+  "Shane",
+  "Trent",
+  "Ursula",
+  "Victor",
+  "Wendy",
+  "Xavier",
+  "Yvonne",
+  "Zander",
+]
+
+export function createPlayers(count: number, start: number = 0) {
+  count = _.clamp(count, 1, 10)
+  const names = _.sampleSize(PLAYERS, count)
+
   const players = new Array<Player>(count)
   for (let i = 0; i < count; i++) {
-    players[i] = new Player(i, `Player ${i}`)
+    players[i] = new Player(start + i, names[i])
   }
   return players
 }

@@ -1,8 +1,8 @@
-import { Prisma, Role } from '@prisma/client'
-import type { PrismaClientX } from '~/prisma'
+import { Prisma, Role } from "@prisma/client"
+import type { PrismaClientX } from "~/prisma"
 
 export default Prisma.defineExtension({
-  name: 'user',
+  name: "user",
   result: {
     user: {
       isAdmin: {
@@ -39,7 +39,7 @@ export default Prisma.defineExtension({
         return {
           role: true,
           isAdmin: true,
-        } satisfies Prisma.UserSelect<PrismaClientX['$extends']['extArgs']>
+        } satisfies Prisma.UserSelect<PrismaClientX["$extends"]["extArgs"]>
       },
     },
   },

@@ -1,8 +1,8 @@
-import { isUserHasId } from 'grammy-guard'
-import { config } from '~/config'
-import { Context, ContextScopeWith } from '~/bot/context'
+import { isUserHasId } from "grammy-guard"
+import type { Context, ContextScopeWith } from "~/bot/context"
+import { config } from "~/config"
 
-export const isAdminUser = <C extends Context>(ctx: C): ctx is C & ContextScopeWith<'user'> => {
+export function isAdminUser<C extends Context>(ctx: C): ctx is C & ContextScopeWith<"user"> {
   return ctx.scope.user?.isAdmin === true
 }
 

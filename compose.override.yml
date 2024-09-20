@@ -1,4 +1,3 @@
-version: '3'
 services:
 
   bot:
@@ -7,7 +6,7 @@ services:
     volumes:
       - ".:/usr/src"
     env_file:
-      - docker-compose.bot.dev.env
+      - .env.bot.dev
     command: sh -c "npx prisma migrate deploy && yarn start:force"
 
   redis:
@@ -17,9 +16,8 @@ services:
   db:
     image: postgres
     restart: always
-    environment:
-      POSTGRES_PASSWORD: container
-      POSTGRES_DB: onuw
+    env_file:
+      - .env.bot.dev
 
   adminer:
     image: adminer

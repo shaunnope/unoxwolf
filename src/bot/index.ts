@@ -1,26 +1,28 @@
-import { autoChatAction } from '@grammyjs/auto-chat-action'
-import { hydrate } from '@grammyjs/hydrate'
-import { hydrateReply, parseMode } from '@grammyjs/parse-mode'
-import { conversations } from '@grammyjs/conversations'
-import { Bot as TelegramBot, BotConfig, StorageAdapter } from 'grammy'
-import type { Container } from '~/container'
-import { gameFeature } from '~/game'
-import { Context, createContextConstructor } from './context'
-import { botAdminFeature, languageFeature, miscFeature, welcomeFeature } from './features'
-import { errorHandler, unhandledHandler } from './handlers'
-import { isMultipleLocales } from './i18n'
-import { i18n, metrics, session, setScope, updateLogger } from './middlewares'
+import type { BotConfig, StorageAdapter } from "grammy"
+import type { Context } from "./context"
+import { autoChatAction } from "@grammyjs/auto-chat-action"
+import { conversations } from "@grammyjs/conversations"
+import { hydrate } from "@grammyjs/hydrate"
+import { hydrateReply, parseMode } from "@grammyjs/parse-mode"
+import { Bot as TelegramBot } from "grammy"
+import type { Container } from "~/container"
+import { gameFeature } from "~/game"
+import { createContextConstructor } from "./context"
+import { botAdminFeature, languageFeature, miscFeature, welcomeFeature } from "./features"
+import { errorHandler, unhandledHandler } from "./handlers"
+import { isMultipleLocales } from "./i18n"
+import { i18n, metrics, session, setScope, updateLogger } from "./middlewares"
 
-type Dependencies = {
+interface Dependencies {
   container: Container
   sessionStorage: StorageAdapter<unknown>
 }
 
-export const createBot = (
+export function createBot(
   token: string,
   { container, sessionStorage }: Dependencies,
-  botConfig?: Omit<BotConfig<Context>, 'ContextConstructor'>
-) => {
+  botConfig?: Omit<BotConfig<Context>, "ContextConstructor">,
+) {
   const { config } = container
   const bot = new TelegramBot(token, {
     ...botConfig,
@@ -29,7 +31,7 @@ export const createBot = (
 
   // Middlewares
 
-  bot.api.config.use(parseMode('HTML'))
+  bot.api.config.use(parseMode("HTML"))
 
   if (config.isDev) {
     bot.use(updateLogger())

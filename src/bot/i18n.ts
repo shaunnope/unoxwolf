@@ -1,9 +1,9 @@
-import { I18n } from '@grammyjs/i18n'
-import type { Context } from './context'
+import type { Context } from "./context"
+import { I18n } from "@grammyjs/i18n"
 
 export const i18n = new I18n<Context>({
-  defaultLocale: 'en',
-  directory: 'locales',
+  defaultLocale: "en",
+  directory: "locales",
   fluentBundleOptions: {
     useIsolating: false,
   },

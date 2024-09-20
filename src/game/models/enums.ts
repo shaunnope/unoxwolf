@@ -9,9 +9,17 @@ export enum Team {
   Synth,
   Symbiote,
   Mortician,
+  __LENGTH,
 }
 
-export type Status = {
+export interface Status {
   isCopy?: true
   isAlien?: true
+}
+
+export enum Phase {
+  None,
+  Copy,
+  Night,
+  Vote,
 }

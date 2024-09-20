@@ -1,28 +1,22 @@
 repos:
-- repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: v4.2.0
-  hooks:
-    - id: trailing-whitespace
-    - id: end-of-file-fixer
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.2.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
 
-- repo: https://github.com/compilerla/conventional-pre-commit
-  rev: v2.1.1
-  hooks:
-    - id: conventional-pre-commit
-      stages: [commit-msg]
-      args: []
+  - repo: https://github.com/compilerla/conventional-pre-commit
+    rev: v2.1.1
+    hooks:
+      - id: conventional-pre-commit
+        stages: [commit-msg]
+        args: []
 
-- repo: local
-  hooks:
-    - id: lint
-      name: lint
-      entry: npx eslint -c .eslintrc.cjs --ext .ts,.tsx --fix
-      files: src/.*\.[jt]sx?$
-      types: [file]
-      language: system
-    - id: prettier
-      name: prettier
-      entry: npx prettier --write src/
-      files: src/.*\.[jt]sx?$
-      types: [file]
-      language: system
+  - repo: local
+    hooks:
+      - id: lint
+        name: lint
+        entry: npx eslint --fix
+        files: (?:src|tests)\/.*\.[jt]sx?$
+        types: [file]
+        language: system

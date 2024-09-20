@@ -1,36 +1,34 @@
-import { Update, UserFromGetMe } from '@grammyjs/types'
-import { Prisma } from '@prisma/client'
-import { Context as DefaultContext, SessionFlavor, type Api, type MiddlewareFn } from 'grammy'
+import type { AutoChatActionFlavor } from "@grammyjs/auto-chat-action"
+import type { HydrateFlavor } from "@grammyjs/hydrate"
+import type { I18nFlavor } from "@grammyjs/i18n"
+import type { ParseModeFlavor } from "@grammyjs/parse-mode"
+import type { Update, UserFromGetMe } from "@grammyjs/types"
+import type { Prisma } from "@prisma/client"
 import {
-  type Conversation as DefaultConversation,
+  type ConversationConfig,
   type ConversationFlavor,
+  type ConversationFn,
+  type Conversation as DefaultConversation,
   createConversation as defaultCreateConversation,
-  ConversationFn,
-  ConversationConfig,
-} from '@grammyjs/conversations'
+} from "@grammyjs/conversations"
+import { type Api, Context as DefaultContext, type MiddlewareFn, type SessionFlavor } from "grammy"
 
-import { AutoChatActionFlavor } from '@grammyjs/auto-chat-action'
-import { HydrateFlavor } from '@grammyjs/hydrate'
-import { I18nFlavor } from '@grammyjs/i18n'
-import { ParseModeFlavor } from '@grammyjs/parse-mode'
-import { Logger } from '~/logger'
-import type { Container } from '~/container'
-import { PrismaClientX } from '~/prisma'
+import { logConvoHandle } from "~/bot/helpers/logging"
+import type { Container } from "~/container"
 
-import { ActionChoice } from '~/game/gameplay/actions'
-import type { Game } from '~/game'
+import type { Game } from "~/game"
+import type { ActionChoice } from "~/game/gameplay/actions"
 
-// HACK: Override `ctx.has.command`
-import { customChecker } from '~/bot/helpers/hack.bot-command'
-import { logConvoHandle } from '~/bot/helpers/logging'
+import type { Logger } from "~/logger"
+import type { PrismaClientX } from "~/prisma"
 
-type ScopeUser = Omit<Prisma.$UserPayload<PrismaClientX['$extends']['extArgs']>['scalars'], 'updatedAt' | 'createdAt'>
+type ScopeUser = Omit<Prisma.$UserPayload<PrismaClientX["$extends"]["extArgs"]>["scalars"], "updatedAt" | "createdAt">
 
 export interface ContextScope {
   user?: ScopeUser
 }
 
-type ExtendedContextFlavor = {
+interface ExtendedContextFlavor {
   prisma: PrismaClientX
   logger: Logger
   scope: ContextScope
@@ -38,9 +36,9 @@ type ExtendedContextFlavor = {
   games: Map<string, Game>
 }
 
-export type ContextScopeWith<P extends keyof ContextScope> = Record<'scope', Record<P, NonNullable<ContextScope[P]>>>
+export type ContextScopeWith<P extends keyof ContextScope> = Record<"scope", Record<P, NonNullable<ContextScope[P]>>>
 
-export type SessionData = {
+export interface SessionData {
   // group data
   games: { [key: string]: string } // map of topicId to gameId
 
@@ -52,11 +50,11 @@ export type SessionData = {
 export type Context = ParseModeFlavor<
   HydrateFlavor<
     DefaultContext &
-      ExtendedContextFlavor &
-      SessionFlavor<SessionData> &
-      I18nFlavor &
-      AutoChatActionFlavor &
-      ConversationFlavor
+    ExtendedContextFlavor &
+    SessionFlavor<SessionData> &
+    I18nFlavor &
+    AutoChatActionFlavor &
+    ConversationFlavor
   >
 >
 
@@ -71,8 +69,6 @@ export function createContextConstructor(container: Container) {
     games: Map<string, Game>
 
     scope: ContextScope
-
-    static has = customChecker // HACK: Override `ctx.has.command`
 
     constructor(update: Update, api: Api, me: UserFromGetMe) {
       super(update, api, me)
@@ -89,18 +85,18 @@ export function createContextConstructor(container: Container) {
 }
 
 // FIXME: log wrapper doesn't appear to work
-export const createConversation = <C extends DefaultContext>(
+export function createConversation<C extends DefaultContext>(
   builder: ConversationFn<C>,
-  config: string | ConversationConfig = {}
-): MiddlewareFn<C & ConversationFlavor> => {
-  const { id = builder.name, maxMillisecondsToWait }: ConversationConfig =
-    typeof config === 'string' ? { id: config } : config
+  config: string | ConversationConfig = {},
+): MiddlewareFn<C & ConversationFlavor> {
+  const { id = builder.name, maxMillisecondsToWait }: ConversationConfig
+    = typeof config === "string" ? { id: config } : config
   return defaultCreateConversation<C>(
     async (conversation: DefaultConversation<C>, ctx: C) => {
       logConvoHandle(id, ctx)
       await builder(conversation, ctx)
       logConvoHandle(id, ctx, true)
     },
-    { id, maxMillisecondsToWait }
+    { id, maxMillisecondsToWait },
   )
 }

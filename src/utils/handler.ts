@@ -1,7 +1,7 @@
-import { BotError } from 'grammy'
+import type { BotError } from "grammy"
 
-import { log } from './logger'
+import { log } from "./logger"
 
-export const errHandler = (err: BotError) => {
-  log.error('', err)
+export function errHandler(err: BotError) {
+  log.error("", err)
 }
