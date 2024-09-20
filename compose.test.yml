@@ -2,9 +2,8 @@ services:
   db:
     image: postgres
     restart: always
-    environment:
-      POSTGRES_PASSWORD: testing
-      POSTGRES_DB: test
+    env_file:
+      - .env.bot.test
     ports:
       - 5432:5432
 

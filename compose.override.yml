@@ -16,9 +16,8 @@ services:
   db:
     image: postgres
     restart: always
-    environment:
-      POSTGRES_PASSWORD: container
-      POSTGRES_DB: onuw
+    env_file:
+      - .env.bot.dev
 
   adminer:
     image: adminer
