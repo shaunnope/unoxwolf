@@ -124,6 +124,7 @@ game =
 events = <strong>Order of Events:</strong>
     .vote = Vote
     .copy = Copy
+    .protect = Protect
     .peek = Peek
     .swap = Swap
     .off = Off
@@ -131,11 +132,12 @@ events = <strong>Order of Events:</strong>
     .reveal = Reveal
 
 copy =
-    .start = {""}
     .end = As the sun set, rumors of identity theft spread through the village.
 
+dusk =
+    .end = Night falls...
+
 night =
-    .start = Night falls...
     .end = The sun rises...
 
 vote = Who do you want to vote for?
@@ -367,19 +369,19 @@ doppelganger = Doppelgänger
     .action = Whose role would you like to copy?
 
 ## DAYBREAK ROLES
-sentinel = Sentinel
-    .name = {sentinel} {sentinel.emoji}
-    .emoji = 🚨
+guardian = Guardian Angel
+    .name = {guardian} {guardian.emoji}
+    .emoji = 👼
     .desc =
-        At night, the Sentinel may choose to protect another player's role from being robbed, switched, or looked at by other players.
+        The Guardian Angel may protect another player's role from being robbed, switched, or looked at during the night.
 
-        <em>The Sentinel is on the {team.village} team.</em>
+        <em>The Guardian Angel is on the {team.village} team.</em>
     .lore =
-        You are the {sentinel.name}
-        Tonight, you may protect another player's role from being robbed, switched, or looked at by other players.
+        You are the {guardian.name}
+        Tonight, you may protect another player's role from being robbed, switched, or looked at.
     .action = Who would you like to protect?
     .poke = As you drift off to sleep, you feel a sense of security, knowing that you will be safe from harm tonight.
-    .reveal = { $user } was protected by the {sentinel.name}.
+    .reveal = { $user } was protected by the {guardian.name}.
 
 apprentice_seer = Apprentice Seer
     .name = {apprentice_seer} {apprentice_seer.emoji}
@@ -402,7 +404,7 @@ wildchild = Wild Child
     .desc =
         At night, the {wildchild} may view the roles of two other players, one at a time. If they view a role that is not on the {team.village} team, they must stop looking and join the team of the role they viewed.
 
-        <em>The Wild Child is on the {team.village} team, unless they view a role that is not on the {team.village} team, then they join that team.</em>
+        <em>The Wild Child is on the team of the last role they view.</em>
     .lore =
         You are the {wildchild.name}
         Morbidly curious, yet highly impressionable, you yearn to learn more about your fellow villagers, even if it means risking your humanity.
