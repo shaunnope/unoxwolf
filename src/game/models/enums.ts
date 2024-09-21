@@ -20,6 +20,7 @@ export interface Status {
 export enum Phase {
   None,
   Copy,
+  Dusk,
   Night,
   Vote,
 }

@@ -8,6 +8,7 @@ import { Role } from "~/game/models/role"
 
 export interface CanCopy {
   copiedRole?: Role
+  get tail(): Role
   copy: (player: Player, game: GameInfo) => void
 }
 

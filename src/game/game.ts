@@ -181,6 +181,9 @@ export class Game implements GameInfo {
     }
     await sleep(2 * this.tickRate)
 
+    await this.duskPhase()
+    await sleep(2 * this.tickRate)
+
     await this.nightPhase()
     await sleep(5 * this.tickRate)
 
@@ -275,7 +278,7 @@ export class Game implements GameInfo {
 
   /**
    * Run copy phase.
-   *
+   * Doppelganger
    */
   async copyPhase() {
     await this.setupPhase(Phase.Copy)
@@ -284,11 +287,20 @@ export class Game implements GameInfo {
   }
 
   /**
+   * Run dusk phase.
+   * Guardian Angel
+   */
+  async duskPhase() {
+    await this.setupPhase(Phase.Dusk)
+
+    await this.runPhase(Phase.Dusk)
+  }
+
+  /**
    * Run night phase.
    *
    */
   async nightPhase() {
-    await this.reply(this.ctx.t("night.start"), undefined, "trace")
     await this.setupPhase(Phase.Night)
 
     await this.runPhase(Phase.Night)
@@ -303,6 +315,9 @@ export class Game implements GameInfo {
             p.innateRole.copy(p, this)
           }
         }
+        break
+      case Phase.Dusk:
+        callback = p => p.role.doDusk(p, this)
         break
       case Phase.Night:
         callback = p => p.role.doNight(p, this)
@@ -325,6 +340,9 @@ export class Game implements GameInfo {
     switch (phase) {
       case Phase.Copy:
         await this.phaseTimer("copy", this.settings.copyTimeout)
+        break
+      case Phase.Dusk:
+        await this.phaseTimer("dusk", this.settings.duskTimeout)
         break
       case Phase.Night:
         await this.phaseTimer("night", this.settings.nightTimeout)
@@ -660,6 +678,6 @@ export class Game implements GameInfo {
   }
 
   canExit(ts: number) {
-    return this.privateMsgs.size === 0 && ts > 10
+    return this.privateMsgs.size === 0 && ts > 5
   }
 }

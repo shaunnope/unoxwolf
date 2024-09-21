@@ -62,7 +62,7 @@ try {
     beforeEach(async () => {
       game = (await MockGame.init(bot, group, chats, games, queue))
         .assign(roles.map(R => new R()))
-      Copy.fallback(game.info, game.players[0])
+      Copy.force(game.info, game.players[0], [game.players[1]])
 
       queue.length = 0
       keyboards.length = 0
