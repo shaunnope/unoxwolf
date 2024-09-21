@@ -36,7 +36,8 @@ export function members(game: GameInfo, player: Player, team: Team, also: (other
  * Get array of all other players in game
  * @param game
  * @param player
+ * @param skipProtected Whether protected players should be excluded
  */
-export function others(game: GameInfo, player: Player) {
-  return game.players.filter(other => other.id !== player.id)
+export function others(game: GameInfo, player: Player, skipProtected?: true) {
+  return game.players.filter(other => other.id !== player.id && (!skipProtected || other.isProtected))
 }
