@@ -15,11 +15,23 @@ export interface RoleInfo {
   mask?: string
 }
 
+export interface Abilities {
+  copy?: true
+  reveal?: true
+  peek?: true
+  swap?: true
+}
+
 export class Role {
   static readonly info: RoleInfo = {
     name: "role",
     team: Team.None,
     command: "rolelist",
+  }
+
+  static readonly can: Abilities
+  get can() {
+    return (<typeof Role> this.constructor).can
   }
 
   static toString() {

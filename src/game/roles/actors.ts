@@ -1,11 +1,16 @@
-import { Keyboard } from "~/game/helpers/keyboards"
+import * as Actions from "~/game/gameplay/actions"
 import type { GameInfo } from "~/game/models/game"
 
 import * as G from "~/game/models/game.fn"
 import type { Player } from "~/game/models/player"
+import type { Abilities } from "~/game/models/role"
 import { Role } from "~/game/models/role"
 
 export abstract class Revealer extends Role {
+  static readonly can: Abilities = {
+    reveal: true,
+  }
+
   processLone(game: GameInfo) {
     return game.ctx.t(this.locale("lone"))
   }
@@ -30,15 +35,11 @@ export abstract class Revealer extends Role {
 }
 
 export abstract class Swapper extends Role {
-  doNight(player: Player, game: GameInfo) {
-    if (player.ctx === undefined) {
-      // TODO: fallback
-      return
-    }
-    const kb = new Keyboard(game)
-      .addPlayers(other => other.id !== player.id, "swap")
-      .addPass(player)
+  static readonly can: Abilities = {
+    swap: true,
+  }
 
-    game.privateMsgs.set(player.id, kb.send(player)!)
+  doNight(player: Player, game: GameInfo) {
+    Actions.Swap.setup(game, player)
   }
 }

@@ -66,7 +66,7 @@ export interface GameFlags {
 }
 
 export interface GameEvent {
-  type: "none" | "vote" | "swap" | "peek" | "copy" | "reveal" | "off" | "rotate"
+  type: "none" | "vote" | "swap" | "peek" | "copy" | "reveal" | "off" | "rotate" | "protect"
   icon: string
   author: Player
   targets: Player[]

@@ -30,6 +30,7 @@ export function generateRoles(
     Roles.Doppelganger,
     Roles.Fool,
     Roles.ApprenticeSeer,
+    Roles.GuardianAngel,
   ]
 
   if (shuffle) {
