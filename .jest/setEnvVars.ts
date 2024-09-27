@@ -8,6 +8,6 @@ process.env = {
   BOT_ALLOWED_UPDATES: '[]',
   BOT_TOKEN: 'test',
   BOT_WEBHOOK: 'https://example.com/test',
-  BOT_OWNER_USER_ID: '1',
+  BOT_OWNER_USER_ID: '-100',
   BOT_ADMIN_USER_ID: '[1]',
 }
