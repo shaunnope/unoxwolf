@@ -1,13 +1,12 @@
 import _ from "lodash"
 import * as Actions from "~/game/gameplay/actions"
-import { Keyboard } from "~/game/helpers/keyboards"
 import { Team } from "~/game/models/enums"
 import * as Events from "~/game/models/events"
 import type { GameInfo } from "~/game/models/game"
 
 import * as G from "~/game/models/game.fn"
 import type { Player } from "~/game/models/player"
-import type { RoleInfo } from "~/game/models/role"
+import type { Abilities, RoleInfo } from "~/game/models/role"
 import { Role } from "~/game/models/role"
 import * as Actors from "~/game/roles/actors"
 
@@ -67,16 +66,12 @@ export class Seer extends Villager {
     priority: 2,
   }
 
-  doNight(player: Player, game: GameInfo) {
-    if (player.ctx === undefined) {
-      return
-    }
-    const kb = new Keyboard(game)
-      .addPlayers(other => other.id !== player.id, "peek")
-      .addUnassigned("peek")
-      .addPass(player)
+  static readonly can: Abilities = {
+    peek: true,
+  }
 
-    game.privateMsgs.set(player.id, kb.send(player)!)
+  doNight(player: Player, game: GameInfo) {
+    Actions.Peek.setup(game, player)
   }
 }
 
@@ -86,6 +81,14 @@ export class Robber extends Actors.Swapper {
     team: Team.Village,
     command: "roleRobber",
     priority: 3,
+  }
+
+  doNight(player: Player, game: GameInfo) {
+    if (player.isProtected) {
+      player.ctx?.reply(player.ctx.t("robber.protected"))
+      return
+    }
+    Actions.Swap.setup(game, player)
   }
 }
 
@@ -109,16 +112,9 @@ export class Drunk extends Villager {
 
   async doNight(player: Player, game: GameInfo) {
     const target = game.unassignedRoles[Math.floor(Math.random() * game.unassignedRoles.length)]
-    if (player.ctx === undefined) {
-      game.events.push(Events.Swap(player, [player, target], game, this.priority, false))
-      return
-    }
-    Actions.Swap.fn(game, player.ctx, [player, target], {
-      priority: this.priority,
-      swapSelf: true,
-      isAuto: true,
-    })
-    player.ctx.reply(player.ctx.t("drunk.action", { role: target.name }))
+    game.events.push(Events.Swap(player, [player, target], game, this.priority, false))
+
+    player.ctx?.reply(player.ctx.t("drunk.action", { role: target.name }))
   }
 }
 

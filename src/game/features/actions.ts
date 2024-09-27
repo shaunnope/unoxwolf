@@ -7,7 +7,6 @@ import * as Actions from "~/game/gameplay/actions"
 import { validateCallbackQuery } from "~/game/helpers/game.context"
 import type { Player } from "~/game/models/player"
 import * as Roles from "~/game/roles"
-import * as Actors from "~/game/roles/actors"
 
 const composer = new Composer<Context>()
 
@@ -38,7 +37,7 @@ feature.callbackQuery(/peek([\w.]+)\+([\w.]+)/, logHandle("callback-peek"), asyn
   if (res === undefined)
     return
   const [game, player, userId] = res
-  if (!(player.role instanceof Roles.Seer))
+  if (!player.role.can.peek)
     return
 
   const targets: Player[] = []
@@ -99,7 +98,7 @@ feature.callbackQuery(/swap([\w.]+)\+([\w.]+)/, logHandle("callback-swap"), asyn
     return
   }
 
-  if (!(player.role instanceof Actors.Swapper))
+  if (!player.role.can.swap)
     return
 
   const target = game.playerMap.get(Number(userId))
@@ -152,6 +151,27 @@ feature.callbackQuery(/copy([\w.]+)\+([\w.]+)/, logHandle("callback-swap"), asyn
       priority: player.role.priority,
     })
   }
+})
+
+/**
+ * Protect roles
+ */
+feature.callbackQuery(/prot([\w.]+)\+([\w.]+)/, logHandle("callback-prot"), async (ctx) => {
+  const res = validateCallbackQuery(ctx)
+  if (res === undefined)
+    return
+  const [game, player, userId] = res
+
+  if (!(player.role instanceof Roles.GuardianAngel))
+    return
+
+  const target = game.playerMap.get(Number(userId))
+  if (target === undefined) {
+    ctx.answerCallbackQuery(ctx.t("game_error.invalid_vote", { user: userId }))
+    return
+  }
+
+  Actions.Protect.fn(game, ctx, [target])
 })
 
 /**

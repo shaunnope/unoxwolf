@@ -2,9 +2,9 @@
 import { Team } from "~/game/models/enums"
 import type { GameInfo } from "~/game/models/game"
 import type { Player } from "~/game/models/player"
-import type { RoleInfo } from "~/game/models/role"
+import type { Abilities, RoleInfo } from "~/game/models/role"
 
-import { Seer } from "."
+import { Seer, Villager, Werewolf } from "."
 
 import { Keyboard } from "../helpers/keyboards"
 
@@ -36,5 +36,43 @@ export class ApprenticeSeer extends Seer {
     const kb = new Keyboard(game).addUnassigned("peek", 1).addPass(player)
 
     game.privateMsgs.set(player.id, kb.send(player)!)
+  }
+}
+
+export class GuardianAngel extends Villager {
+  static readonly info: RoleInfo = {
+    name: "guardian",
+    team: Team.Village,
+    command: "roleGA",
+  }
+
+  doDusk(player: Player, game: GameInfo) {
+    if (player.ctx === undefined) {
+      return
+    }
+    const kb = new Keyboard(game)
+      .addPlayers(other => other.id !== player.id, "prot")
+      .addPass(player)
+
+    game.privateMsgs.set(player.id, kb.send(player)!)
+  }
+}
+
+export class MysticWolf extends Werewolf {
+  static readonly info: RoleInfo = {
+    name: "mystic_wolf",
+    team: Team.Werewolf,
+    command: "roleMystic",
+  }
+
+  static readonly can: Abilities = {
+    ...super.can,
+    peek: true,
+  }
+
+  doNight(player: Player, game: GameInfo) {
+    if (player.ctx === undefined)
+      return
+    super.doNight(player, game)
   }
 }

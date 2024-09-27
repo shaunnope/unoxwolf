@@ -18,6 +18,7 @@ const feature = composer.chatType("private")
 async function phases(ctx: Context) {
   await ctx.reply(
     `${ctx.t("help.copy")}\n${RoleGroups.PHASES.copy.map(role => getRoleListEntry(ctx, role)).join("\n")}\n\n`
+    + `${ctx.t("help.dusk")}\n${RoleGroups.PHASES.dusk.map(role => getRoleListEntry(ctx, role)).join("\n")}\n\n`
     + `${ctx.t("help.night")}\n${RoleGroups.PHASES.night.map(role => getRoleListEntry(ctx, role)).join("\n")}\n\n`,
   )
   await ctx.reply(

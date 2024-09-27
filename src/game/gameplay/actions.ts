@@ -102,7 +102,7 @@ export const Vote: Action = {
  */
 export const Swap: Action = {
   fallback: (game: Game, player: Player, other: ActionOptions = DEFAULT_ACTION_OPTIONS) => {
-    const targets = _.sampleSize(G.others(game, player), 2)
+    const targets = _.sampleSize(G.others(game, player, true), 2)
     if (other.swapSelf)
       targets[0] = player
 
@@ -110,12 +110,14 @@ export const Swap: Action = {
   },
   setup: (game: Game, player: Player) => {
     if (player.ctx === undefined || !game.playerMap.has(player.id))
+      // TODO: fallback
       return
 
     game.privateMsgs.set(
       player.id,
       new Keyboard(game)
-        .addPlayers(other => other.id !== player.id, "swap")
+        .addPlayers(other => other.id !== player.id && !other.isProtected, "swap")
+        .addPass(player)
         .send(player)!,
     )
   },
@@ -145,7 +147,17 @@ export const Swap: Action = {
  */
 export const Peek: Action = {
   fallback: (_game: Game, _player: Player) => {},
-  setup: (_game: Game, _player: Player) => {},
+  setup: (game: Game, player: Player) => {
+    if (player.ctx === undefined) {
+      return
+    }
+    const kb = new Keyboard(game)
+      .addPlayers(other => other.id !== player.id && !other.isProtected, "peek")
+      .addUnassigned("peek")
+      .addPass(player)
+
+    game.privateMsgs.set(player.id, kb.send(player)!)
+  },
   fn: (game: Game, playerCtx: Context, targets?: Player[], other: ActionOptions = DEFAULT_ACTION_OPTIONS) => {
     const player = game.playerMap.get(playerCtx.from!.id)
     if (player === undefined)
@@ -205,7 +217,7 @@ export const Copy: Action & DebugAction = {
     copyEvent.fn()
   },
   fallback: (game: Game, player: Player) => {
-    const options = G.others(game, player)
+    const options = game.players
     Copy.force(game, player, [options[Math.floor(Math.random() * options.length)]])
   },
   setup: (game: Game, player: Player) => {
@@ -263,7 +275,7 @@ export const Rotate: Action = {
     game.privateMsgs.set(
       player.id,
       new Keyboard(game)
-        .addPlayers(other => other.id !== player.id, "rotate")
+        .addPlayers(other => other.id !== player.id && !other.isProtected, "rotate")
         .send(player)!,
     )
   },
@@ -308,6 +320,50 @@ export const Pass: Action = {
     game.privateMsgs.get(player.id)?.then((msg) => {
       game.ctx.api.editMessageText(player.id, msg.message_id, game.ctx.t("misc.passed"))
     })
+
+    playerCtx.answerCallbackQuery()
+    game.privateMsgs.delete(player.id)
+  },
+}
+
+/**
+ * Protect action
+ */
+export const Protect: Action = {
+  fallback: (_game: Game, _player: Player) => {},
+  setup: (game: Game, player: Player) => {
+    if (player.ctx === undefined || !game.playerMap.has(player.id))
+      return
+
+    game.privateMsgs.set(
+      player.id,
+      new Keyboard(game)
+        .addPlayers(other => other.id !== player.id, "prot")
+        .addPass(player)
+        .send(player)!,
+    )
+  },
+  fn: (game: Game, playerCtx: Context, targets?: Player[]) => {
+    if (playerCtx.from?.id === undefined)
+      return
+    const player = game.playerMap.get(playerCtx.from?.id)
+    if (player === undefined)
+      return
+    if (game.privateMsgs.get(player.id) === undefined) {
+      playerCtx.reply(playerCtx.t("game_error.wrong_qn"))
+      return
+    }
+    if (targets === undefined || targets.length !== 1) {
+      playerCtx.answerCallbackQuery(
+        playerCtx.t("game_error.invalid_vote", { user: targets?.toString() || "undefined" }),
+      )
+      return
+    }
+    game.privateMsgs.get(player.id)?.then((msg) => {
+      game.ctx.api.editMessageText(player.id, msg.message_id, game.ctx.t("vote.cast", { user: targets[0].name }))
+    })
+
+    game.events.push(Events.Protect(player, targets[0], game))
 
     playerCtx.answerCallbackQuery()
     game.privateMsgs.delete(player.id)

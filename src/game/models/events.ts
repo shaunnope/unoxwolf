@@ -151,6 +151,20 @@ export function Copy(player: Player, target: Player, game: Game) {
   } as GameEvent
 }
 
+export function Protect(player: Player, target: Player, game: Game) {
+  return {
+    type: "protect",
+    icon: "🛡",
+    author: player,
+    targets: [target],
+    priority: player.innateRole.priority,
+    fn: () => {
+      target.isProtected = true
+      return game.ctx.reply(game.ctx.t("guardian.reveal", { user: target.name }))
+    },
+  } as GameEvent
+}
+
 export function Rotate(player: Player, rotation: number, game: Game, priority: number = 0) {
   return {
     type: "rotate",
