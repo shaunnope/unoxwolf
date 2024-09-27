@@ -70,8 +70,10 @@ help =
 
     Within each phase, role actions are performed in a specific order. The phases and order of actions are as follows:
 
-    .copy = <strong>Copy Phase</strong>
-    .night = <strong>Night Phase</strong>
+    .copy = <strong>Sun Down</strong>
+    .twilight = <strong>Twilight</strong>
+    .dusk = <strong>Dusk</strong>
+    .night = <strong>Night</strong>
     .passive =
         <strong>Passive Roles</strong>
         The following roles do not perform actions that need to be resolved in a specific order.
@@ -262,6 +264,7 @@ robber = Robber
         Tonight, you may rob another player's role, exchanging it with your own.
     .action = Whose role would you like to rob?
     .swap = You stole { $user2 }'s role. { misc.self_role_changed }
+    .protected = Under the { guardian }'s protective gaze, you decided that it'd be best not to rob roles tonight.
 
 troublemaker = Troublemaker
     .name = {troublemaker} {troublemaker.emoji}
@@ -381,7 +384,7 @@ guardian = Guardian Angel
         Tonight, you may protect another player's role from being robbed, switched, or looked at.
     .action = Who would you like to protect?
     .poke = As you drift off to sleep, you feel a sense of security, knowing that you will be safe from harm tonight.
-    .reveal = { $user } was protected by the {guardian.name}.
+    .reveal = { $user } was protected by the {guardian.name}
 
 apprentice_seer = Apprentice Seer
     .name = {apprentice_seer} {apprentice_seer.emoji}

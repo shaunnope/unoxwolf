@@ -35,7 +35,6 @@ const configSchema = z.object({
   BOT_OWNER_USER_ID: z.coerce.number().safe(),
   BOT_ADMIN_USER_ID: z
     .preprocess(arg => parseJsonSafe(arg as string), z.array(z.coerce.number().safe()).or(z.coerce.number().safe()))
-    // .array(z.coerce.number().safe()).or(z.coerce.number().safe())
     .transform(v => (Array.isArray(v) ? v : [v]))
     .catch([]),
 })
