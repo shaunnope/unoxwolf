@@ -129,7 +129,7 @@ export class Insomniac extends Villager {
   }
 
   doNight(player: Player, game: GameInfo) {
-    if (player.ctx === undefined) // can skip night check if protected
+    if (player.ctx === undefined)
       return
 
     if (player.isProtected) {
