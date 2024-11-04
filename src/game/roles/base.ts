@@ -84,6 +84,8 @@ export class Robber extends Actors.Swapper {
   }
 
   doNight(player: Player, game: GameInfo) {
+    if (player.ctx === undefined)
+      return
     if (player.isProtected) {
       player.ctx?.reply(player.ctx.t("robber.protected"))
       return
@@ -127,8 +129,13 @@ export class Insomniac extends Villager {
   }
 
   doNight(player: Player, game: GameInfo) {
-    if (player.ctx === undefined)
+    if (player.ctx === undefined) // can skip night check if protected
       return
+
+    if (player.isProtected) {
+      player.ctx.reply(player.ctx.t("insomniac.protected"))
+      return
+    }
 
     Actions.Peek.fn(game, player.ctx, [player], {
       priority: this.priority,
