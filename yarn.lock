@@ -923,16 +923,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@grammyjs/i18n@npm:^1.0.2":
-  version: 1.0.2
-  resolution: "@grammyjs/i18n@npm:1.0.2"
+"@grammyjs/i18n@npm:^1.1.2":
+  version: 1.1.2
+  resolution: "@grammyjs/i18n@npm:1.1.2"
   dependencies:
     "@deno/shim-deno": "npm:~0.18.0"
     "@fluent/bundle": "npm:^0.17.1"
     "@fluent/langneg": "npm:^0.6.2"
   peerDependencies:
     grammy: ^1.10.0
-  checksum: 10/37acd17c974185ffbd59e49882d27e8c56974d7528b02a21dbe14442f67c8d636052a72b9844bff30e9ad132c143f34a23c6567d9eb3f075c68468832cc7968f
+  checksum: 10/145033397c14ddbc6d4268a6a2fc8643f3024178795b66db29ef9ffd8f8dc6b19e628bd114f2bfc7a2662f5b4703889e67d9bed958760efd9c14d36d67650caa
   languageName: node
   linkType: hard
 
@@ -7352,7 +7352,7 @@ __metadata:
     "@grammyjs/auto-chat-action": "npm:^0.1.1"
     "@grammyjs/conversations": "npm:^1.2.0"
     "@grammyjs/hydrate": "npm:^1.4.1"
-    "@grammyjs/i18n": "npm:^1.0.2"
+    "@grammyjs/i18n": "npm:^1.1.2"
     "@grammyjs/parse-mode": "npm:^1.10.0"
     "@grammyjs/storage-redis": "npm:^2.4.2"
     "@grammyjs/types": "npm:^3.14.0"
