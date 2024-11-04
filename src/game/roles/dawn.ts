@@ -51,7 +51,7 @@ export class GuardianAngel extends Villager {
       return
     }
     const kb = new Keyboard(game)
-      .addPlayers(other => other.id !== player.id, "prot")
+      .addPlayers(_ => true, "prot")
       .addPass(player)
 
     game.privateMsgs.set(player.id, kb.send(player)!)

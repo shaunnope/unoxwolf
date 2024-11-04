@@ -316,6 +316,7 @@ insomniac = Insomniac
         With news of werewolves hiding in your midst, it would be a miracle if you were able to sleep soundly tonight.
     .true = You are still the {insomniac.name}
     .false = {misc.self_role_changed}
+    .protected = As you drift off to sleep, you feel a sense of security, knowing that you will be safe from harm tonight.
 
 hunter = Hunter
     .name = {hunter} {hunter.emoji}
@@ -383,7 +384,6 @@ guardian = Guardian Angel
         You are the {guardian.name}
         Tonight, you may protect another player's role from being robbed, switched, or looked at.
     .action = Who would you like to protect?
-    .poke = As you drift off to sleep, you feel a sense of security, knowing that you will be safe from harm tonight.
     .reveal = { $user } was protected by the {guardian.name}
 
 apprentice_seer = Apprentice Seer
