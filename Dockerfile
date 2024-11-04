@@ -10,11 +10,12 @@ RUN corepack enable
 FROM base AS builder
 
 # Files required by yarn install
-COPY package.json ./
-COPY yarn.lock ./
+COPY package.json yarn.lock .yarnrc.yml prisma/ ./
+
 
 # Install app dependencies
 RUN yarn install
+RUN yarn prisma generate
 
 # Bundle app source
 COPY . .
@@ -23,6 +24,8 @@ COPY . .
 RUN yarn typecheck
 
 FROM base AS runner
+
+COPY --from=builder /usr/src/node_modules/@prisma/client ./node_modules/@prisma/client
 
 # Bundle app source
 COPY . .
