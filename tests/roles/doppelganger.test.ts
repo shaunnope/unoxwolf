@@ -51,6 +51,7 @@ try {
     Roles.Doppelganger,
     Roles.ApprenticeSeer,
     Roles.Fool,
+    Roles.GuardianAngel,
   ] as (typeof Role)[])("village: %s", (role) => {
     const roles = [
       Roles.Doppelganger,
